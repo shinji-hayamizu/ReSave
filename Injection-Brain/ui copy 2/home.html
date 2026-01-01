@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ホーム - Injection-Brain</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#2563eb',
+            'primary-dark': '#1d4ed8',
+            secondary: '#3b82f6',
+            accent: '#0ea5e9',
+            surface: '#eff6ff',
+            'surface-light': '#dbeafe',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .card-gradient {
+      background: linear-gradient(135deg, #dbeafe 0%, #eff6ff 100%);
+    }
+    .sidebar-overlay {
+      background-color: rgba(0, 0, 0, 0.5);
+      transition: opacity 0.3s ease;
+    }
+    .sidebar-menu {
+      transition: transform 0.3s ease;
+    }
+    .sidebar-menu.closed {
+      transform: translateX(-100%);
+    }
+    @media (min-width: 768px) {
+      .sidebar-menu.closed {
+        transform: translateX(0);
+      }
+    }
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+    }
+    .answer-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease-out;
+    }
+    .answer-content.expanded {
+      max-height: 500px;
+      transition: max-height 0.4s ease-in;
+    }
+    .toggle-icon {
+      transition: transform 0.3s ease;
+    }
+    .toggle-icon.expanded {
+      transform: rotate(180deg);
+    }
+  </style>
+</head>
+<body class="bg-white text-gray-900 min-h-screen">
+
+  <!-- Sidebar Overlay (Mobile only) -->
+  <div id="sidebar-overlay" class="fixed inset-0 sidebar-overlay z-40 hidden md:hidden" onclick="closeSidebar()"></div>
+
+  <!-- Left Sidebar -->
+  <aside id="sidebar" class="sidebar-menu closed fixed top-0 left-0 h-full bg-white border-r border-gray-200 z-50
+                            w-60 md:w-[72px] lg:w-60
+                            md:translate-x-0 md:static md:block">
+    <!-- Sidebar Header -->
+    <div class="h-14 flex items-center px-4 border-b border-gray-200">
+      <button class="p-2 hover:bg-gray-100 rounded-full transition md:hidden" onclick="closeSidebar()">
+        <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+      <span class="ml-2 font-bold text-gray-900 md:hidden lg:block">Injection-Brain</span>
+    </div>
+
+    <!-- Sidebar Navigation -->
+    <nav class="py-2">
+      <a href="home.html" class="flex items-center gap-4 px-4 py-3 text-blue-600 bg-blue-50 hover:bg-blue-100 transition">
+        <svg class="w-6 h-6 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+        </svg>
+        <span class="md:hidden lg:inline">ホーム</span>
+      </a>
+      <a href="#" class="flex items-center gap-4 px-4 py-3 text-gray-700 hover:bg-gray-100 transition">
+        <svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+        </svg>
+        <span class="md:hidden lg:inline">メモ</span>
+      </a>
+      <a href="#" class="flex items-center gap-4 px-4 py-3 text-gray-700 hover:bg-gray-100 transition">
+        <svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+        </svg>
+        <span class="md:hidden lg:inline">追加</span>
+      </a>
+      <a href="#" class="flex items-center gap-4 px-4 py-3 text-gray-700 hover:bg-gray-100 transition">
+        <svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+        </svg>
+        <span class="md:hidden lg:inline">AI生成</span>
+      </a>
+      <a href="#" class="flex items-center gap-4 px-4 py-3 text-gray-700 hover:bg-gray-100 transition">
+        <svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+        </svg>
+        <span class="md:hidden lg:inline">設定</span>
+      </a>
+    </nav>
+  </aside>
+
+  <!-- Main Content Wrapper -->
+  <div class="md:ml-[72px] lg:ml-60 min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-white border-b border-gray-200 sticky top-0 z-30">
+      <div class="px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <!-- Hamburger Menu (Mobile only) -->
+          <button class="p-2 hover:bg-gray-100 rounded-full transition md:hidden" onclick="openSidebar()">
+            <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+            </svg>
+          </button>
+          <h1 class="text-xl font-bold text-gray-900">
+            Injection-Brain
+          </h1>
+        </div>
+        <!-- User Icon -->
+        <button class="w-9 h-9 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-medium hover:bg-blue-700 transition">
+          U
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 pb-8">
+      <div class="max-w-4xl mx-auto px-4">
+
+        <!-- Stats Card -->
+        <div class="mt-4 p-4 card-gradient rounded-2xl border border-blue-200">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-gray-600 text-sm">今日の進捗</span>
+            <span class="text-xs text-blue-600">12/22 (日)</span>
+          </div>
+          <div class="flex items-end gap-4">
+            <div>
+              <span class="text-4xl font-bold text-blue-600">8</span>
+              <span class="text-gray-500 text-sm ml-1">/ 15 枚</span>
+            </div>
+            <div class="flex-1 h-2 bg-blue-100 rounded-full overflow-hidden">
+              <div class="h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full" style="width: 53%"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Compact Number Tabs -->
+        <div class="mt-6">
+          <!-- Tab Navigation -->
+          <div class="flex flex-wrap gap-2 mb-4">
+            <button id="tab-all" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium bg-blue-600 text-white transition hover:bg-blue-700" onclick="selectTab('all')">
+              全<span class="ml-1 text-xs opacity-80">(7)</span>
+            </button>
+            <button id="tab-1" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium bg-white text-gray-600 border border-gray-200 transition hover:bg-blue-50" onclick="selectTab('1')">
+              1<span class="ml-1 text-xs opacity-80">(2)</span>
+            </button>
+            <button id="tab-2" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium bg-white text-gray-600 border border-gray-200 transition hover:bg-blue-50" onclick="selectTab('2')">
+              2<span class="ml-1 text-xs opacity-80">(3)</span>
+            </button>
+            <button id="tab-3" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium bg-white text-gray-600 border border-gray-200 transition hover:bg-blue-50" onclick="selectTab('3')">
+              3<span class="ml-1 text-xs opacity-80">(1)</span>
+            </button>
+            <button id="tab-4" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium bg-white text-gray-600 border border-gray-200 transition hover:bg-blue-50" onclick="selectTab('4')">
+              4<span class="ml-1 text-xs opacity-80">(1)</span>
+            </button>
+            <button id="tab-5" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium bg-white text-gray-600 border border-gray-200 transition hover:bg-blue-50" onclick="selectTab('5')">
+              5<span class="ml-1 text-xs opacity-80">(0)</span>
+            </button>
+          </div>
+
+          <!-- Tab Contents -->
+          <!-- All Cards -->
+          <div id="content-all" class="tab-content active">
+            <div class="space-y-4">
+              <!-- Card 1: React Hooks -->
+              <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden" id="card-1">
+                <!-- Card Header -->
+                <div class="p-4">
+                  <!-- Evaluation Buttons Row -->
+                  <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center gap-2">
+                      <button class="bg-green-500 hover:bg-green-600 text-white text-sm font-medium rounded-full px-3 py-1 transition">OK</button>
+                      <button class="bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium rounded-full px-3 py-1 transition">覚えた</button>
+                      <button class="bg-red-400 hover:bg-red-500 text-white text-sm font-medium rounded-full px-3 py-1 transition">覚え直し</button>
+                    </div>
+                    <button class="toggle-icon text-gray-400 hover:text-gray-600 p-1" onclick="toggleAnswer('card-1')">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                      </svg>
+                    </button>
+                  </div>
+
+                  <!-- Question Title Row -->
+                  <div class="flex items-start justify-between mb-3">
+                    <h3 class="text-lg font-medium text-gray-900">useStateとuseEffectの違いは?</h3>
+                    <button class="text-orange-500 hover:text-orange-600 p-1 ml-2 flex-shrink-0">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                      </svg>
+                    </button>
+                  </div>
+
+                  <!-- Meta Info Row -->
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                      <span class="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded">0/6</span>
+                      <button class="text-orange-500 hover:text-orange-600 text-sm font-medium">編集</button>
+                    </div>
+                    <span class="text-sm text-gray-500">復習日 2025/12/24</span>
+                  </div>
+                </div>
+
+                <!-- Toggle Button -->
+                <div class="border-t border-gray-200 flex justify-center">
+                  <button class="w-full py-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition" onclick="toggleAnswer('card-1')">
+                    <svg class="w-5 h-5 mx-auto toggle-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
+                    </svg>
+                  </button>
+                </div>
+
+                <!-- Answer Area -->
+                <div class="answer-content" id="answer-card-1">
+                  <div class="bg-amber-50 p-4 border-t border-amber-200">
+                    <p class="text-gray-700 mb-3"><strong>useState</strong>: コンポーネントの状態を管理するHook。状態の初期値を設定し、状態を更新する関数を提供します。</p>
+                    <p class="text-gray-700 mb-3"><strong>useEffect</strong>: 副作用を処理するHook。コンポーネントのレンダリング後に実行され、データの取得、購読、DOM操作などに使用します。</p>
+                    <div class="bg-amber-100 rounded-lg p-3 mt-2">
+                      <pre class="text-sm text-gray-800 overflow-x-auto"><code>// useState example
+const [count, setCount] = useState(0);
+
+// useEffect example
+useEffect(() => {
+  document.title = `Count: ${count}`;
+}, [count]);</code></pre>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Card 2: TypeScript Generics -->
+              <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden" id="card-2">
+                <!-- Card Header -->
+                <div class="p-4">
+                  <!-- Evaluation Buttons Row -->
+                  <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center gap-2">
+                      <button class="bg-green-500 hover:bg-green-600 text-white text-sm font-medium rounded-full px-3 py-1 transition">OK</button>
+                      <button class="bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium rounded-full px-3 py-1 transition">覚えた</button>
+                      <button class="bg-red-400 hover:bg-red-500 text-white text-sm font-medium rounded-full px-3 py-1 transition">覚え直し</button>
+                    </div>
+                    <button class="toggle-icon text-gray-400 hover:text-gray-600 p-1" onclick="toggleAnswer('card-2')">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                      </svg>
+                    </button>
+                  </div>
+
+                  <!-- Question Title Row -->
+                  <div class="flex items-start justify-between mb-3">
+                    <h3 class="text-lg font-medium text-gray-900">ジェネリクスの主な用途は?</h3>
+                    <button class="text-orange-500 hover:text-orange-600 p-1 ml-2 flex-shrink-0">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                      </svg>
+                    </button>
+                  </div>
+
+                  <!-- Meta Info Row -->
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                      <span class="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded">1/6</span>
+                      <button class="text-orange-500 hover:text-orange-600 text-sm font-medium">編集</button>
+                    </div>
+                    <span class="text-sm text-gray-500">復習日 2025/12/25</span>
+                  </div>
+                </div>
+
+                <!-- Toggle Button -->
+                <div class="border-t border-gray-200 flex justify-center">
+                  <button class="w-full py-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition" onclick="toggleAnswer('card-2')">
+                    <svg class="w-5 h-5 mx-auto toggle-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
+                    </svg>
+                  </button>
+                </div>
+
+                <!-- Answer Area -->
+                <div class="answer-content" id="answer-card-2">
+                  <div class="bg-amber-50 p-4 border-t border-amber-200">
+                    <p class="text-gray-700 mb-3">ジェネリクスは<strong>型の再利用性</strong>を高めるための機能です。</p>
+                    <ul class="list-disc list-inside text-gray-700 mb-3 space-y-1">
+                      <li>型安全性を保ちながら柔軟なコードを書ける</li>
+                      <li>コードの重複を減らせる</li>
+                      <li>コンパイル時に型チェックができる</li>
+                    </ul>
+                    <div class="bg-amber-100 rounded-lg p-3 mt-2">
+                      <pre class="text-sm text-gray-800 overflow-x-auto"><code>// Generic function
+function identity&lt;T&gt;(arg: T): T {
+  return arg;
+}
+
+// Generic interface
+interface Box&lt;T&gt; {
+  value: T;
+}
+
+const stringBox: Box&lt;string&gt; = { value: "hello" };
+const numberBox: Box&lt;number&gt; = { value: 42 };</code></pre>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Card 3: SQL Injection -->
+              <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden" id="card-3">
+                <!-- Card Header -->
+                <div class="p-4">
+                  <!-- Evaluation Buttons Row -->
+                  <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center gap-2">
+                      <button class="bg-green-500 hover:bg-green-600 text-white text-sm font-medium rounded-full px-3 py-1 transition">OK</button>
+                      <button class="bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium rounded-full px-3 py-1 transition">覚えた</button>
+                      <button class="bg-red-400 hover:bg-red-500 text-white text-sm font-medium rounded-full px-3 py-1 transition">覚え直し</button>
+                    </div>
+                    <button class="toggle-icon text-gray-400 hover:text-gray-600 p-1" onclick="toggleAnswer('card-3')">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                      </svg>
+                    </button>
+                  </div>
+
+                  <!-- Question Title Row -->
+                  <div class="flex items-start justify-between mb-3">
+                    <h3 class="text-lg font-medium text-gray-900">プリペアドステートメントとは?</h3>
+                    <button class="text-orange-500 hover:text-orange-600 p-1 ml-2 flex-shrink-0">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                      </svg>
+                    </button>
+                  </div>
+
+                  <!-- Meta Info Row -->
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                      <span class="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded">2/6</span>
+                      <button class="text-orange-500 hover:text-orange-600 text-sm font-medium">編集</button>
+                    </div>
+                    <span class="text-sm text-gray-500">復習日 2025/12/26</span>
+                  </div>
+                </div>
+
+                <!-- Toggle Button -->
+                <div class="border-t border-gray-200 flex justify-center">
+                  <button class="w-full py-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition" onclick="toggleAnswer('card-3')">
+                    <svg class="w-5 h-5 mx-auto toggle-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
+                    </svg>
+                  </button>
+                </div>
+
+                <!-- Answer Area -->
+                <div class="answer-content" id="answer-card-3">
+                  <div class="bg-amber-50 p-4 border-t border-amber-200">
+                    <p class="text-gray-700 mb-3">プリペアドステートメントは、SQLクエリを<strong>事前にコンパイル</strong>し、パラメータを後からバインドする仕組みです。</p>
+                    <p class="text-gray-700 mb-3">SQLインジェクション攻撃を防ぐための重要なセキュリティ対策です。</p>
+                    <div class="bg-amber-100 rounded-lg p-3 mt-2">
+                      <pre class="text-sm text-gray-800 overflow-x-auto"><code>// Bad: SQL Injection vulnerable
+const query = `SELECT * FROM users WHERE id = ${userId}`;
+
+// Good: Prepared Statement
+const stmt = db.prepare('SELECT * FROM users WHERE id = ?');
+stmt.run(userId);</code></pre>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Card 4: Docker -->
+              <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden" id="card-4">
+                <!-- Card Header -->
+                <div class="p-4">
+                  <!-- Evaluation Buttons Row -->
+                  <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center gap-2">
+                      <button class="bg-green-500 hover:bg-green-600 text-white text-sm font-medium rounded-full px-3 py-1 transition">OK</button>
+                      <button class="bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium rounded-full px-3 py-1 transition">覚えた</button>
+                      <button class="bg-red-400 hover:bg-red-500 text-white text-sm font-medium rounded-full px-3 py-1 transition">覚え直し</button>
+                    </div>
+                    <button class="toggle-icon text-gray-400 hover:text-gray-600 p-1" onclick="toggleAnswer('card-4')">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                      </svg>
+                    </button>
+                  </div>
+
+                  <!-- Question Title Row -->
+                  <div class="flex items-start justify-between mb-3">
+                    <h3 class="text-lg font-medium text-gray-900">コンテナとイメージの違いは?</h3>
+                    <button class="text-orange-500 hover:text-orange-600 p-1 ml-2 flex-shrink-0">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                      </svg>
+                    </button>
+                  </div>
+
+                  <!-- Meta Info Row -->
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                      <span class="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded">2/6</span>
+                      <button class="text-orange-500 hover:text-orange-600 text-sm font-medium">編集</button>
+                    </div>
+                    <span class="text-sm text-gray-500">復習日 2025/12/27</span>
+                  </div>
+                </div>
+
+                <!-- Toggle Button -->
+                <div class="border-t border-gray-200 flex justify-center">
+                  <button class="w-full py-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition" onclick="toggleAnswer('card-4')">
+                    <svg class="w-5 h-5 mx-auto toggle-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
+                    </svg>
+                  </button>
+                </div>
+
+                <!-- Answer Area -->
+                <div class="answer-content" id="answer-card-4">
+                  <div class="bg-amber-50 p-4 border-t border-amber-200">
+                    <p class="text-gray-700 mb-3"><strong>イメージ</strong>: アプリケーションと依存関係をパッケージ化した読み取り専用のテンプレート。設計図のようなもの。</p>
+                    <p class="text-gray-700 mb-3"><strong>コンテナ</strong>: イメージから作成される実行中のインスタンス。イメージを元に起動した実際の環境。</p>
+                    <div class="bg-amber-100 rounded-lg p-3 mt-2">
+                      <pre class="text-sm text-gray-800 overflow-x-auto"><code># イメージをビルド
+docker build -t myapp:latest .
+
+# イメージからコンテナを起動
+docker run -d --name myapp-container myapp:latest</code></pre>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Card 5: REST API -->
+              <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden" id="card-5">
+                <!-- Card Header -->
+                <div class="p-4">
+                  <!-- Evaluation Buttons Row -->
+                  <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center gap-2">
+                      <button class="bg-green-500 hover:bg-green-600 text-white text-sm font-medium rounded-full px-3 py-1 transition">OK</button>
+                      <button class="bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium rounded-full px-3 py-1 transition">覚えた</button>
+                      <button class="bg-red-400 hover:bg-red-500 text-white text-sm font-medium rounded-full px-3 py-1 transition">覚え直し</button>
+                    </div>
+                    <button class="toggle-icon text-gray-400 hover:text-gray-600 p-1" onclick="toggleAnswer('card-5')">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                      </svg>
+                    </button>
+                  </div>
+
+                  <!-- Question Title Row -->
+                  <div class="flex items-start justify-between mb-3">
+                    <h3 class="text-lg font-medium text-gray-900">HTTPメソッドの使い分けは?</h3>
+                    <button class="text-orange-500 hover:text-orange-600 p-1 ml-2 flex-shrink-0">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                      </svg>
+                    </button>
+                  </div>
+
+                  <!-- Meta Info Row -->
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                      <span class="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded">2/6</span>
+                      <button class="text-orange-500 hover:text-orange-600 text-sm font-medium">編集</button>
+                    </div>
+                    <span class="text-sm text-gray-500">復習日 2025/12/28</span>
+                  </div>
+                </div>
+
+                <!-- Toggle Button -->
+                <div class="border-t border-gray-200 flex justify-center">
+                  <button class="w-full py-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition" onclick="toggleAnswer('card-5')">
+                    <svg class="w-5 h-5 mx-auto toggle-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
+                    </svg>
+                  </button>
+                </div>
+
+                <!-- Answer Area -->
+                <div class="answer-content" id="answer-card-5">
+                  <div class="bg-amber-50 p-4 border-t border-amber-200">
+                    <ul class="text-gray-700 space-y-2">
+                      <li><strong>GET</strong>: リソースの取得（読み取り専用）</li>
+                      <li><strong>POST</strong>: 新規リソースの作成</li>
+                      <li><strong>PUT</strong>: リソースの完全な更新/置換</li>
+                      <li><strong>PATCH</strong>: リソースの部分的な更新</li>
+                      <li><strong>DELETE</strong>: リソースの削除</li>
+                    </ul>
+                    <div class="bg-amber-100 rounded-lg p-3 mt-3">
+                      <pre class="text-sm text-gray-800 overflow-x-auto"><code>GET    /users      # ユーザー一覧取得
+GET    /users/1    # 特定ユーザー取得
+POST   /users      # 新規ユーザー作成
+PUT    /users/1    # ユーザー情報更新
+DELETE /users/1    # ユーザー削除</code></pre>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Card 6: Git -->
+              <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden" id="card-6">
+                <!-- Card Header -->
+                <div class="p-4">
+                  <!-- Evaluation Buttons Row -->
+                  <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center gap-2">
+                      <button class="bg-green-500 hover:bg-green-600 text-white text-sm font-medium rounded-full px-3 py-1 transition">OK</button>
+                      <button class="bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium rounded-full px-3 py-1 transition">覚えた</button>
+                      <button class="bg-red-400 hover:bg-red-500 text-white text-sm font-medium rounded-full px-3 py-1 transition">覚え直し</button>
+                    </div>
+                    <button class="toggle-icon text-gray-400 hover:text-gray-600 p-1" onclick="toggleAnswer('card-6')">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                      </svg>
+                    </button>
+                  </div>
+
+                  <!-- Question Title Row -->
+                  <div class="flex items-start justify-between mb-3">
+                    <h3 class="text-lg font-medium text-gray-900">ブランチの作成とマージの方法は?</h3>
+                    <button class="text-orange-500 hover:text-orange-600 p-1 ml-2 flex-shrink-0">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                      </svg>
+                    </button>
+                  </div>
+
+                  <!-- Meta Info Row -->
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                      <span class="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded">3/6</span>
+                      <button class="text-orange-500 hover:text-orange-600 text-sm font-medium">編集</button>
+                    </div>
+                    <span class="text-sm text-gray-500">復習日 2025/12/29</span>
+                  </div>
+                </div>
+
+                <!-- Toggle Button -->
+                <div class="border-t border-gray-200 flex justify-center">
+                  <button class="w-full py-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition" onclick="toggleAnswer('card-6')">
+                    <svg class="w-5 h-5 mx-auto toggle-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
+                    </svg>
+                  </button>
+                </div>
+
+                <!-- Answer Area -->
+                <div class="answer-content" id="answer-card-6">
+                  <div class="bg-amber-50 p-4 border-t border-amber-200">
+                    <p class="text-gray-700 mb-3">Gitブランチは独立した開発ラインを作成し、後でメインラインに統合できます。</p>
+                    <div class="bg-amber-100 rounded-lg p-3 mt-2">
+                      <pre class="text-sm text-gray-800 overflow-x-auto"><code># ブランチの作成と切り替え
+git checkout -b feature/new-feature
+
+# 作業後、コミット
+git add .
+git commit -m "Add new feature"
+
+# mainブランチに戻る
+git checkout main
+
+# ブランチをマージ
+git merge feature/new-feature
+
+# ブランチの削除
+git branch -d feature/new-feature</code></pre>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Card 7: CSS Flexbox -->
+              <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden" id="card-7">
+                <!-- Card Header -->
+                <div class="p-4">
+                  <!-- Evaluation Buttons Row -->
+                  <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center gap-2">
+                      <button class="bg-green-500 hover:bg-green-600 text-white text-sm font-medium rounded-full px-3 py-1 transition">OK</button>
+                      <button class="bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium rounded-full px-3 py-1 transition">覚えた</button>
+                      <button class="bg-red-400 hover:bg-red-500 text-white text-sm font-medium rounded-full px-3 py-1 transition">覚え直し</button>
+                    </div>
+                    <button class="toggle-icon text-gray-400 hover:text-gray-600 p-1" onclick="toggleAnswer('card-7')">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                      </svg>
+                    </button>
+                  </div>
+
+                  <!-- Question Title Row -->
+                  <div class="flex items-start justify-between mb-3">
+                    <h3 class="text-lg font-medium text-gray-900">justify-contentとalign-itemsの違いは?</h3>
+                    <button class="text-orange-500 hover:text-orange-600 p-1 ml-2 flex-shrink-0">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                      </svg>
+                    </button>
+                  </div>
+
+                  <!-- Meta Info Row -->
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                      <span class="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded">4/6</span>
+                      <button class="text-orange-500 hover:text-orange-600 text-sm font-medium">編集</button>
+                    </div>
+                    <span class="text-sm text-gray-500">復習日 2025/12/30</span>
+                  </div>
+                </div>
+
+                <!-- Toggle Button -->
+                <div class="border-t border-gray-200 flex justify-center">
+                  <button class="w-full py-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition" onclick="toggleAnswer('card-7')">
+                    <svg class="w-5 h-5 mx-auto toggle-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
+                    </svg>
+                  </button>
+                </div>
+
+                <!-- Answer Area -->
+                <div class="answer-content" id="answer-card-7">
+                  <div class="bg-amber-50 p-4 border-t border-amber-200">
+                    <p class="text-gray-700 mb-3"><strong>justify-content</strong>: 主軸（デフォルトは横方向）に沿った配置を制御</p>
+                    <p class="text-gray-700 mb-3"><strong>align-items</strong>: 交差軸（デフォルトは縦方向）に沿った配置を制御</p>
+                    <div class="bg-amber-100 rounded-lg p-3 mt-2">
+                      <pre class="text-sm text-gray-800 overflow-x-auto"><code>.container {
+  display: flex;
+
+  /* 横方向の配置 */
+  justify-content: center;  /* 中央揃え */
+  justify-content: space-between; /* 両端揃え */
+
+  /* 縦方向の配置 */
+  align-items: center;  /* 中央揃え */
+  align-items: flex-start; /* 上揃え */
+}</code></pre>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 1回目 Cards -->
+          <div id="content-1" class="tab-content">
+            <div class="space-y-4">
+              <p class="text-sm text-gray-500 mb-4">1回目の復習カード（2枚）</p>
+              <!-- Simplified cards for other tabs -->
+              <div class="bg-white border border-red-200 rounded-xl shadow-sm p-4">
+                <div class="flex items-center gap-2 mb-2">
+                  <span class="text-xs text-red-500">期限切れ</span>
+                </div>
+                <h3 class="font-medium text-gray-900">useStateとuseEffectの違いは?</h3>
+                <p class="text-sm text-gray-500 mt-1">復習日: 2025/12/24</p>
+              </div>
+              <div class="bg-white border border-red-200 rounded-xl shadow-sm p-4">
+                <div class="flex items-center gap-2 mb-2">
+                  <span class="text-xs text-red-500">期限切れ</span>
+                </div>
+                <h3 class="font-medium text-gray-900">ジェネリクスの主な用途は?</h3>
+                <p class="text-sm text-gray-500 mt-1">復習日: 2025/12/25</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2回目 Cards -->
+          <div id="content-2" class="tab-content">
+            <div class="space-y-4">
+              <p class="text-sm text-gray-500 mb-4">2回目の復習カード（3枚）</p>
+              <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-4">
+                <h3 class="font-medium text-gray-900">プリペアドステートメントとは?</h3>
+                <p class="text-sm text-gray-500 mt-1">復習日: 2025/12/26</p>
+              </div>
+              <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-4">
+                <h3 class="font-medium text-gray-900">コンテナとイメージの違いは?</h3>
+                <p class="text-sm text-gray-500 mt-1">復習日: 2025/12/27</p>
+              </div>
+              <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-4">
+                <h3 class="font-medium text-gray-900">HTTPメソッドの使い分けは?</h3>
+                <p class="text-sm text-gray-500 mt-1">復習日: 2025/12/28</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3回目 Cards -->
+          <div id="content-3" class="tab-content">
+            <div class="space-y-4">
+              <p class="text-sm text-gray-500 mb-4">3回目の復習カード（1枚）</p>
+              <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-4">
+                <h3 class="font-medium text-gray-900">ブランチの作成とマージの方法は?</h3>
+                <p class="text-sm text-gray-500 mt-1">復習日: 2025/12/29</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4回目 Cards -->
+          <div id="content-4" class="tab-content">
+            <div class="space-y-4">
+              <p class="text-sm text-gray-500 mb-4">4回目の復習カード（1枚）</p>
+              <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-4">
+                <h3 class="font-medium text-gray-900">justify-contentとalign-itemsの違いは?</h3>
+                <p class="text-sm text-gray-500 mt-1">復習日: 2025/12/30</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- 5回目 Cards -->
+          <div id="content-5" class="tab-content">
+            <div class="py-8 text-center">
+              <p class="text-sm text-gray-500">マスターしたカードはまだありません</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Start Review Button -->
+        <button class="w-full sm:w-auto sm:px-8 mt-6 py-4 bg-blue-600 hover:bg-blue-700 rounded-xl font-medium text-white shadow-lg shadow-blue-600/25 hover:shadow-blue-600/40 transition-all hover:scale-[1.02] active:scale-[0.98]">
+          復習を始める（7枚）
+        </button>
+
+      </div>
+    </main>
+
+  </div>
+
+  <script>
+    function openSidebar() {
+      document.getElementById('sidebar').classList.remove('closed');
+      document.getElementById('sidebar-overlay').classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeSidebar() {
+      document.getElementById('sidebar').classList.add('closed');
+      document.getElementById('sidebar-overlay').classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+
+    function selectTab(tabId) {
+      var tabs = ['all', '1', '2', '3', '4', '5'];
+
+      tabs.forEach(function(id) {
+        var tabBtn = document.getElementById('tab-' + id);
+        var content = document.getElementById('content-' + id);
+
+        if (id === tabId) {
+          tabBtn.classList.remove('bg-white', 'text-gray-600', 'border', 'border-gray-200', 'hover:bg-blue-50');
+          tabBtn.classList.add('bg-blue-600', 'text-white', 'hover:bg-blue-700');
+          content.classList.add('active');
+        } else {
+          tabBtn.classList.remove('bg-blue-600', 'text-white', 'hover:bg-blue-700');
+          tabBtn.classList.add('bg-white', 'text-gray-600', 'border', 'border-gray-200', 'hover:bg-blue-50');
+          content.classList.remove('active');
+        }
+      });
+    }
+
+    function toggleAnswer(cardId) {
+      var answerElement = document.getElementById('answer-' + cardId);
+      var cardElement = document.getElementById(cardId);
+      var toggleIcons = cardElement.querySelectorAll('.toggle-icon');
+
+      if (answerElement.classList.contains('expanded')) {
+        answerElement.classList.remove('expanded');
+        toggleIcons.forEach(function(icon) {
+          icon.classList.remove('expanded');
+        });
+      } else {
+        answerElement.classList.add('expanded');
+        toggleIcons.forEach(function(icon) {
+          icon.classList.add('expanded');
+        });
+      }
+    }
+  </script>
+</body>
+</html>

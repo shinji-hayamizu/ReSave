@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>メモ追加 - Injection-Brain</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#6366f1',
+            secondary: '#8b5cf6',
+            accent: '#a78bfa',
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="min-h-screen bg-gray-50">
+  <!-- Header -->
+  <header class="bg-white sticky top-0 z-20 border-b border-gray-100">
+    <div class="max-w-lg mx-auto px-4 py-4">
+      <div class="flex items-center justify-between">
+        <a href="home.html" class="flex items-center text-gray-600 hover:text-gray-800 transition-colors">
+          <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+          </svg>
+          キャンセル
+        </a>
+        <h1 class="text-lg font-bold text-gray-800">新規メモ</h1>
+        <a href="home.html"
+          class="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-full text-sm font-medium shadow-lg shadow-indigo-500/20 hover:from-indigo-700 hover:to-purple-700 transition-all">
+          保存
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Form -->
+  <main class="max-w-lg mx-auto px-4 py-6">
+    <form class="space-y-6">
+      <!-- Title -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">タイトル</label>
+        <input type="text" placeholder="例: React Hooks の使い方"
+          class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none">
+      </div>
+
+      <!-- Category -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">カテゴリ</label>
+        <select class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none bg-white">
+          <option value="">カテゴリを選択</option>
+          <option value="programming">プログラミング</option>
+          <option value="english">英語</option>
+          <option value="qualification">資格</option>
+          <option value="general">一般知識</option>
+        </select>
+      </div>
+
+      <!-- Question (Front of card) -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          質問（カード表面）
+          <span class="text-gray-400 font-normal ml-1">必須</span>
+        </label>
+        <textarea rows="4" placeholder="覚えたい質問や問題を入力..."
+          class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none resize-none"></textarea>
+      </div>
+
+      <!-- Answer (Back of card) -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          回答（カード裏面）
+          <span class="text-gray-400 font-normal ml-1">必須</span>
+        </label>
+        <textarea rows="6" placeholder="回答や解説を入力..."
+          class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none resize-none"></textarea>
+      </div>
+
+      <!-- Tags -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">タグ</label>
+        <div class="flex flex-wrap gap-2 mb-3">
+          <span class="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm flex items-center gap-1">
+            React
+            <button type="button" class="hover:text-primary/70">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+            </button>
+          </span>
+          <span class="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm flex items-center gap-1">
+            Hooks
+            <button type="button" class="hover:text-primary/70">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+            </button>
+          </span>
+        </div>
+        <div class="relative">
+          <input type="text" placeholder="タグを追加..."
+            class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none pr-12">
+          <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-primary hover:text-secondary transition-colors">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Preview Card -->
+      <div class="pt-4 border-t border-gray-200">
+        <h3 class="text-sm font-medium text-gray-700 mb-3">カードプレビュー</h3>
+        <div class="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl p-6 text-white shadow-xl">
+          <div class="text-center">
+            <p class="text-white/60 text-sm mb-2">質問</p>
+            <p class="text-lg font-medium">ここに質問が表示されます</p>
+          </div>
+          <div class="mt-6 pt-4 border-t border-white/20 text-center">
+            <p class="text-white/60 text-xs">タップで回答を表示</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Advanced Options -->
+      <div class="pt-4">
+        <button type="button" onclick="toggleAdvanced()" class="flex items-center gap-2 text-gray-600 hover:text-gray-800 transition-colors">
+          <svg id="advancedIcon" class="w-5 h-5 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+          </svg>
+          <span class="text-sm font-medium">詳細オプション</span>
+        </button>
+
+        <div id="advancedOptions" class="hidden mt-4 space-y-4 bg-gray-50 rounded-xl p-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">初回復習日</label>
+            <input type="date"
+              class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none bg-white">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">重要度</label>
+            <div class="flex gap-2">
+              <button type="button" class="flex-1 py-2 border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors">低</button>
+              <button type="button" class="flex-1 py-2 bg-primary text-white rounded-lg">中</button>
+              <button type="button" class="flex-1 py-2 border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors">高</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+  </main>
+
+  <script>
+    function toggleAdvanced() {
+      const options = document.getElementById('advancedOptions');
+      const icon = document.getElementById('advancedIcon');
+      options.classList.toggle('hidden');
+      icon.classList.toggle('rotate-180');
+    }
+  </script>
+</body>
+</html>
