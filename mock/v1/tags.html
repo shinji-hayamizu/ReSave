@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* ========================================
+       Tag Management Specific Styles
+       ======================================== */
+
+    /* Page Header */
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 24px 0 16px;
+    }
+
+    .page-header__title {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    /* Tag List */
+    .tag-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    /* Tag Item */
+    .tag-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px;
+      background: var(--bg-primary);
+      border-radius: var(--border-radius-lg);
+      box-shadow: var(--shadow-sm);
+      transition: box-shadow var(--transition-fast);
+    }
+
+    .tag-item:hover {
+      box-shadow: var(--shadow-md);
+    }
+
+    .tag-item__chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 14px;
+      font-size: 14px;
+      font-weight: 500;
+      border-radius: 9999px;
+      white-space: nowrap;
+    }
+
+    .tag-item__info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .tag-item__name {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-bottom: 2px;
+    }
+
+    .tag-item__count {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .tag-item__actions {
+      display: flex;
+      gap: 4px;
+    }
+
+    .tag-item__action {
+      width: 36px;
+      height: 36px;
+      border: none;
+      background: var(--bg-secondary);
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-secondary);
+      transition: all var(--transition-fast);
+    }
+
+    .tag-item__action:hover {
+      background: var(--border-color);
+      color: var(--text-primary);
+    }
+
+    .tag-item__action--danger:hover {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--color-danger);
+    }
+
+    .tag-item__action svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* Empty State */
+    .tag-list__empty {
+      text-align: center;
+      padding: 64px 20px;
+      background: var(--bg-primary);
+      border-radius: var(--border-radius-lg);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .tag-list__empty-icon {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 16px;
+      color: var(--text-muted);
+    }
+
+    .tag-list__empty-title {
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+
+    .tag-list__empty-text {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    /* Modal Overlay */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    /* Modal */
+    .modal {
+      width: 100%;
+      max-width: 400px;
+      background: var(--bg-primary);
+      border-radius: var(--border-radius-lg);
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+    }
+
+    .modal__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .modal__title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .modal__close {
+      width: 32px;
+      height: 32px;
+      border: none;
+      background: transparent;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-secondary);
+      transition: all var(--transition-fast);
+    }
+
+    .modal__close:hover {
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+    }
+
+    .modal__close svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .modal__body {
+      padding: 24px;
+    }
+
+    .modal__footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      padding: 16px 24px;
+      background: var(--bg-secondary);
+      border-top: 1px solid var(--border-color);
+    }
+
+    /* Color Palette */
+    .color-palette {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .color-option {
+      width: 32px;
+      height: 32px;
+      border: 2px solid transparent;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      position: relative;
+    }
+
+    .color-option:hover {
+      transform: scale(1.1);
+    }
+
+    .color-option.selected {
+      border-color: var(--text-primary);
+    }
+
+    .color-option.selected::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 12px;
+      height: 12px;
+      background: white;
+      border-radius: 50%;
+    }
+
+    /* Tag Color Variants */
+    .tag-color--blue {
+      background: #e0f2fe;
+      color: #0369a1;
+      border: 1px solid #bae6fd;
+    }
+
+    .tag-color--green {
+      background: #dcfce7;
+      color: #15803d;
+      border: 1px solid #bbf7d0;
+    }
+
+    .tag-color--purple {
+      background: #f3e8ff;
+      color: #7c3aed;
+      border: 1px solid #e9d5ff;
+    }
+
+    .tag-color--orange {
+      background: #ffedd5;
+      color: #c2410c;
+      border: 1px solid #fed7aa;
+    }
+
+    .tag-color--pink {
+      background: #fce7f3;
+      color: #be185d;
+      border: 1px solid #fbcfe8;
+    }
+
+    .tag-color--cyan {
+      background: #cffafe;
+      color: #0e7490;
+      border: 1px solid #a5f3fc;
+    }
+
+    .tag-color--yellow {
+      background: #fef9c3;
+      color: #a16207;
+      border: 1px solid #fde047;
+    }
+
+    .tag-color--gray {
+      background: #f1f5f9;
+      color: #475569;
+      border: 1px solid #e2e8f0;
+    }
+
+    /* Color option backgrounds */
+    .color-swatch--blue { background: #0369a1; }
+    .color-swatch--green { background: #15803d; }
+    .color-swatch--purple { background: #7c3aed; }
+    .color-swatch--orange { background: #c2410c; }
+    .color-swatch--pink { background: #be185d; }
+    .color-swatch--cyan { background: #0e7490; }
+    .color-swatch--yellow { background: #a16207; }
+    .color-swatch--gray { background: #475569; }
+
+    /* Delete Modal */
+    .modal__message {
+      font-size: 15px;
+      color: var(--text-primary);
+      margin-bottom: 12px;
+    }
+
+    .modal__warning {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 12px;
+      background: #fef9c3;
+      border: 1px solid #fde047;
+      border-radius: var(--border-radius);
+      font-size: 13px;
+      color: #92400e;
+    }
+
+    .modal__warning svg {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    /* Character Counter */
+    .form-input-wrapper {
+      position: relative;
+    }
+
+    .form-input-counter {
+      position: absolute;
+      right: 12px;
+      bottom: 12px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .form-input-counter--warning {
+      color: var(--color-warning);
+    }
+
+    .form-input-counter--error {
+      color: var(--color-danger);
+    }
+  </style>
+</head>
+<body class="content-body">
+  <!--
+    画面: タグ管理
+    機能: F-017
+    参照仕様: docs/requirements/functions/tag/F-017-tag-management.md
+    前の画面: index.html (サイドバーから)
+    次の画面: index.html (戻る)
+  -->
+
+  <!-- [Component: TagManagementPage] -->
+  <div class="content-wrapper" data-component="TagManagementPage">
+
+    <!-- ========================================
+         Page Header
+         ======================================== -->
+    <div class="page-header">
+      <h1 class="page-header__title">タグ管理</h1>
+      <button
+        class="btn btn--primary"
+        data-action="onClick:openCreateModal"
+      >
+        <svg class="btn__icon" data-icon="lucide:Plus" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+        タグ追加
+      </button>
+    </div>
+
+    <!-- ========================================
+         [Component: TagList]
+         タグ一覧
+         ======================================== -->
+    <div class="tag-list" data-component="TagList" data-list="tags">
+
+      <!-- [ListItem: TagItem] - Sample 1: 英語 -->
+      <div
+        class="tag-item"
+        data-component="TagItem"
+        data-list-item
+        data-key="tagId"
+        data-props="tag,onEdit,onDelete"
+      >
+        <span class="tag-item__chip tag-color--blue" data-prop="tagColor">英語</span>
+        <div class="tag-item__info">
+          <div class="tag-item__name" data-prop="tagName">英語</div>
+          <div class="tag-item__count"><span data-prop="cardCount">15</span>枚のカード</div>
+        </div>
+        <div class="tag-item__actions">
+          <button
+            class="tag-item__action"
+            title="編集"
+            data-action="onClick:onEdit"
+          >
+            <svg data-icon="lucide:Edit" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+          </button>
+          <button
+            class="tag-item__action tag-item__action--danger"
+            title="削除"
+            data-action="onClick:onDelete"
+          >
+            <svg data-icon="lucide:Trash2" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+          </button>
+        </div>
+      </div>
+      <!-- [/ListItem: TagItem] -->
+
+      <!-- [ListItem: TagItem] - Sample 2: TOEIC -->
+      <div class="tag-item" data-list-item data-key="tagId">
+        <span class="tag-item__chip tag-color--green">TOEIC</span>
+        <div class="tag-item__info">
+          <div class="tag-item__name">TOEIC</div>
+          <div class="tag-item__count">8枚のカード</div>
+        </div>
+        <div class="tag-item__actions">
+          <button class="tag-item__action" title="編集">
+            <svg data-icon="lucide:Edit" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+          </button>
+          <button class="tag-item__action tag-item__action--danger" title="削除">
+            <svg data-icon="lucide:Trash2" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- [ListItem: TagItem] - Sample 3: プログラミング -->
+      <div class="tag-item" data-list-item data-key="tagId">
+        <span class="tag-item__chip tag-color--purple">プログラミング</span>
+        <div class="tag-item__info">
+          <div class="tag-item__name">プログラミング</div>
+          <div class="tag-item__count">23枚のカード</div>
+        </div>
+        <div class="tag-item__actions">
+          <button class="tag-item__action" title="編集">
+            <svg data-icon="lucide:Edit" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+          </button>
+          <button class="tag-item__action tag-item__action--danger" title="削除">
+            <svg data-icon="lucide:Trash2" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- [ListItem: TagItem] - Sample 4: 日本史 -->
+      <div class="tag-item" data-list-item data-key="tagId">
+        <span class="tag-item__chip tag-color--orange">日本史</span>
+        <div class="tag-item__info">
+          <div class="tag-item__name">日本史</div>
+          <div class="tag-item__count">5枚のカード</div>
+        </div>
+        <div class="tag-item__actions">
+          <button class="tag-item__action" title="編集">
+            <svg data-icon="lucide:Edit" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+          </button>
+          <button class="tag-item__action tag-item__action--danger" title="削除">
+            <svg data-icon="lucide:Trash2" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- [State: empty] タグが0件の場合 -->
+      <div class="tag-list__empty" data-state="empty" data-show-if="tags.length === 0" style="display: none;">
+        <svg class="tag-list__empty-icon" data-icon="lucide:Tags" xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 6.3 6.3a2.4 2.4 0 0 1 0 3.4L17 19"/><path d="M9.586 5.586A2 2 0 0 0 8.172 5H3a1 1 0 0 0-1 1v5.172a2 2 0 0 0 .586 1.414L8.29 18.29a2.426 2.426 0 0 0 3.42 0l3.58-3.58a2.426 2.426 0 0 0 0-3.42z"/><circle cx="6.5" cy="9.5" r=".5" fill="currentColor"/></svg>
+        <p class="tag-list__empty-title">タグがありません</p>
+        <p class="tag-list__empty-text">タグを作成して、カードを整理しましょう</p>
+      </div>
+
+    </div>
+    <!-- [/Component: TagList] -->
+
+  </div>
+  <!-- [/Component: TagManagementPage] -->
+
+
+  <!-- ========================================
+       [Component: TagFormModal]
+       タグ作成/編集モーダル
+       ======================================== -->
+  <div
+    class="modal-overlay"
+    id="tag-form-modal"
+    data-component="TagFormModal"
+    data-props="isOpen,mode,tag,onSave,onClose"
+  >
+    <div class="modal" role="dialog" aria-labelledby="modal-title" aria-modal="true">
+      <div class="modal__header">
+        <h2 class="modal__title" id="modal-title" data-prop="modalTitle">タグを追加</h2>
+        <button
+          class="modal__close"
+          title="閉じる"
+          data-action="onClick:onClose"
+        >
+          <svg data-icon="lucide:X" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <form data-action="onSubmit:handleSave">
+          <div class="form-group">
+            <label class="form-label" for="tag-name">タグ名</label>
+            <div class="form-input-wrapper">
+              <input
+                type="text"
+                id="tag-name"
+                class="form-input"
+                placeholder="タグ名を入力"
+                maxlength="30"
+                data-prop="tagName"
+                data-action="onChange:setTagName"
+              >
+              <span class="form-input-counter" data-prop="charCount">0/30</span>
+            </div>
+            <!-- [State: error] バリデーションエラー -->
+            <p class="form-error" data-state="error" data-show-if="errors.tagName" style="display: none;">タグ名を入力してください</p>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">色</label>
+            <div class="color-palette" data-prop="selectedColor">
+              <button
+                type="button"
+                class="color-option color-swatch--blue selected"
+                data-color="blue"
+                data-action="onClick:setColor('blue')"
+                title="青"
+              ></button>
+              <button
+                type="button"
+                class="color-option color-swatch--green"
+                data-color="green"
+                data-action="onClick:setColor('green')"
+                title="緑"
+              ></button>
+              <button
+                type="button"
+                class="color-option color-swatch--purple"
+                data-color="purple"
+                data-action="onClick:setColor('purple')"
+                title="紫"
+              ></button>
+              <button
+                type="button"
+                class="color-option color-swatch--orange"
+                data-color="orange"
+                data-action="onClick:setColor('orange')"
+                title="オレンジ"
+              ></button>
+              <button
+                type="button"
+                class="color-option color-swatch--pink"
+                data-color="pink"
+                data-action="onClick:setColor('pink')"
+                title="ピンク"
+              ></button>
+              <button
+                type="button"
+                class="color-option color-swatch--cyan"
+                data-color="cyan"
+                data-action="onClick:setColor('cyan')"
+                title="シアン"
+              ></button>
+              <button
+                type="button"
+                class="color-option color-swatch--yellow"
+                data-color="yellow"
+                data-action="onClick:setColor('yellow')"
+                title="黄"
+              ></button>
+              <button
+                type="button"
+                class="color-option color-swatch--gray"
+                data-color="gray"
+                data-action="onClick:setColor('gray')"
+                title="グレー"
+              ></button>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal__footer">
+        <button
+          class="btn btn--secondary"
+          data-action="onClick:onClose"
+        >
+          キャンセル
+        </button>
+        <button
+          class="btn btn--primary"
+          data-action="onClick:handleSave"
+        >
+          保存
+        </button>
+      </div>
+    </div>
+  </div>
+  <!-- [/Component: TagFormModal] -->
+
+
+  <!-- ========================================
+       [Component: DeleteConfirmModal]
+       削除確認モーダル
+       ======================================== -->
+  <div
+    class="modal-overlay"
+    id="delete-confirm-modal"
+    data-component="DeleteConfirmModal"
+    data-props="isOpen,tag,onConfirm,onClose"
+  >
+    <div class="modal" role="alertdialog" aria-labelledby="delete-modal-title" aria-describedby="delete-modal-desc" aria-modal="true">
+      <div class="modal__header">
+        <h2 class="modal__title" id="delete-modal-title">タグを削除</h2>
+        <button
+          class="modal__close"
+          title="閉じる"
+          data-action="onClick:onClose"
+        >
+          <svg data-icon="lucide:X" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <p class="modal__message" id="delete-modal-desc">
+          このタグを削除しますか？
+        </p>
+        <p class="modal__message">
+          <strong data-prop="tagName">英語</strong> (<span data-prop="cardCount">15</span>枚のカードに紐付け)
+        </p>
+        <div class="modal__warning">
+          <svg data-icon="lucide:Info" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+          <span>紐付いているカードは削除されません。タグの関連付けのみが解除されます。</span>
+        </div>
+      </div>
+      <div class="modal__footer">
+        <button
+          class="btn btn--secondary"
+          data-action="onClick:onClose"
+        >
+          キャンセル
+        </button>
+        <button
+          class="btn btn--danger"
+          data-action="onClick:onConfirm"
+        >
+          削除する
+        </button>
+      </div>
+    </div>
+  </div>
+  <!-- [/Component: DeleteConfirmModal] -->
+
+
+  <script src="js/main.js"></script>
+</body>
+</html>

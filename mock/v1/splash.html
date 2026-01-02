@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ReSave</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="splash-body">
+  <!--
+    画面: スプラッシュ
+    機能: -
+    参照仕様: -
+    前の画面: -
+    次の画面: main.html (認証済み), login.html (未認証)
+  -->
+
+  <!-- [Component: SplashScreen] -->
+  <div class="splash" data-component="SplashScreen">
+    <div class="splash__content">
+      <!-- Logo -->
+      <div class="splash__logo">
+        <svg class="splash__logo-icon" data-icon="lucide:Layers" xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/>
+          <path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/>
+          <path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/>
+        </svg>
+        <h1 class="splash__app-name">ReSave</h1>
+      </div>
+
+      <!-- Subtitle -->
+      <p class="splash__subtitle">- 記憶を科学する -</p>
+
+      <!-- Loading Indicator -->
+      <div class="splash__loading">
+        <div class="splash__spinner"></div>
+        <span class="splash__loading-text">読み込み中...</span>
+      </div>
+    </div>
+  </div>
+  <!-- [/Component: SplashScreen] -->
+
+  <!--
+    実装注記:
+    自動遷移ロジック（実際の実装時）
+    - 認証状態チェック後に遷移
+    - 認証済み: main.html へリダイレクト
+    - 未認証: login.html へリダイレクト
+    - 遷移タイミング: 最低1.5秒表示後
+  -->
+
+  <script src="js/main.js"></script>
+</body>
+</html>

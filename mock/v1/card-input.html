@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* Card Input Page Specific Styles */
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 16px 0 8px;
+      transition: color var(--transition-fast);
+    }
+
+    .back-link:hover {
+      color: var(--color-primary);
+    }
+
+    .back-link svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .card-input-form {
+      background: var(--bg-primary);
+      border-radius: var(--border-radius-lg);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+
+    .card-input-form__section {
+      padding: 20px;
+    }
+
+    .card-input-form__section--optional {
+      border-top: 1px solid var(--border-color);
+      background: var(--bg-secondary);
+    }
+
+    .card-input-form__section--danger {
+      border-top: 1px solid var(--border-color);
+      padding: 16px 20px;
+    }
+
+    .form-group--with-counter {
+      position: relative;
+    }
+
+    .form-label__row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .form-label__text {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+
+    .form-label__text--required::after {
+      content: " *";
+      color: var(--color-danger);
+    }
+
+    .form-label__counter {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .form-label__counter--warning {
+      color: var(--color-warning);
+    }
+
+    .form-label__counter--danger {
+      color: var(--color-danger);
+    }
+
+    .form-hint {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .form-hint--required {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      color: var(--text-secondary);
+    }
+
+    .form-hint--required::before {
+      content: "";
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      background: var(--color-primary);
+      border-radius: 50%;
+    }
+
+    .form-actions--center {
+      justify-content: center;
+      margin-top: 16px;
+    }
+
+    .form-actions--spread {
+      justify-content: space-between;
+      margin-top: 16px;
+    }
+
+    /* Tag Selection */
+    .tag-selector {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 12px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--border-radius);
+      background: var(--bg-primary);
+      min-height: 48px;
+    }
+
+    .tag-selector__tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      background: #e0f2fe;
+      color: #0369a1;
+      font-size: 12px;
+      font-weight: 500;
+      border-radius: 9999px;
+      border: 1px solid #bae6fd;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .tag-selector__tag:hover {
+      background: #bae6fd;
+    }
+
+    .tag-selector__tag--selected {
+      background: var(--color-primary);
+      color: white;
+      border-color: var(--color-primary);
+    }
+
+    .tag-selector__tag--selected:hover {
+      background: var(--color-primary-hover);
+    }
+
+    .tag-selector__tag-remove {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 14px;
+      height: 14px;
+      border: none;
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      cursor: pointer;
+      padding: 0;
+    }
+
+    .tag-selector__tag-remove svg {
+      width: 10px;
+      height: 10px;
+    }
+
+    .tag-selector__placeholder {
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    /* Repeat Select */
+    .form-select {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--border-radius);
+      font-size: 14px;
+      font-family: inherit;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 40px;
+    }
+
+    .form-select:focus {
+      outline: none;
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    /* Info Link */
+    .info-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      color: var(--text-muted);
+      font-size: 12px;
+      text-decoration: none;
+      margin-top: 6px;
+      transition: color var(--transition-fast);
+    }
+
+    .info-link:hover {
+      color: var(--color-primary);
+    }
+
+    .info-link svg {
+      width: 14px;
+      height: 14px;
+    }
+  </style>
+</head>
+<body class="content-body">
+  <!--
+    画面: カード入力（詳細入力）
+    機能: F-013, F-014, F-016
+    参照仕様: docs/requirements/functions/card/F-013-card-create.md, F-014-card-edit.md, F-016-card-tagging.md
+    前の画面: main.html
+    次の画面: main.html
+  -->
+
+  <!-- [Component: CardInputPage] -->
+  <div class="content-wrapper" data-component="CardInputPage" data-props="mode,card,tags,onSave,onDelete">
+
+    <!-- [Component: BackLink] -->
+    <a href="main.html" class="back-link" data-component="BackLink" data-action="onClick:navigateBack">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+      <span>戻る</span>
+    </a>
+    <!-- [/Component: BackLink] -->
+
+    <!-- [Component: CardInputForm] -->
+    <form class="card-input-form" data-component="CardInputForm" data-action="onSubmit:handleSubmit">
+
+      <!-- ========================================
+           Required Section
+           ======================================== -->
+      <div class="card-input-form__section" data-component="RequiredSection">
+
+        <!-- [Component: TextInput - Question] -->
+        <div class="form-group form-group--with-counter" data-component="TextInput" data-props="value,maxLength,error">
+          <div class="form-label__row">
+            <label class="form-label__text form-label__text--required" for="card-text">テキスト</label>
+            <span class="form-label__counter" data-prop="counter">
+              <span data-prop="currentLength">0</span> / 500
+            </span>
+          </div>
+          <textarea
+            id="card-text"
+            class="form-textarea"
+            placeholder="覚えたいことを入力"
+            maxlength="500"
+            rows="3"
+            required
+            data-prop="value"
+            data-action="onChange:setText"
+          ></textarea>
+          <!-- [State: error] -->
+          <p class="form-error" data-show-if="error" style="display: none;">テキストを入力してください</p>
+        </div>
+        <!-- [/Component: TextInput - Question] -->
+
+        <!-- [Component: TextInput - Answer] -->
+        <div class="form-group form-group--with-counter" data-component="TextInput" data-props="value,maxLength">
+          <div class="form-label__row">
+            <label class="form-label__text" for="card-hidden">隠しテキスト</label>
+            <span class="form-label__counter" data-prop="counter">
+              <span data-prop="currentLength">0</span> / 2000
+            </span>
+          </div>
+          <textarea
+            id="card-hidden"
+            class="form-textarea"
+            placeholder="答え（任意）"
+            maxlength="2000"
+            rows="3"
+            data-prop="value"
+            data-action="onChange:setHiddenText"
+          ></textarea>
+        </div>
+        <!-- [/Component: TextInput - Answer] -->
+
+        <div class="form-actions form-actions--center">
+          <button
+            type="submit"
+            class="btn btn--primary"
+            data-action="onClick:handleSaveRequired"
+          >
+            保存
+          </button>
+          <span class="form-hint form-hint--required">必須項目</span>
+        </div>
+
+      </div>
+
+      <!-- ========================================
+           Optional Section
+           ======================================== -->
+      <div class="card-input-form__section card-input-form__section--optional" data-component="OptionalSection">
+
+        <!-- [Component: TagSelector] -->
+        <div class="form-group" data-component="TagSelector" data-props="selectedTags,availableTags,maxTags">
+          <label class="form-label" for="card-tags">タグ</label>
+          <div class="tag-selector" data-action="onClick:openTagPicker">
+            <!-- [State: tags-selected] - 選択されたタグがある場合 -->
+            <span
+              class="tag-selector__tag tag-selector__tag--selected"
+              data-list-item
+              data-key="tagId"
+              data-show-if="selectedTags.length > 0"
+            >
+              <span data-prop="tagName">地理</span>
+              <button
+                type="button"
+                class="tag-selector__tag-remove"
+                data-action="onClick:removeTag"
+                title="タグを削除"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+              </button>
+            </span>
+            <span
+              class="tag-selector__tag tag-selector__tag--selected"
+              data-list-item
+              data-key="tagId"
+            >
+              <span data-prop="tagName">日本</span>
+              <button
+                type="button"
+                class="tag-selector__tag-remove"
+                data-action="onClick:removeTag"
+                title="タグを削除"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+              </button>
+            </span>
+            <!-- [State: no-tags] - タグがない場合のプレースホルダー -->
+            <span class="tag-selector__placeholder" data-show-if="selectedTags.length === 0" style="display: none;">タグを選択</span>
+          </div>
+          <p class="form-hint">タグは最大10個まで</p>
+          <!-- [State: error] -->
+          <p class="form-error" data-show-if="tagError" style="display: none;">タグは10個までです</p>
+        </div>
+        <!-- [/Component: TagSelector] -->
+
+        <!-- [Component: SourceUrlInput] -->
+        <div class="form-group" data-component="SourceUrlInput" data-props="value">
+          <label class="form-label" for="card-source">ソース</label>
+          <input
+            type="url"
+            id="card-source"
+            class="form-input"
+            placeholder="https://..."
+            data-prop="value"
+            data-action="onChange:setSourceUrl"
+          >
+        </div>
+        <!-- [/Component: SourceUrlInput] -->
+
+        <!-- [Component: RepeatSelector] -->
+        <div class="form-group" data-component="RepeatSelector" data-props="value">
+          <label class="form-label" for="card-repeat">リピート</label>
+          <select
+            id="card-repeat"
+            class="form-select"
+            data-prop="value"
+            data-action="onChange:setRepeatMode"
+          >
+            <option value="spaced" selected>間隔反復</option>
+            <option value="daily">毎日</option>
+            <option value="weekly">毎週</option>
+            <option value="none">なし</option>
+          </select>
+          <a href="#" class="info-link" data-action="onClick:showRepeatInfo">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+            <span>間隔反復について</span>
+          </a>
+        </div>
+        <!-- [/Component: RepeatSelector] -->
+
+        <div class="form-actions form-actions--center">
+          <button
+            type="submit"
+            class="btn btn--primary"
+            data-action="onClick:handleSaveAll"
+          >
+            保存
+          </button>
+        </div>
+
+      </div>
+
+      <!-- ========================================
+           Danger Section (Edit mode only)
+           ======================================== -->
+      <!-- [State: edit-mode] - 編集モード時のみ表示 -->
+      <div
+        class="card-input-form__section card-input-form__section--danger"
+        data-component="DangerSection"
+        data-show-if="mode === 'edit'"
+      >
+        <div class="form-actions form-actions--center">
+          <button
+            type="button"
+            class="btn btn--danger"
+            data-action="onClick:handleDelete"
+          >
+            削除
+          </button>
+        </div>
+      </div>
+
+    </form>
+    <!-- [/Component: CardInputForm] -->
+
+  </div>
+  <!-- [/Component: CardInputPage] -->
+
+  <script src="js/main.js"></script>
+  <script>
+    // Card Input Page Specific JavaScript
+    document.addEventListener('DOMContentLoaded', function() {
+      // Character counter for text input
+      const textInput = document.getElementById('card-text');
+      const hiddenInput = document.getElementById('card-hidden');
+
+      function updateCounter(input, maxLength) {
+        const counterSpan = input.closest('.form-group').querySelector('[data-prop="currentLength"]');
+        if (counterSpan) {
+          const currentLength = input.value.length;
+          counterSpan.textContent = currentLength;
+
+          const counterContainer = counterSpan.parentElement;
+          counterContainer.classList.remove('form-label__counter--warning', 'form-label__counter--danger');
+
+          if (currentLength >= maxLength) {
+            counterContainer.classList.add('form-label__counter--danger');
+          } else if (currentLength >= maxLength * 0.9) {
+            counterContainer.classList.add('form-label__counter--warning');
+          }
+        }
+      }
+
+      if (textInput) {
+        textInput.addEventListener('input', function() {
+          updateCounter(this, 500);
+        });
+      }
+
+      if (hiddenInput) {
+        hiddenInput.addEventListener('input', function() {
+          updateCounter(this, 2000);
+        });
+      }
+
+      // Tag selection (demo interaction)
+      const tagSelector = document.querySelector('.tag-selector');
+      if (tagSelector) {
+        tagSelector.addEventListener('click', function(e) {
+          if (e.target.closest('.tag-selector__tag-remove')) {
+            const tag = e.target.closest('.tag-selector__tag');
+            if (tag) {
+              tag.remove();
+              // Show placeholder if no tags remain
+              const remainingTags = tagSelector.querySelectorAll('.tag-selector__tag');
+              if (remainingTags.length === 0) {
+                const placeholder = tagSelector.querySelector('.tag-selector__placeholder');
+                if (placeholder) {
+                  placeholder.style.display = 'block';
+                }
+              }
+            }
+            e.stopPropagation();
+          }
+        });
+      }
+
+      // Form submission (demo)
+      const form = document.querySelector('.card-input-form');
+      if (form) {
+        form.addEventListener('submit', function(e) {
+          e.preventDefault();
+
+          const text = textInput ? textInput.value.trim() : '';
+          const hidden = hiddenInput ? hiddenInput.value.trim() : '';
+          const source = document.getElementById('card-source')?.value.trim() || '';
+          const repeat = document.getElementById('card-repeat')?.value || 'spaced';
+
+          if (!text) {
+            const errorMsg = textInput.closest('.form-group').querySelector('.form-error');
+            if (errorMsg) {
+              errorMsg.style.display = 'block';
+            }
+            textInput.focus();
+            return;
+          }
+
+          // Demo: Show saved data
+          alert('カードを保存しました!\n\nテキスト: ' + text + '\n隠しテキスト: ' + (hidden || '(なし)') + '\nソース: ' + (source || '(なし)') + '\nリピート: ' + repeat);
+
+          // Navigate back
+          window.location.href = 'main.html';
+        });
+      }
+
+      // Delete button (demo)
+      const deleteBtn = document.querySelector('[data-action="onClick:handleDelete"]');
+      if (deleteBtn) {
+        deleteBtn.addEventListener('click', function() {
+          if (confirm('このカードを削除しますか?')) {
+            alert('カードを削除しました');
+            window.location.href = 'main.html';
+          }
+        });
+      }
+
+      // Info link
+      const infoLink = document.querySelector('.info-link');
+      if (infoLink) {
+        infoLink.addEventListener('click', function(e) {
+          e.preventDefault();
+          alert('間隔反復（Spaced Repetition）とは:\n\n記憶の定着を最大化するため、復習間隔を徐々に延ばしていく学習法です。\n\nデフォルト間隔: 1日 -> 3日 -> 7日 -> 14日 -> 30日 -> 180日');
+        });
+      }
+
+      // Hide error on input
+      if (textInput) {
+        textInput.addEventListener('input', function() {
+          const errorMsg = this.closest('.form-group').querySelector('.form-error');
+          if (errorMsg) {
+            errorMsg.style.display = 'none';
+          }
+        });
+      }
+    });
+  </script>
+</body>
+</html>

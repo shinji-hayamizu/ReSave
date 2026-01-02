@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* Profile Page Specific Styles */
+    .profile-header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 32px 24px;
+      background: var(--bg-primary);
+      border-radius: var(--border-radius-lg);
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 20px;
+      margin-top: 24px;
+    }
+
+    .profile-header__avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: var(--color-primary);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 32px;
+      margin-bottom: 16px;
+    }
+
+    .profile-header__name {
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .profile-header__email {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    .profile-header__registered {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .profile-section {
+      background: var(--bg-primary);
+      border-radius: var(--border-radius-lg);
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+
+    .profile-section__title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-primary);
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .profile-section__content {
+      padding: 20px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      padding: 16px;
+      background: var(--bg-secondary);
+      border-radius: var(--border-radius);
+    }
+
+    .stat-item__label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+    }
+
+    .stat-item__value {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .stat-item__unit {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+
+    .edit-form {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .edit-form .form-group {
+      margin-bottom: 0;
+    }
+
+    .edit-form .form-input:disabled {
+      background: var(--bg-secondary);
+      color: var(--text-muted);
+      cursor: not-allowed;
+    }
+
+    .coming-soon-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      background: var(--bg-secondary);
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 500;
+      border-radius: 9999px;
+      margin-left: 8px;
+    }
+
+    .btn:disabled {
+      background: var(--bg-secondary);
+      color: var(--text-muted);
+      border: 1px solid var(--border-color);
+      cursor: not-allowed;
+    }
+
+    @media (min-width: 480px) {
+      .stats-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+  </style>
+</head>
+<body class="content-body">
+  <!--
+    画面: ユーザー詳細
+    機能: F-005（予定）
+    参照仕様: -
+    前の画面: index.html (サイドバーから)
+    次の画面: index.html (戻る)
+  -->
+
+  <!-- [Component: ProfilePage] -->
+  <div class="content-wrapper" data-component="ProfilePage">
+
+    <!-- ========================================
+         [Component: ProfileHeader]
+         ======================================== -->
+    <div class="profile-header" data-component="ProfileHeader">
+      <div class="profile-header__avatar" data-prop="avatarInitial">U</div>
+      <h1 class="profile-header__name" data-prop="displayName">User</h1>
+      <p class="profile-header__email" data-prop="email">user@example.com</p>
+      <p class="profile-header__registered" data-prop="registeredAt">2024年1月1日 登録</p>
+    </div>
+    <!-- [/Component: ProfileHeader] -->
+
+    <!-- ========================================
+         [Component: LearningSummary]
+         ======================================== -->
+    <div class="profile-section" data-component="LearningSummary">
+      <h2 class="profile-section__title">学習サマリー</h2>
+      <div class="profile-section__content">
+        <div class="stats-grid">
+          <div class="stat-item">
+            <span class="stat-item__label">総カード数</span>
+            <span class="stat-item__value" data-prop="totalCards">156<span class="stat-item__unit">枚</span></span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-item__label">総復習回数</span>
+            <span class="stat-item__value" data-prop="totalReviews">1,234<span class="stat-item__unit">回</span></span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-item__label">現在のストリーク</span>
+            <span class="stat-item__value" data-prop="currentStreak">7<span class="stat-item__unit">日</span></span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-item__label">最長ストリーク</span>
+            <span class="stat-item__value" data-prop="longestStreak">14<span class="stat-item__unit">日</span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- [/Component: LearningSummary] -->
+
+    <!-- ========================================
+         [Component: ProfileEdit]
+         v1.1で対応予定（グレーアウト）
+         ======================================== -->
+    <div class="profile-section" data-component="ProfileEdit">
+      <h2 class="profile-section__title">
+        プロフィール編集
+        <span class="coming-soon-badge">近日公開</span>
+      </h2>
+      <div class="profile-section__content">
+        <div class="edit-form">
+          <div class="form-group">
+            <label class="form-label" for="display-name">表示名</label>
+            <input
+              type="text"
+              id="display-name"
+              class="form-input"
+              value="User"
+              disabled
+              data-prop="displayName"
+            >
+          </div>
+          <div class="form-group">
+            <button
+              type="button"
+              class="btn btn--secondary"
+              disabled
+              data-action="onClick:handleAvatarChange"
+            >
+              アバターを変更
+            </button>
+          </div>
+          <div class="form-actions">
+            <button
+              type="button"
+              class="btn btn--primary"
+              disabled
+              data-action="onClick:handleSave"
+            >
+              保存
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- [/Component: ProfileEdit] -->
+
+  </div>
+  <!-- [/Component: ProfilePage] -->
+
+  <script src="js/main.js"></script>
+</body>
+</html>

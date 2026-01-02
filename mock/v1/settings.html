@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* Settings Page Specific Styles */
+    .settings-section {
+      margin-bottom: 16px;
+    }
+
+    .settings-section__title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .settings-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .settings-item:last-child {
+      border-bottom: none;
+    }
+
+    .settings-item__label {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .settings-item__name {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .settings-item__description {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .settings-item__value {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .settings-item__control {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Number Input */
+    .number-input {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .number-input__field {
+      width: 60px;
+      padding: 8px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--border-radius);
+      font-size: 14px;
+      text-align: center;
+    }
+
+    .number-input__field:focus {
+      outline: none;
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    .number-input__unit {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    /* Toggle Switch */
+    .toggle-switch {
+      position: relative;
+      width: 48px;
+      height: 24px;
+      background: var(--border-color);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background var(--transition-fast);
+    }
+
+    .toggle-switch::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 20px;
+      height: 20px;
+      background: white;
+      border-radius: 50%;
+      transition: transform var(--transition-fast);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .toggle-switch.active {
+      background: var(--color-primary);
+    }
+
+    .toggle-switch.active::after {
+      transform: translateX(24px);
+    }
+
+    /* Disabled State */
+    .settings-item--disabled {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+
+    .settings-item--disabled .settings-item__name::after {
+      content: '(近日公開)';
+      font-size: 11px;
+      font-weight: 400;
+      color: var(--text-muted);
+      margin-left: 8px;
+    }
+
+    /* Select */
+    .settings-select {
+      padding: 8px 32px 8px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--border-radius);
+      font-size: 14px;
+      background: var(--bg-primary);
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+    }
+
+    .settings-select:focus {
+      outline: none;
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    /* Link Button */
+    .settings-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 14px;
+      color: var(--color-primary);
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .settings-link:hover {
+      text-decoration: underline;
+    }
+
+    .settings-link svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* App Info */
+    .app-info {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .app-info__version {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .app-info__links {
+      display: flex;
+      gap: 16px;
+    }
+
+    /* Actions */
+    .settings-actions {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border-color);
+    }
+  </style>
+</head>
+<body class="content-body">
+  <!--
+    画面: 設定
+    機能: -
+    参照仕様: -
+    前の画面: index.html (サイドバーから)
+    次の画面: index.html (戻る), login.html (ログアウト時)
+  -->
+
+  <!-- [Component: SettingsPage] -->
+  <div class="content-wrapper" data-component="SettingsPage">
+
+    <!-- ========================================
+         [Component: LearningSettings]
+         学習設定セクション
+         ======================================== -->
+    <div class="summary-card settings-section" data-component="LearningSettings">
+      <h2 class="settings-section__title">学習設定</h2>
+
+      <!-- 1日の新規カード上限 -->
+      <div class="settings-item" data-component="NewCardLimit">
+        <div class="settings-item__label">
+          <span class="settings-item__name">1日の新規カード上限</span>
+          <span class="settings-item__description">1日に学習する新規カードの最大枚数</span>
+        </div>
+        <div class="settings-item__control">
+          <div class="number-input">
+            <input
+              type="number"
+              class="number-input__field"
+              value="20"
+              min="1"
+              max="100"
+              data-prop="newCardLimit"
+              data-action="onChange:setNewCardLimit"
+            >
+            <span class="number-input__unit">枚</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 復習間隔のカスタマイズ -->
+      <div class="settings-item" data-component="ReviewInterval">
+        <div class="settings-item__label">
+          <span class="settings-item__name">復習間隔</span>
+          <span class="settings-item__description">忘却曲線に基づいた復習スケジュール</span>
+        </div>
+        <div class="settings-item__control">
+          <a href="#" class="settings-link" data-action="onClick:openIntervalSettings">
+            詳細設定
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+    <!-- [/Component: LearningSettings] -->
+
+    <!-- ========================================
+         [Component: NotificationSettings]
+         通知設定セクション (将来対応)
+         ======================================== -->
+    <div class="summary-card settings-section" data-component="NotificationSettings">
+      <h2 class="settings-section__title">通知設定</h2>
+
+      <!-- 復習リマインダー -->
+      <div class="settings-item settings-item--disabled" data-component="ReviewReminder">
+        <div class="settings-item__label">
+          <span class="settings-item__name">復習リマインダー</span>
+          <span class="settings-item__description">復習が必要なカードがある時に通知</span>
+        </div>
+        <div class="settings-item__control">
+          <div
+            class="toggle-switch"
+            data-prop="reminderEnabled"
+            data-action="onClick:toggleReminder"
+          ></div>
+        </div>
+      </div>
+
+      <!-- 通知時間帯 -->
+      <div class="settings-item settings-item--disabled" data-component="NotificationTime">
+        <div class="settings-item__label">
+          <span class="settings-item__name">通知時間帯</span>
+          <span class="settings-item__description">リマインダーを送信する時間</span>
+        </div>
+        <div class="settings-item__control">
+          <select
+            class="settings-select"
+            disabled
+            data-prop="notificationTime"
+            data-action="onChange:setNotificationTime"
+          >
+            <option value="morning">朝 (8:00)</option>
+            <option value="noon">昼 (12:00)</option>
+            <option value="evening" selected>夕方 (18:00)</option>
+            <option value="night">夜 (21:00)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <!-- [/Component: NotificationSettings] -->
+
+    <!-- ========================================
+         [Component: AccountSettings]
+         アカウントセクション
+         ======================================== -->
+    <div class="summary-card settings-section" data-component="AccountSettings">
+      <h2 class="settings-section__title">アカウント</h2>
+
+      <!-- メールアドレス -->
+      <div class="settings-item" data-component="EmailDisplay">
+        <div class="settings-item__label">
+          <span class="settings-item__name">メールアドレス</span>
+        </div>
+        <div class="settings-item__value" data-prop="email">
+          user@example.com
+        </div>
+      </div>
+
+      <!-- パスワード変更 -->
+      <div class="settings-item" data-component="PasswordChange">
+        <div class="settings-item__label">
+          <span class="settings-item__name">パスワード</span>
+        </div>
+        <div class="settings-item__control">
+          <a href="#" class="settings-link" data-action="onClick:openPasswordChange">
+            パスワード変更
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- ログアウト -->
+      <div class="settings-actions">
+        <button
+          type="button"
+          class="btn btn--danger btn--block"
+          data-action="onClick:handleLogout"
+        >
+          ログアウト
+        </button>
+      </div>
+    </div>
+    <!-- [/Component: AccountSettings] -->
+
+    <!-- ========================================
+         [Component: DataManagement]
+         データ管理セクション (将来対応)
+         ======================================== -->
+    <div class="summary-card settings-section" data-component="DataManagement">
+      <h2 class="settings-section__title">データ管理</h2>
+
+      <!-- データエクスポート -->
+      <div class="settings-item settings-item--disabled" data-component="DataExport">
+        <div class="settings-item__label">
+          <span class="settings-item__name">データエクスポート</span>
+          <span class="settings-item__description">全てのカードデータをファイルに書き出し</span>
+        </div>
+        <div class="settings-item__control">
+          <button
+            type="button"
+            class="btn btn--secondary btn--sm"
+            disabled
+            data-action="onClick:handleExport"
+          >
+            エクスポート
+          </button>
+        </div>
+      </div>
+
+      <!-- データインポート -->
+      <div class="settings-item settings-item--disabled" data-component="DataImport">
+        <div class="settings-item__label">
+          <span class="settings-item__name">データインポート</span>
+          <span class="settings-item__description">ファイルからカードデータを読み込み</span>
+        </div>
+        <div class="settings-item__control">
+          <button
+            type="button"
+            class="btn btn--secondary btn--sm"
+            disabled
+            data-action="onClick:handleImport"
+          >
+            インポート
+          </button>
+        </div>
+      </div>
+    </div>
+    <!-- [/Component: DataManagement] -->
+
+    <!-- ========================================
+         [Component: AppInfo]
+         アプリ情報セクション
+         ======================================== -->
+    <div class="summary-card settings-section" data-component="AppInfo">
+      <h2 class="settings-section__title">アプリ情報</h2>
+
+      <div class="app-info">
+        <div class="app-info__version">
+          バージョン: 1.0.0
+        </div>
+        <div class="app-info__links">
+          <a href="#" class="settings-link" data-action="onClick:openTerms">
+            利用規約
+          </a>
+          <a href="#" class="settings-link" data-action="onClick:openPrivacy">
+            プライバシーポリシー
+          </a>
+        </div>
+      </div>
+    </div>
+    <!-- [/Component: AppInfo] -->
+
+  </div>
+  <!-- [/Component: SettingsPage] -->
+
+  <script src="js/main.js"></script>
+</body>
+</html>
