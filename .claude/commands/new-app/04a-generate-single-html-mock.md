@@ -32,11 +32,15 @@ allowed-tools: Read, Write, Edit, Glob, Grep
 - 確認ダイアログのテキスト
 
 ```html
-<!-- 例: 日本語で記述 -->
-<button class="btn btn--primary">ログイン</button>
-<label>メールアドレス</label>
-<input placeholder="メールアドレスを入力してください">
-<span class="error">パスワードが正しくありません</span>
+<!-- 例: 日本語 + Tailwind + data属性 -->
+<button class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition"
+        data-action="onClick:handleLogin">
+  ログイン
+</button>
+<label class="text-sm font-medium text-gray-700">メールアドレス</label>
+<input class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:outline-none"
+       placeholder="メールアドレスを入力してください">
+<span class="text-red-500 text-sm" data-state="error">パスワードが正しくありません</span>
 ```
 
 ---
@@ -249,20 +253,26 @@ Read docs/requirements/functions/[カテゴリ]/F-XXX-*.md
 ```markdown
 | 入力 | email | string | Yes | メールアドレス | RFC 5322準拠、最大254文字 |
 ```
-↓ 変換
+↓ 変換（Tailwind + data属性）
 ```html
-<div class="form-group">
-  <label class="form-label" for="email">メールアドレス <span class="required">*</span></label>
+<!-- [Component: FormField] -->
+<div class="flex flex-col gap-1" data-component="FormField" data-props="label,name,type,required,hint">
+  <label class="text-sm font-medium text-gray-700" for="email">
+    メールアドレス <span class="text-red-500">*</span>
+  </label>
   <input 
     type="email" 
-    id="email" 
-    class="form-input" 
+    id="email"
+    name="email"
+    class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:border-primary focus:outline-none transition"
     placeholder="example@email.com"
     maxlength="254"
     required
+    data-action="onChange:handleChange"
   >
-  <span class="form-hint">RFC 5322準拠</span>
+  <span class="text-xs text-gray-500">RFC 5322準拠</span>
 </div>
+<!-- [/Component: FormField] -->
 ```
 
 ### 5.2 バリデーション → エラー表示
@@ -272,9 +282,10 @@ Read docs/requirements/functions/[カテゴリ]/F-XXX-*.md
 ```markdown
 | E-F001-02 | パスワードが要件を満たさない | パスワードは8文字以上、英数字を含める必要があります |
 ```
-↓ 変換
+↓ 変換（状態バリエーション）
 ```html
-<span class="form-error" id="password-error" style="display:none;">
+<!-- [State: error] -->
+<span class="text-red-500 text-sm" id="password-error" data-state="error" style="display:none;">
   パスワードは8文字以上、英数字を含める必要があります
 </span>
 ```
@@ -290,16 +301,21 @@ Read docs/requirements/functions/[カテゴリ]/F-XXX-*.md
 │     [ 学習開始 ]            │
 └─────────────────────────────┘
 ```
-↓ 変換
+↓ 変換（Tailwind + data属性）
 ```html
-<div class="card summary-card">
-  <h2 class="card__title">今日の学習</h2>
-  <div class="card__stats">
-    <span>復習: <strong>15</strong>枚</span>
-    <span>新規: <strong>5</strong>枚</span>
+<!-- [Component: StudySummaryCard] -->
+<div class="bg-white rounded-xl shadow-md p-6" data-component="StudySummaryCard">
+  <h2 class="text-lg font-bold text-gray-800 mb-4">今日の学習</h2>
+  <div class="flex gap-6 mb-4">
+    <span class="text-gray-600">復習: <strong class="text-primary" data-prop="reviewCount">15</strong>枚</span>
+    <span class="text-gray-600">新規: <strong class="text-secondary" data-prop="newCount">5</strong>枚</span>
   </div>
-  <button class="btn btn--primary">学習開始</button>
+  <button class="w-full bg-primary text-white py-3 rounded-lg font-medium hover:bg-primary/90 transition"
+          data-action="onClick:handleStartStudy">
+    学習開始
+  </button>
 </div>
+<!-- [/Component: StudySummaryCard] -->
 ```
 
 ### 5.4 ビジネスルール → UI制約
@@ -311,7 +327,9 @@ Read docs/requirements/functions/[カテゴリ]/F-XXX-*.md
 ```
 ↓ 変換
 ```html
-<span class="form-hint">タグは最大10個まで (現在: <span id="tag-count">0</span>/10)</span>
+<span class="text-xs text-gray-500">
+  タグは最大10個まで (現在: <span data-prop="tagCount" id="tag-count">0</span>/10)
+</span>
 ```
 
 ---
@@ -323,8 +341,9 @@ Read docs/requirements/functions/[カテゴリ]/F-XXX-*.md
 #### Step 1: 共通ファイル生成
 
 1. `css/style.css`
-   - 採用パターンの `:root` 変数を引き継ぐ
-   - 共通コンポーネントスタイルを追加
+   - 採用パターンの `:root` 変数を引き継ぐ（カスタムカラー用）
+   - Tailwindで対応できない追加スタイルのみ記述
+   - アニメーション定義等
 
 2. `js/main.js`
    - ページ読み込み関数 `loadPage(url)`
@@ -340,32 +359,55 @@ Read docs/requirements/functions/[カテゴリ]/F-XXX-*.md
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>[アプリ名]</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: 'var(--color-primary)',
+            secondary: 'var(--color-secondary)',
+          }
+        }
+      }
+    }
+  </script>
   <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
-  <!-- ヘッダー -->
-  <header class="header">
-    <button class="hamburger" id="hamburger">☰</button>
-    <h1 class="header__title">[アプリ名]</h1>
-    <div class="header__actions"><!-- アクションボタン --></div>
+<body class="min-h-screen bg-gray-50">
+  <!-- [Component: Header] -->
+  <header class="fixed top-0 left-0 right-0 h-14 bg-white border-b border-gray-200 flex items-center px-4 z-50"
+          data-component="Header">
+    <button class="lg:hidden p-2 hover:bg-gray-100 rounded-lg" id="hamburger"
+            data-action="onClick:toggleSidebar">
+      <span data-icon="lucide:Menu" class="w-6 h-6">☰</span>
+    </button>
+    <h1 class="text-lg font-bold text-gray-800 ml-2" data-prop="appName">[アプリ名]</h1>
+    <div class="ml-auto flex items-center gap-2"><!-- アクションボタン --></div>
   </header>
 
-  <!-- サイドバー -->
-  <nav class="sidebar" id="sidebar">
-    <a href="#" class="sidebar__item active" onclick="loadPage('main.html')">
-      <span class="sidebar__icon">🏠</span>
-      <span class="sidebar__label">ホーム</span>
+  <!-- [Component: Sidebar] -->
+  <nav class="fixed left-0 top-14 bottom-0 w-64 bg-white border-r border-gray-200 
+              transform -translate-x-full lg:translate-x-0 transition-transform z-40
+              md:w-16 md:translate-x-0 md:hover:w-64 group"
+       id="sidebar" data-component="Sidebar">
+    <a href="#" class="flex items-center gap-3 px-4 py-3 text-primary bg-primary/10 hover:bg-primary/20 transition"
+       onclick="loadPage('main.html')" data-action="onClick:navigateTo('main')">
+      <span data-icon="lucide:Home" class="w-5 h-5 flex-shrink-0">🏠</span>
+      <span class="md:hidden md:group-hover:block lg:block">ホーム</span>
     </a>
     <!-- 他のナビゲーション項目 -->
   </nav>
 
   <!-- メインコンテンツエリア -->
-  <main class="main-content">
-    <iframe id="content-frame" src="main.html" frameborder="0"></iframe>
+  <main class="pt-14 lg:pl-64 md:pl-16 min-h-screen">
+    <iframe id="content-frame" src="main.html" class="w-full h-[calc(100vh-3.5rem)] border-none"></iframe>
   </main>
 
-  <!-- ボトムナビ（スマホ用） -->
-  <nav class="bottom-nav">
+  <!-- [Component: BottomNav] - スマホ用 -->
+  <nav class="fixed bottom-0 left-0 right-0 h-16 bg-white border-t border-gray-200 
+              flex items-center justify-around md:hidden"
+       data-component="BottomNav">
     <!-- ナビゲーション項目 -->
   </nav>
 
@@ -388,13 +430,36 @@ Read docs/requirements/functions/[カテゴリ]/F-XXX-*.md
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: 'var(--color-primary)',
+            secondary: 'var(--color-secondary)',
+          }
+        }
+      }
+    }
+  </script>
   <link rel="stylesheet" href="css/style.css">
 </head>
-<body class="content-body">
-  <!-- メインコンテンツのみ記述 -->
-  <div class="content-wrapper">
+<body class="bg-transparent p-4">
+  <!-- [Component: MainContent] -->
+  <div class="max-w-4xl mx-auto" data-component="MainContent">
     <!-- 機能仕様に基づくUI要素 -->
+    
+    <!-- 例: カード一覧 -->
+    <ul data-list="cards" class="flex flex-col gap-4">
+      <!-- [ListItem: CardItem] -->
+      <li data-list-item data-key="cardId" class="bg-white rounded-lg shadow p-4">
+        <h3 data-prop="title" class="font-bold text-gray-800">カードタイトル</h3>
+        <p data-prop="content" class="text-gray-600 text-sm mt-2">カード内容...</p>
+      </li>
+    </ul>
   </div>
+  <!-- [/Component: MainContent] -->
 </body>
 </html>
 ```
@@ -416,10 +481,27 @@ Read docs/requirements/functions/[カテゴリ]/F-XXX-*.md
 ## 7. 技術仕様
 
 ### CSS
-- 外部ライブラリなし（Pure CSS）
-- CSS Variables で色・サイズ管理
-- BEM風の命名規則
-- モバイルファーストのメディアクエリ
+- **Tailwind CSS を使用**（CDN版）
+- CSS Variables でカスタムカラー管理（Tailwindと併用）
+- モバイルファーストのレスポンシブ（Tailwindのブレークポイント使用）
+
+```html
+<!-- CDN読み込み -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          primary: 'var(--color-primary)',
+          secondary: 'var(--color-secondary)',
+          // 採用パターンから引き継ぐ
+        }
+      }
+    }
+  }
+</script>
+```
 
 ### JavaScript
 - Vanilla JS のみ
@@ -428,29 +510,105 @@ Read docs/requirements/functions/[カテゴリ]/F-XXX-*.md
 - モーダル制御
 - フォームバリデーション表示（視覚的フィードバック）
 
-### ブレークポイント
-```css
-/* モバイルファースト */
-/* タブレット: 768px以上 */
-@media (min-width: 768px) { }
-/* デスクトップ: 1024px以上 */
-@media (min-width: 1024px) { }
+### ブレークポイント（Tailwind標準）
+```html
+<!-- モバイルファースト -->
+<div class="block md:hidden">スマホのみ</div>
+<div class="hidden md:block lg:hidden">タブレットのみ</div>
+<div class="hidden lg:block">PCのみ</div>
 ```
 
 ### iframe スタイル
-```css
-.main-content iframe {
-  width: 100%;
-  height: 100%;
-  border: none;
-}
+```html
+<!-- Tailwindで記述 -->
+<main class="flex-1 overflow-hidden">
+  <iframe id="content-frame" src="main.html" class="w-full h-full border-none"></iframe>
+</main>
+```
 
-/* コンテンツHTML用 */
-.content-body {
-  margin: 0;
-  padding: 1rem;
-  background: transparent;
-}
+---
+
+## 7.1 React変換用 data属性規約（重要）
+
+HTMLモックをReactコンポーネントに変換しやすくするため、以下のdata属性を使用すること。
+
+### コンポーネント境界の明示
+```html
+<!-- [Component: LoginForm] -->
+<form class="flex flex-col gap-4" data-component="LoginForm">
+  <!-- [Component: FormField] -->
+  <div data-component="FormField" data-props="label,name,type,required">
+    <label class="text-sm font-medium text-gray-700">メールアドレス</label>
+    <input name="email" type="email" required class="border rounded-lg px-3 py-2">
+  </div>
+</form>
+<!-- [/Component: LoginForm] -->
+```
+
+### Propsになる動的値のマーク
+```html
+<span data-prop="userName">山田太郎</span>
+<span data-prop="cardCount">15</span>
+<img src="placeholder.jpg" data-prop="avatarUrl" class="w-10 h-10 rounded-full">
+```
+
+### イベントハンドラの明示
+```html
+<button data-action="onClick:handleLogin" class="bg-primary text-white px-4 py-2 rounded-lg">
+  ログイン
+</button>
+<input data-action="onChange:handleInputChange" class="border rounded-lg px-3 py-2">
+<form data-action="onSubmit:handleSubmit">
+```
+
+### 状態バリエーション（同ファイルに用意）
+```html
+<!-- [State: default] -->
+<div data-state="default">通常表示</div>
+
+<!-- [State: loading] -->
+<div data-state="loading" class="hidden">
+  <div class="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full"></div>
+</div>
+
+<!-- [State: error] -->
+<div data-state="error" class="hidden">
+  <p class="text-red-500">エラーが発生しました</p>
+</div>
+
+<!-- [State: empty] -->
+<div data-state="empty" class="hidden">
+  <p class="text-gray-500">データがありません</p>
+</div>
+```
+
+### 繰り返し要素（map用）
+```html
+<ul data-list="cards" class="flex flex-col gap-2">
+  <!-- [ListItem: CardItem] - この要素が .map() される -->
+  <li data-list-item data-key="cardId" class="p-4 bg-white rounded-lg shadow">
+    <span data-prop="title">カードタイトル</span>
+  </li>
+  <!-- サンプルとして2-3個表示 -->
+  <li data-list-item data-key="cardId" class="p-4 bg-white rounded-lg shadow">...</li>
+</ul>
+```
+
+### アイコン（Lucide Icons想定）
+```html
+<!-- React変換時: import { Home, Settings, Plus } from 'lucide-react' -->
+<span data-icon="lucide:Home" class="w-5 h-5"></span>
+<span data-icon="lucide:Settings" class="w-5 h-5"></span>
+<span data-icon="lucide:Plus" class="w-5 h-5"></span>
+```
+
+### 条件付きレンダリング
+```html
+<!-- [Condition: isLoggedIn] -->
+<div data-show-if="isLoggedIn">ログイン済みの表示</div>
+
+<!-- [Condition: !isLoggedIn] -->
+<div data-show-if="!isLoggedIn">未ログインの表示</div>
 ```
 
 ---

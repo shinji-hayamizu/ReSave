@@ -9,6 +9,7 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Task
 - Phase 3a で生成したデザインサンプルが承認済み
 - 採用パターン番号が決定している
 - Phase 3b で画面遷移図（flow.md）が生成済み
+- **Phase 4a で `mock/v1/index.html` + `mock/v1/main.html` が完成済み**
 
 ---
 
@@ -25,11 +26,15 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Task
 - 確認ダイアログのテキスト
 
 ```html
-<!-- 例: 日本語で記述 -->
-<button class="btn btn--primary">ログイン</button>
-<label>メールアドレス</label>
-<input placeholder="メールアドレスを入力してください">
-<span class="error">パスワードが正しくありません</span>
+<!-- 例: 日本語 + Tailwind + data属性 -->
+<button class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition"
+        data-action="onClick:handleLogin">
+  ログイン
+</button>
+<label class="text-sm font-medium text-gray-700">メールアドレス</label>
+<input class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:outline-none"
+       placeholder="メールアドレスを入力してください">
+<span class="text-red-500 text-sm" data-state="error">パスワードが正しくありません</span>
 ```
 
 ---
@@ -56,6 +61,19 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Task
 ---
 
 ## 1. 実行前の確認（必須）
+
+### Step 0: 基盤ファイルの存在確認
+
+**以下のファイルが存在することを確認すること:**
+
+```
+Read mock/v1/index.html
+Read mock/v1/main.html
+Read mock/v1/css/style.css
+Read mock/v1/js/main.js
+```
+
+**これらのファイルが存在しない場合は、先に Phase 4a を実行して基盤を作成すること。**
 
 ### Step 1: 採用パターンの確認
 
@@ -204,20 +222,26 @@ flow.md + 機能仕様から以下を整理:
 ```markdown
 | 入力 | email | string | Yes | メールアドレス | RFC 5322準拠、最大254文字 |
 ```
-↓ 変換
+↓ 変換（Tailwind + data属性）
 ```html
-<div class="form-group">
-  <label class="form-label" for="email">メールアドレス <span class="required">*</span></label>
+<!-- [Component: FormField] -->
+<div class="flex flex-col gap-1" data-component="FormField" data-props="label,name,type,required,hint">
+  <label class="text-sm font-medium text-gray-700" for="email">
+    メールアドレス <span class="text-red-500">*</span>
+  </label>
   <input 
     type="email" 
-    id="email" 
-    class="form-input" 
+    id="email"
+    name="email"
+    class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:border-primary focus:outline-none transition"
     placeholder="example@email.com"
     maxlength="254"
     required
+    data-action="onChange:handleChange"
   >
-  <span class="form-hint">RFC 5322準拠</span>
+  <span class="text-xs text-gray-500">RFC 5322準拠</span>
 </div>
+<!-- [/Component: FormField] -->
 ```
 
 ### 5.2 バリデーション → エラー表示
@@ -227,9 +251,10 @@ flow.md + 機能仕様から以下を整理:
 ```markdown
 | E-F001-02 | パスワードが要件を満たさない | パスワードは8文字以上、英数字を含める必要があります |
 ```
-↓ 変換
+↓ 変換（状態バリエーション）
 ```html
-<span class="form-error" id="password-error" style="display:none;">
+<!-- [State: error] -->
+<span class="text-red-500 text-sm" id="password-error" data-state="error" style="display:none;">
   パスワードは8文字以上、英数字を含める必要があります
 </span>
 ```
@@ -245,16 +270,21 @@ flow.md + 機能仕様から以下を整理:
 │     [ 学習開始 ]            │
 └─────────────────────────────┘
 ```
-↓ 変換
+↓ 変換（Tailwind + data属性）
 ```html
-<div class="card summary-card">
-  <h2 class="card__title">今日の学習</h2>
-  <div class="card__stats">
-    <span>復習: <strong>15</strong>枚</span>
-    <span>新規: <strong>5</strong>枚</span>
+<!-- [Component: StudySummaryCard] -->
+<div class="bg-white rounded-xl shadow-md p-6" data-component="StudySummaryCard">
+  <h2 class="text-lg font-bold text-gray-800 mb-4">今日の学習</h2>
+  <div class="flex gap-6 mb-4">
+    <span class="text-gray-600">復習: <strong class="text-primary" data-prop="reviewCount">15</strong>枚</span>
+    <span class="text-gray-600">新規: <strong class="text-secondary" data-prop="newCount">5</strong>枚</span>
   </div>
-  <button class="btn btn--primary">学習開始</button>
+  <button class="w-full bg-primary text-white py-3 rounded-lg font-medium hover:bg-primary/90 transition"
+          data-action="onClick:handleStartStudy">
+    学習開始
+  </button>
 </div>
+<!-- [/Component: StudySummaryCard] -->
 ```
 
 ### 5.4 ビジネスルール → UI制約
@@ -266,7 +296,9 @@ flow.md + 機能仕様から以下を整理:
 ```
 ↓ 変換
 ```html
-<span class="form-hint">タグは最大10個まで (現在: <span id="tag-count">0</span>/10)</span>
+<span class="text-xs text-gray-500">
+  タグは最大10個まで (現在: <span data-prop="tagCount" id="tag-count">0</span>/10)
+</span>
 ```
 
 ---
@@ -276,13 +308,15 @@ flow.md + 機能仕様から以下を整理:
 ### Step 1: 共通ファイル生成
 
 1. `css/style.css`
-   - 採用パターンの `:root` 変数を引き継ぐ
-   - 共通コンポーネントスタイルを追加
+   - 採用パターンの `:root` 変数を引き継ぐ（カスタムカラー用）
+   - Tailwindで対応できない追加スタイルのみ記述
+   - アニメーション定義等
 
 2. `js/main.js`
    - サイドバー開閉
    - モーダル制御
    - フォームバリデーション表示
+   - `loadPage(url)` - iframe/fetchでのページ読み込み
 
 ### Step 2: 各画面を並列生成
 
@@ -344,10 +378,27 @@ Task: settings.html 生成
 ## 8. 技術仕様
 
 ### CSS
-- 外部ライブラリなし（Pure CSS）
-- CSS Variables で色・サイズ管理
-- BEM風の命名規則
-- モバイルファーストのメディアクエリ
+- **Tailwind CSS を使用**（CDN版）
+- CSS Variables でカスタムカラー管理（Tailwindと併用）
+- モバイルファーストのレスポンシブ（Tailwindのブレークポイント使用）
+
+```html
+<!-- CDN読み込み -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          primary: 'var(--color-primary)',
+          secondary: 'var(--color-secondary)',
+          // 採用パターンから引き継ぐ
+        }
+      }
+    }
+  }
+</script>
+```
 
 ### JavaScript
 - Vanilla JS のみ
@@ -355,13 +406,97 @@ Task: settings.html 生成
 - モーダル制御
 - フォームバリデーション表示（視覚的フィードバック）
 
-### ブレークポイント
-```css
-/* モバイルファースト */
-/* タブレット: 768px以上 */
-@media (min-width: 768px) { }
-/* デスクトップ: 1024px以上 */
-@media (min-width: 1024px) { }
+### ブレークポイント（Tailwind標準）
+```html
+<!-- モバイルファースト -->
+<div class="block md:hidden">スマホのみ</div>
+<div class="hidden md:block lg:hidden">タブレットのみ</div>
+<div class="hidden lg:block">PCのみ</div>
+```
+
+---
+
+## 8.1 React変換用 data属性規約（重要）
+
+HTMLモックをReactコンポーネントに変換しやすくするため、以下のdata属性を使用すること。
+
+### コンポーネント境界の明示
+```html
+<!-- [Component: LoginForm] -->
+<form class="flex flex-col gap-4" data-component="LoginForm">
+  <!-- [Component: FormField] -->
+  <div data-component="FormField" data-props="label,name,type,required">
+    <label class="text-sm font-medium text-gray-700">メールアドレス</label>
+    <input name="email" type="email" required class="border rounded-lg px-3 py-2">
+  </div>
+</form>
+<!-- [/Component: LoginForm] -->
+```
+
+### Propsになる動的値のマーク
+```html
+<span data-prop="userName">山田太郎</span>
+<span data-prop="cardCount">15</span>
+<img src="placeholder.jpg" data-prop="avatarUrl" class="w-10 h-10 rounded-full">
+```
+
+### イベントハンドラの明示
+```html
+<button data-action="onClick:handleLogin" class="bg-primary text-white px-4 py-2 rounded-lg">
+  ログイン
+</button>
+<input data-action="onChange:handleInputChange" class="border rounded-lg px-3 py-2">
+<form data-action="onSubmit:handleSubmit">
+```
+
+### 状態バリエーション（同ファイルに用意）
+```html
+<!-- [State: default] -->
+<div data-state="default">通常表示</div>
+
+<!-- [State: loading] -->
+<div data-state="loading" class="hidden">
+  <div class="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full"></div>
+</div>
+
+<!-- [State: error] -->
+<div data-state="error" class="hidden">
+  <p class="text-red-500">エラーが発生しました</p>
+</div>
+
+<!-- [State: empty] -->
+<div data-state="empty" class="hidden">
+  <p class="text-gray-500">データがありません</p>
+</div>
+```
+
+### 繰り返し要素（map用）
+```html
+<ul data-list="cards" class="flex flex-col gap-2">
+  <!-- [ListItem: CardItem] - この要素が .map() される -->
+  <li data-list-item data-key="cardId" class="p-4 bg-white rounded-lg shadow">
+    <span data-prop="title">カードタイトル</span>
+  </li>
+  <!-- サンプルとして2-3個表示 -->
+  <li data-list-item data-key="cardId" class="p-4 bg-white rounded-lg shadow">...</li>
+</ul>
+```
+
+### アイコン（Lucide Icons想定）
+```html
+<!-- React変換時: import { Home, Settings, Plus } from 'lucide-react' -->
+<span data-icon="lucide:Home" class="w-5 h-5"></span>
+<span data-icon="lucide:Settings" class="w-5 h-5"></span>
+<span data-icon="lucide:Plus" class="w-5 h-5"></span>
+```
+
+### 条件付きレンダリング
+```html
+<!-- [Condition: isLoggedIn] -->
+<div data-show-if="isLoggedIn">ログイン済みの表示</div>
+
+<!-- [Condition: !isLoggedIn] -->
+<div data-show-if="!isLoggedIn">未ログインの表示</div>
 ```
 
 ---
