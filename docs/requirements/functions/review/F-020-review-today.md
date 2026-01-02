@@ -13,7 +13,7 @@
 
 ## 概要
 
-ユーザーが今日復習すべきカードを確認し、効率的に学習できるようにする。FSRSアルゴリズムに基づいて次回復習日（due）が今日以前のカードを抽出する。
+ユーザーが今日復習すべきカードを確認し、効率的に学習できるようにする。固定間隔スケジューリングに基づいて次回復習日（next_review_date）が今日以前のカードを抽出する。
 
 ## ユーザーフロー
 
@@ -28,32 +28,41 @@
 | 種別 | 項目名 | 型 | 必須 | 説明 | 制約・バリデーション |
 |-----|-------|---|-----|-----|-------------------|
 | 入力 | tagIds | string[] | No | フィルタするタグ | 空の場合は全カード |
-| 出力 | reviewCount | number | - | 復習対象カード数 | due <= today |
+| 出力 | reviewCount | number | - | 復習対象カード数 | next_review_date <= today |
 | 出力 | newCount | number | - | 新規カード数 | state = 'new' |
-| 出力 | totalStudyTime | number | - | 推定学習時間（分） | カード数 × 平均所要時間 |
+| 出力 | totalStudyTime | number | - | 推定学習時間（分） | カード数 x 平均所要時間 |
 
 ## ビジネスルール
 
 | ID | ルール | 条件 | 結果 |
 |----|-------|-----|-----|
-| BR-F020-01 | 復習対象抽出 | fsrs_due <= 今日の終わり | 復習リストに含める |
-| BR-F020-02 | 新規カード | fsrs_state = 'new' | 新規カードとしてカウント |
+| BR-F020-01 | 復習対象抽出 | next_review_date <= 今日の終わり | 復習リストに含める |
+| BR-F020-02 | 新規カード | state = 'new' | 新規カードとしてカウント |
 | BR-F020-03 | 優先順位 | 学習時 | 期限超過(overdue) > 新規(new) > 期限内(due today) |
 | BR-F020-04 | 1日の制限 | 新規カード | デフォルト20枚/日（設定で変更可能） |
 | BR-F020-05 | タグフィルタ | タグ指定時 | 該当タグのカードのみカウント |
+| BR-F020-06 | 完了カード除外 | state = 'completed' | 復習リストに含めない |
+
+## カード状態
+
+| 状態 | 説明 |
+|------|------|
+| new | 未学習 |
+| learning | 学習中（固定間隔で復習中） |
+| completed | 完了一覧（復習終了） |
 
 ## データ抽出ロジック
 
 ```typescript
-// 復習対象カード
+// 復習対象カード（学習中で復習日が今日以前）
 const reviewCards = cards.filter(card =>
-  card.fsrs_state !== 'new' &&
-  new Date(card.fsrs_due) <= endOfToday
+  card.state === 'learning' &&
+  new Date(card.next_review_date) <= endOfToday
 )
 
 // 新規カード（1日の上限内）
 const newCards = cards.filter(card =>
-  card.fsrs_state === 'new'
+  card.state === 'new'
 ).slice(0, dailyNewCardLimit)
 
 // 推定学習時間（1カード平均30秒と仮定）
@@ -73,6 +82,7 @@ const estimatedMinutes = Math.ceil((reviewCards.length + newCards.length) * 0.5)
 - [ ] AC-03: 復習対象がない場合、「本日の復習は完了です」と表示されること
 - [ ] AC-04: タグでフィルタした場合、該当タグのカードのみがカウントされること
 - [ ] AC-05: 推定学習時間が表示されること
+- [ ] AC-06: 完了一覧のカードは復習対象に含まれないこと
 
 ## 画面要件
 
@@ -111,14 +121,14 @@ const { data: reviewCards, count: reviewCount } = await supabase
   .from('cards')
   .select('*', { count: 'exact' })
   .eq('user_id', userId)
-  .neq('fsrs_state', 'new')
-  .lte('fsrs_due', today.toISOString())
+  .eq('state', 'learning')
+  .lte('next_review_date', today.toISOString())
 
 const { data: newCards, count: newCount } = await supabase
   .from('cards')
   .select('*', { count: 'exact' })
   .eq('user_id', userId)
-  .eq('fsrs_state', 'new')
+  .eq('state', 'new')
 ```
 
 ### TanStack Query Hook

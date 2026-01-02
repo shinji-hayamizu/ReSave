@@ -4,45 +4,50 @@
 
 ## 機能一覧
 
-### 認証・ユーザー管理
+### auth（認証・ユーザー管理）
 
 | ID | 機能名 | ファイル | 優先度 | ステータス |
 |----|-------|---------|-------|----------|
-| F-001 | ユーザー登録 | [F-001-user-registration.md](./F-001-user-registration.md) | P0 | Draft |
-| F-002 | ログイン | [F-002-user-login.md](./F-002-user-login.md) | P0 | Draft |
-| F-003 | パスワードリセット | [F-003-password-reset.md](./F-003-password-reset.md) | P0 | Draft |
+| F-001 | ユーザー登録 | [F-001-user-registration.md](./auth/F-001-user-registration.md) | P0 | Draft |
+| F-002 | ログイン | [F-002-user-login.md](./auth/F-002-user-login.md) | P0 | Draft |
+| F-003 | パスワードリセット | [F-003-password-reset.md](./auth/F-003-password-reset.md) | P0 | Draft |
 
-### カード管理
-
-| ID | 機能名 | ファイル | 優先度 | ステータス |
-|----|-------|---------|-------|----------|
-| F-013 | カード作成 | [F-013-card-create.md](./F-013-card-create.md) | P0 | Draft |
-| F-014 | カード編集 | [F-014-card-edit.md](./F-014-card-edit.md) | P0 | Draft |
-| F-015 | カード削除 | [F-015-card-delete.md](./F-015-card-delete.md) | P0 | Draft |
-| F-016 | カードへのタグ付け | [F-016-card-tagging.md](./F-016-card-tagging.md) | P0 | Draft |
-| F-017 | タグ管理 | [F-017-tag-management.md](./F-017-tag-management.md) | P0 | Draft |
-| F-018 | タグフィルタ・検索 | [F-018-tag-filter.md](./F-018-tag-filter.md) | P0 | Draft |
-
-### 学習・復習機能
+### card（カード管理）
 
 | ID | 機能名 | ファイル | 優先度 | ステータス |
 |----|-------|---------|-------|----------|
-| F-020 | 今日の復習カード | [F-020-review-today.md](./F-020-review-today.md) | P0 | Draft |
-| F-021 | カード学習 | [F-021-card-study.md](./F-021-card-study.md) | P0 | Draft |
-| F-022 | 記憶度自己評価 | [F-022-self-assessment.md](./F-022-self-assessment.md) | P0 | Draft |
-| F-023 | FSRS次回復習日設定 | [F-023-fsrs-scheduling.md](./F-023-fsrs-scheduling.md) | P0 | Draft |
+| F-013 | カード作成 | [F-013-card-create.md](./card/F-013-card-create.md) | P0 | Draft |
+| F-014 | カード編集 | [F-014-card-edit.md](./card/F-014-card-edit.md) | P0 | Draft |
+| F-015 | カード削除 | [F-015-card-delete.md](./card/F-015-card-delete.md) | P0 | Draft |
+| F-016 | カードへのタグ付け | [F-016-card-tagging.md](./card/F-016-card-tagging.md) | P0 | Draft |
 
-### 進捗・統計
-
-| ID | 機能名 | ファイル | 優先度 | ステータス |
-|----|-------|---------|-------|----------|
-| F-030 | 日別学習統計 | [F-030-daily-stats.md](./F-030-daily-stats.md) | P0 | Draft |
-
-### データ同期
+### tag（タグ管理）
 
 | ID | 機能名 | ファイル | 優先度 | ステータス |
 |----|-------|---------|-------|----------|
-| F-050 | Web/Mobile自動同期 | [F-050-data-sync.md](./F-050-data-sync.md) | P0 | Draft |
+| F-017 | タグ管理 | [F-017-tag-management.md](./tag/F-017-tag-management.md) | P0 | Draft |
+| F-018 | タグフィルタ・検索 | [F-018-tag-filter.md](./tag/F-018-tag-filter.md) | P0 | Draft |
+
+### review（学習・復習機能）
+
+| ID | 機能名 | ファイル | 優先度 | ステータス |
+|----|-------|---------|-------|----------|
+| F-020 | 今日の復習カード | [F-020-review-today.md](./review/F-020-review-today.md) | P0 | Draft |
+| F-021 | カード学習 | [F-021-card-study.md](./review/F-021-card-study.md) | P0 | Draft |
+| F-022 | 記憶度自己評価 | [F-022-self-assessment.md](./review/F-022-self-assessment.md) | P0 | Draft |
+| F-023 | 固定間隔スケジューリング | [F-023-interval-scheduling.md](./review/F-023-interval-scheduling.md) | P0 | Draft |
+
+### stats（進捗・統計）
+
+| ID | 機能名 | ファイル | 優先度 | ステータス |
+|----|-------|---------|-------|----------|
+| F-030 | 日別学習統計 | [F-030-daily-stats.md](./stats/F-030-daily-stats.md) | P0 | Draft |
+
+### sync（データ同期）
+
+| ID | 機能名 | ファイル | 優先度 | ステータス |
+|----|-------|---------|-------|----------|
+| F-050 | Web/Mobile自動同期 | [F-050-data-sync.md](./sync/F-050-data-sync.md) | P0 | Draft |
 
 ## 機能間の依存関係
 
@@ -59,7 +64,7 @@ F-013 (カード作成)
   └-> F-020 (今日の復習カード)
         └-> F-021 (カード学習)
               └-> F-022 (記憶度評価)
-                    └-> F-023 (FSRS次回復習日)
+                    └-> F-023 (固定間隔スケジューリング)
 
 F-022 (記憶度評価)
   └-> F-030 (日別統計)
@@ -72,7 +77,7 @@ F-002 (ログイン)
 
 | フェーズ | 含まれる機能 | 目的 |
 |---------|------------|-----|
-| MVP | F-001, F-002, F-003, F-013~F-018, F-020~F-023, F-030, F-050 | 最小限の価値提供: カード作成・タグ管理・FSRS学習・デバイス同期 |
+| MVP | F-001, F-002, F-003, F-013~F-018, F-020~F-023, F-030, F-050 | 最小限の価値提供: カード作成・タグ管理・固定間隔復習・デバイス同期 |
 | v1.1 | F-004 (Google OAuth), F-031 (タグ別習熟度), F-032 (ストリーク) | 認証簡略化・モチベーション機能 |
 | v1.2 | F-040~F-042 (通知・リマインダー) | 学習習慣定着支援 |
 | v1.3 | F-005 (プロフィール), F-019 (画像添付), F-033 (グラフ可視化), F-051~F-052 (エクスポート/インポート) | UX向上・データポータビリティ |
@@ -88,11 +93,18 @@ F-002 (ログイン)
 2. 柔軟な分類: 1つのカードに複数タグを付与可能（例: "英語" + "TOEIC" + "文法"）
 3. 横断学習: タグの組み合わせで柔軟に学習範囲を指定可能
 
-### FSRSアルゴリズム
+### 固定間隔スケジューリング
 
-SM-2ではなくFSRS（Free Spaced Repetition Scheduler）を採用。
+FSRSやSM-2などの複雑なアルゴリズムではなく、**シンプルな固定間隔方式**を採用。
 
 **理由:**
-1. 科学的根拠: 2023年に機械学習で最適化された最新アルゴリズム
-2. 効率性: SM-2比で20-30%の学習効率向上
-3. パラメータ最適化: ユーザーの学習パターンに自動適応
+1. シンプルさ: ユーザーが復習タイミングを直感的に理解できる
+2. カスタマイズ性: ユーザーが自分で間隔を設定できる
+3. 予測可能性: 次の復習がいつかが明確
+
+**デフォルト間隔:** `1, 3, 7, 14, 30, 180` 日
+
+**3段階評価:**
+- OK: 次の間隔へ進む
+- 覚えた: 完了一覧へ移動
+- 覚え直し: 1日目からやり直し
