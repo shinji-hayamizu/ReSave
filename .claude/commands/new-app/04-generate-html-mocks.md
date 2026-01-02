@@ -51,7 +51,7 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Task
 - 各HTMLファイルは **subAgent** で並列実行すること
 
 ## 出力先
-`mock/` ディレクトリに出力（`sample/` は残す）
+`mock/v1/` ディレクトリに出力（`mock/sample/` は残す）
 
 ---
 
@@ -137,18 +137,19 @@ flow.md + 機能仕様から以下を整理:
 ```
 /mock
 ├── sample/                 # Phase 3a の成果物（残す）
-├── index.html              # エントリーポイント（リダイレクト専用）
-├── login.html              # ログイン画面
-├── register.html           # 会員登録画面
-├── [メイン画面].html        # メイン画面
-├── [機能名].html           # 各機能画面（flow.mdから特定）
-├── settings.html           # 設定画面
-├── css/
-│   └── style.css           # 共通スタイル（採用パターンベース）
-├── js/
-│   └── main.js             # 共通JS（サイドバー開閉等）
-└── components/             # 共通パーツ確認用（オプション）
-    └── styleguide.html
+└── v1/                     # 正式なMock出力先
+    ├── index.html              # エントリーポイント（リダイレクト専用）
+    ├── login.html              # ログイン画面
+    ├── register.html           # 会員登録画面
+    ├── [メイン画面].html        # メイン画面
+    ├── [機能名].html           # 各機能画面（flow.mdから特定）
+    ├── settings.html           # 設定画面
+    ├── css/
+    │   └── style.css           # 共通スタイル（採用パターンベース）
+    ├── js/
+    │   └── main.js             # 共通JS（サイドバー開閉等）
+    └── components/             # 共通パーツ確認用（オプション）
+        └── styleguide.html
 ```
 
 ※ 具体的なファイル名は `docs/screens/flow.md` の画面遷移図から決定すること
@@ -371,7 +372,7 @@ Task: settings.html 生成
 
 ```
 【画面名】: [画面名]
-【ファイル】: mock/[ファイル名].html
+【ファイル】: mock/v1/[ファイル名].html
 
 【参照する機能仕様（全文）】
 以下の機能仕様ファイルの内容を全て読み込んで反映すること:

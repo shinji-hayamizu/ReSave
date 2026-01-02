@@ -54,7 +54,7 @@ allowed-tools: Read, Write, Edit, Glob, Grep
 ---
 
 ## 出力先
-`mock/` ディレクトリに出力
+`mock/v1/` ディレクトリに出力（`mock/sample/` は残す）
 
 ---
 
@@ -175,17 +175,18 @@ Read docs/requirements/functions/[カテゴリ]/F-XXX-*.md
 ```
 /mock
 ├── sample/                 # Phase 3a の成果物（残す）
-├── index.html              # 基盤シェル（サイドバー、ヘッダー含む）
-├── main.html               # メインコンテンツ（最初の画面）
-├── css/
-│   └── style.css           # 共通スタイル
-└── js/
-    └── main.js             # 共通JS（ナビゲーション、サイドバー制御）
+└── v1/                     # 正式なMock出力先
+    ├── index.html              # 基盤シェル（サイドバー、ヘッダー含む）
+    ├── main.html               # メインコンテンツ（最初の画面）
+    ├── css/
+    │   └── style.css           # 共通スタイル
+    └── js/
+        └── main.js             # 共通JS（ナビゲーション、サイドバー制御）
 ```
 
 ### 追加画面生成時（選択肢B）
 ```
-/mock
+/mock/v1
 ├── ... (既存ファイル)
 └── [追加画面].html          # 今回追加する画面
 ```
