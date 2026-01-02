@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="content-body">
+  <!--
+    画面: ホーム (main.html)
+    機能: F-013 (カード作成), F-021 (カード学習), F-022 (自己評価)
+  -->
+
+  <div class="content-wrapper">
+
+    <!-- ========================================
+         入力エリア (F-013)
+         ======================================== -->
+    <div class="input-area">
+      <div class="input-row">
+        <input
+          type="text"
+          id="quick-text"
+          class="form-input"
+          placeholder="覚えたいこと"
+          maxlength="500"
+        >
+        <input
+          type="text"
+          id="quick-hidden"
+          class="form-input"
+          placeholder="答え（任意）"
+          maxlength="2000"
+        >
+        <div class="input-actions">
+          <button type="button" class="btn-icon btn-icon--primary" disabled title="保存">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"/>
+              <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+          </button>
+          <button type="button" class="btn-icon btn-icon--secondary" title="詳細入力">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================
+         タブ (未学習 / 復習中 / 完了)
+         ======================================== -->
+    <div class="tabs">
+      <button class="tab active" data-tab="tab-new">
+        未学習<span class="tab__count">5</span>
+      </button>
+      <button class="tab" data-tab="tab-review">
+        復習中<span class="tab__count">15</span>
+      </button>
+      <button class="tab" data-tab="tab-completed">
+        完了<span class="tab__count">45</span>
+      </button>
+    </div>
+
+    <!-- ========================================
+         カードリスト - 未学習タブ (F-021)
+         ======================================== -->
+    <div class="tab-content" id="tab-new" style="display: block;">
+      <div class="card-list">
+
+        <!-- カード 1 -->
+        <div class="study-card">
+          <!-- トップバー: 評価ボタン + タグ -->
+          <div class="study-card__topbar">
+            <div class="rating-buttons">
+              <button class="rating-btn rating-btn--ok" data-rating="ok">
+                <span class="rating-btn__label">OK</span>
+                <span class="rating-btn__preview">3日後</span>
+              </button>
+              <button class="rating-btn rating-btn--learned" data-rating="learned">
+                <span class="rating-btn__label">覚えた</span>
+                <span class="rating-btn__preview">完了</span>
+              </button>
+              <button class="rating-btn rating-btn--again" data-rating="again">
+                <span class="rating-btn__label">もう一度</span>
+                <span class="rating-btn__preview">1日後</span>
+              </button>
+            </div>
+            <div class="study-card__tags">
+              <span class="study-card__tag">地理</span>
+              <span class="study-card__tag">日本</span>
+            </div>
+          </div>
+          <div class="study-card__front">
+            <div class="study-card__header">
+              <p class="study-card__text">日本の首都は？</p>
+              <button class="study-card__edit" title="編集">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <button class="study-card__toggle">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+            <span>答えを見る</span>
+          </button>
+          <div class="study-card__back">
+            <p class="study-card__answer">東京</p>
+          </div>
+        </div>
+
+        <!-- カード 2 -->
+        <div class="study-card">
+          <div class="study-card__topbar">
+            <div class="rating-buttons">
+              <button class="rating-btn rating-btn--ok" data-rating="ok">
+                <span class="rating-btn__label">OK</span>
+                <span class="rating-btn__preview">3日後</span>
+              </button>
+              <button class="rating-btn rating-btn--learned" data-rating="learned">
+                <span class="rating-btn__label">覚えた</span>
+                <span class="rating-btn__preview">完了</span>
+              </button>
+              <button class="rating-btn rating-btn--again" data-rating="again">
+                <span class="rating-btn__label">もう一度</span>
+                <span class="rating-btn__preview">1日後</span>
+              </button>
+            </div>
+            <div class="study-card__tags">
+              <span class="study-card__tag">英語</span>
+              <span class="study-card__tag">語彙</span>
+            </div>
+          </div>
+          <div class="study-card__front">
+            <div class="study-card__header">
+              <p class="study-card__text">「セレンディピティ」の意味は？</p>
+              <button class="study-card__edit" title="編集">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <button class="study-card__toggle">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+            <span>答えを見る</span>
+          </button>
+          <div class="study-card__back">
+            <p class="study-card__answer">偶然の幸運な発見。予期せぬ良い結果に出会うこと。</p>
+          </div>
+        </div>
+
+        <!-- カード 3 (開いた状態の例) -->
+        <div class="study-card open">
+          <div class="study-card__topbar">
+            <div class="rating-buttons">
+              <button class="rating-btn rating-btn--ok" data-rating="ok">
+                <span class="rating-btn__label">OK</span>
+                <span class="rating-btn__preview">3日後</span>
+              </button>
+              <button class="rating-btn rating-btn--learned" data-rating="learned">
+                <span class="rating-btn__label">覚えた</span>
+                <span class="rating-btn__preview">完了</span>
+              </button>
+              <button class="rating-btn rating-btn--again" data-rating="again">
+                <span class="rating-btn__label">もう一度</span>
+                <span class="rating-btn__preview">1日後</span>
+              </button>
+            </div>
+            <div class="study-card__tags">
+              <span class="study-card__tag">アルゴリズム</span>
+              <span class="study-card__tag">CS</span>
+            </div>
+          </div>
+          <div class="study-card__front">
+            <div class="study-card__header">
+              <p class="study-card__text">二分探索の計算量は？</p>
+              <button class="study-card__edit" title="編集">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <button class="study-card__toggle">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+              <line x1="1" y1="1" x2="23" y2="23"/>
+            </svg>
+            <span>答えを隠す</span>
+          </button>
+          <div class="study-card__back">
+            <p class="study-card__answer">O(log n) - 探索範囲が比較ごとに半分になる</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ========================================
+         カードリスト - 復習中タブ
+         ======================================== -->
+    <div class="tab-content" id="tab-review" style="display: none;">
+      <div class="card-list">
+
+        <!-- 復習カード 1 -->
+        <div class="study-card">
+          <div class="study-card__topbar">
+            <div class="rating-buttons">
+              <button class="rating-btn rating-btn--ok" data-rating="ok">
+                <span class="rating-btn__label">OK</span>
+                <span class="rating-btn__preview">7日後</span>
+              </button>
+              <button class="rating-btn rating-btn--learned" data-rating="learned">
+                <span class="rating-btn__label">覚えた</span>
+                <span class="rating-btn__preview">完了</span>
+              </button>
+              <button class="rating-btn rating-btn--again" data-rating="again">
+                <span class="rating-btn__label">もう一度</span>
+                <span class="rating-btn__preview">1日後</span>
+              </button>
+            </div>
+            <div class="study-card__tags">
+              <span class="study-card__tag">React</span>
+              <span class="study-card__tag">フロントエンド</span>
+            </div>
+          </div>
+          <div class="study-card__front">
+            <div class="study-card__header">
+              <p class="study-card__text">ReactのVirtual DOMとは？</p>
+              <button class="study-card__edit" title="編集">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <button class="study-card__toggle">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+            <span>答えを見る</span>
+          </button>
+          <div class="study-card__back">
+            <p class="study-card__answer">実際のDOMの軽量なJavaScript表現。Reactはこれを使って変更部分のみを効率的に更新する。</p>
+          </div>
+        </div>
+
+        <!-- 復習カード 2 -->
+        <div class="study-card">
+          <div class="study-card__topbar">
+            <div class="rating-buttons">
+              <button class="rating-btn rating-btn--ok" data-rating="ok">
+                <span class="rating-btn__label">OK</span>
+                <span class="rating-btn__preview">14日後</span>
+              </button>
+              <button class="rating-btn rating-btn--learned" data-rating="learned">
+                <span class="rating-btn__label">覚えた</span>
+                <span class="rating-btn__preview">完了</span>
+              </button>
+              <button class="rating-btn rating-btn--again" data-rating="again">
+                <span class="rating-btn__label">もう一度</span>
+                <span class="rating-btn__preview">1日後</span>
+              </button>
+            </div>
+            <div class="study-card__tags">
+              <span class="study-card__tag">HTTP</span>
+              <span class="study-card__tag">Web</span>
+            </div>
+          </div>
+          <div class="study-card__front">
+            <div class="study-card__header">
+              <p class="study-card__text">HTTPステータスコード 404</p>
+              <button class="study-card__edit" title="編集">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <button class="study-card__toggle">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+            <span>答えを見る</span>
+          </button>
+          <div class="study-card__back">
+            <p class="study-card__answer">Not Found - サーバーが要求されたリソースを見つけられない</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ========================================
+         カードリスト - 完了タブ
+         ======================================== -->
+    <div class="tab-content" id="tab-completed" style="display: none;">
+      <div class="card-list">
+
+        <!-- 完了カード 1 -->
+        <div class="study-card">
+          <div class="study-card__topbar study-card__topbar--tags-only">
+            <div class="study-card__tags">
+              <span class="study-card__tag">数学</span>
+            </div>
+          </div>
+          <div class="study-card__front">
+            <div class="study-card__header">
+              <p class="study-card__text">1 + 1 = ?</p>
+              <button class="study-card__edit" title="編集">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <button class="study-card__toggle">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+            <span>答えを見る</span>
+          </button>
+          <div class="study-card__back">
+            <p class="study-card__answer">2</p>
+          </div>
+        </div>
+
+        <!-- 完了カード 2 -->
+        <div class="study-card">
+          <div class="study-card__topbar study-card__topbar--tags-only">
+            <div class="study-card__tags">
+              <span class="study-card__tag">一般</span>
+            </div>
+          </div>
+          <div class="study-card__front">
+            <div class="study-card__header">
+              <p class="study-card__text">晴れた日の空は何色？</p>
+              <button class="study-card__edit" title="編集">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <button class="study-card__toggle">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+            <span>答えを見る</span>
+          </button>
+          <div class="study-card__back">
+            <p class="study-card__answer">青</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <script src="js/main.js"></script>
+</body>
+</html>

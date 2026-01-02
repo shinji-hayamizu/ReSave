@@ -19,6 +19,28 @@ allowed-tools: Read, Write, Edit, Glob, Grep
 
 ---
 
+## 言語設定（重要）
+
+**生成するHTMLのUI表示は全て日本語で記述すること:**
+- ボタンテキスト（例: 「ログイン」「送信」「キャンセル」）
+- ラベル（例: 「メールアドレス」「パスワード」）
+- プレースホルダー（例: 「メールアドレスを入力」）
+- エラーメッセージ
+- ナビゲーション項目（例: 「ホーム」「設定」「カード一覧」）
+- 見出し・タイトル
+- ヘルプテキスト・ヒント
+- 確認ダイアログのテキスト
+
+```html
+<!-- 例: 日本語で記述 -->
+<button class="btn btn--primary">ログイン</button>
+<label>メールアドレス</label>
+<input placeholder="メールアドレスを入力してください">
+<span class="error">パスワードが正しくありません</span>
+```
+
+---
+
 ## 参照ドキュメント（必須）
 
 | ドキュメント | 用途 |
@@ -176,14 +198,14 @@ Read docs/requirements/functions/[カテゴリ]/F-XXX-*.md
 ```
 スマホ（~768px）         タブレット（768~1024px）   PC（1024px~）
 ┌──────────┐            ┌──────────────┐          ┌─────────────────┐
-│  Header  │            │icon│          │          │icon Home   │    │
+│ ヘッダー  │            │icon│          │          │icon ホーム │    │
 ├──────────┤            │icon│  iframe  │          │icon 機能1  │iframe│
 │          │            │icon│  /fetch  │          │icon 機能2  │/fetch│
-│  iframe  │            │    │  content │          │icon Settings│content│
+│  iframe  │            │    │ コンテンツ │          │icon 設定   │コンテンツ│
 │  /fetch  │            └──────────────┘          └─────────────────┘
-│  content │            アイコンのみ表示            ラベル付きサイドバー
+│ コンテンツ │            アイコンのみ表示            ラベル付きサイドバー
 ├──────────┤            ホバーで展開
-│ NavBar   │
+│ ナビバー  │
 └──────────┘
 ボトムナビ
 ```
@@ -407,10 +429,10 @@ Read docs/requirements/functions/[カテゴリ]/F-XXX-*.md
 
 ### ブレークポイント
 ```css
-/* Mobile first */
-/* Tablet: 768px+ */
+/* モバイルファースト */
+/* タブレット: 768px以上 */
 @media (min-width: 768px) { }
-/* Desktop: 1024px+ */
+/* デスクトップ: 1024px以上 */
 @media (min-width: 1024px) { }
 ```
 

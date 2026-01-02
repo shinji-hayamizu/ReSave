@@ -185,6 +185,12 @@
   },
   "active": "7ea3f89907f60e86",
   "lastOpenFiles": [
+    "mock/main.html",
+    "mock/index.html",
+    "mock/js/main.js",
+    "mock/css/style.css",
+    "mock/js",
+    "mock/css",
     "docs/requirements/architecture.md",
     "docs/domain/business-rules.md",
     "docs/domain/entities.md",
@@ -197,8 +203,6 @@
     "docs/testing",
     "docs/infrastructure",
     "docs/api/endpoints",
-    "docs/api",
-    "docs/domain",
     "docs/database/migrations.md",
     "docs/security/audit-log.md",
     "docs/database/indexes.md",
@@ -211,15 +215,11 @@
     "docs/security/data-protection.md",
     "docs/auth/roles.md",
     "docs/auth/authorization.md",
-    "docs/auth/authorization.md.tmp.10345.1767329946453",
     "docs/auth/authentication.md",
     "docs/database/tables/card_tags.md",
     "docs/database/tables/tags.md",
-    "docs/database/tables/tags.md.tmp.10345.1767329914662",
     "docs/database/tables/cards.md",
     "docs/security/threat-model.md",
-    "docs/database/tables/users.md",
-    "docs/database/er-diagram.md",
-    "docs/database/tables"
+    "docs/database/tables/users.md"
   ]
 }
