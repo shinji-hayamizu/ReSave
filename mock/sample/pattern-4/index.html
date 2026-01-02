@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ReSave - ダッシュボード | Pattern 4: Minimal Green</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!--
+    パターン: Minimal Green
+    テーマ: クリーン・エコ・ヘルスケア向け
+    特徴: ミニマル、余白重視、ライトサイドバー
+  -->
+
+  <div class="layout">
+    <!-- サイドバー -->
+    <aside class="sidebar">
+      <div class="sidebar__logo">
+        <svg class="sidebar__logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+        </svg>
+        <span class="sidebar__logo-text">ReSave</span>
+      </div>
+      
+      <nav class="sidebar__nav">
+        <a href="#" class="sidebar__link active">
+          <svg class="sidebar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            <polyline points="9,22 9,12 15,12 15,22"/>
+          </svg>
+          <span class="sidebar__label">ダッシュボード</span>
+        </a>
+        <a href="#" class="sidebar__link">
+          <svg class="sidebar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+            <line x1="8" y1="21" x2="16" y2="21"/>
+            <line x1="12" y1="17" x2="12" y2="21"/>
+          </svg>
+          <span class="sidebar__label">今日の復習</span>
+        </a>
+        <a href="#" class="sidebar__link">
+          <svg class="sidebar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14,2 14,8 20,8"/>
+          </svg>
+          <span class="sidebar__label">カード管理</span>
+        </a>
+        <a href="#" class="sidebar__link">
+          <svg class="sidebar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="20" x2="18" y2="10"/>
+            <line x1="12" y1="20" x2="12" y2="4"/>
+            <line x1="6" y1="20" x2="6" y2="14"/>
+          </svg>
+          <span class="sidebar__label">統計</span>
+        </a>
+        <a href="#" class="sidebar__link">
+          <svg class="sidebar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+          <span class="sidebar__label">設定</span>
+        </a>
+      </nav>
+    </aside>
+
+    <!-- メインコンテンツ -->
+    <main class="main">
+      <header class="header">
+        <div class="header__left">
+          <button class="header__menu-btn mobile-only">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="3" y1="12" x2="21" y2="12"/>
+              <line x1="3" y1="6" x2="21" y2="6"/>
+              <line x1="3" y1="18" x2="21" y2="18"/>
+            </svg>
+          </button>
+          <h1 class="header__title">ダッシュボード</h1>
+        </div>
+        <div class="header__right">
+          <button class="btn btn--primary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="btn__icon">
+              <line x1="12" y1="5" x2="12" y2="19"/>
+              <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            新規カード
+          </button>
+          <div class="header__avatar">田</div>
+        </div>
+      </header>
+
+      <div class="dashboard">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <p class="stat-card__value">24</p>
+            <p class="stat-card__label">今日の復習</p>
+            <div class="stat-card__bar"></div>
+          </div>
+          <div class="stat-card">
+            <p class="stat-card__value">7</p>
+            <p class="stat-card__label">連続学習日数</p>
+            <div class="stat-card__bar stat-card__bar--accent"></div>
+          </div>
+          <div class="stat-card">
+            <p class="stat-card__value">78%</p>
+            <p class="stat-card__label">習熟率</p>
+            <div class="stat-card__bar stat-card__bar--success"></div>
+          </div>
+          <div class="stat-card">
+            <p class="stat-card__value">156</p>
+            <p class="stat-card__label">総カード数</p>
+            <div class="stat-card__bar stat-card__bar--muted"></div>
+          </div>
+        </div>
+
+        <section class="section">
+          <div class="section__header">
+            <h2 class="section__title">今日の復習カード</h2>
+            <a href="#" class="section__link">すべて見る</a>
+          </div>
+          <div class="cards-grid">
+            <div class="card">
+              <div class="card__header">
+                <span class="card__tag">英単語</span>
+                <span class="card__progress">中級</span>
+              </div>
+              <h3 class="card__title">ephemeral</h3>
+              <p class="card__desc">一時的な、はかない</p>
+            </div>
+            <div class="card">
+              <div class="card__header">
+                <span class="card__tag card__tag--teal">プログラミング</span>
+                <span class="card__progress card__progress--high">上級</span>
+              </div>
+              <h3 class="card__title">RESTful API</h3>
+              <p class="card__desc">Representational State Transfer</p>
+            </div>
+            <div class="card">
+              <div class="card__header">
+                <span class="card__tag card__tag--amber">歴史</span>
+                <span class="card__progress card__progress--low">初級</span>
+              </div>
+              <h3 class="card__title">明治維新</h3>
+              <p class="card__desc">1868年の政治変革</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section__header">
+            <h2 class="section__title">最近のアクティビティ</h2>
+          </div>
+          <div class="activity-list">
+            <div class="activity-item">
+              <div class="activity-item__dot"></div>
+              <div class="activity-item__content">
+                <p class="activity-item__text">英単語のカードを5枚復習しました</p>
+                <p class="activity-item__time">2時間前</p>
+              </div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-item__dot activity-item__dot--accent"></div>
+              <div class="activity-item__content">
+                <p class="activity-item__text">新しいカードを3枚追加しました</p>
+                <p class="activity-item__time">昨日</p>
+              </div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-item__dot activity-item__dot--warning"></div>
+              <div class="activity-item__content">
+                <p class="activity-item__text">7日間連続学習を達成しました</p>
+                <p class="activity-item__time">昨日</p>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <nav class="bottom-nav">
+      <a href="#" class="bottom-nav__item active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        </svg>
+        <span>ホーム</span>
+      </a>
+      <a href="#" class="bottom-nav__item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+        </svg>
+        <span>復習</span>
+      </a>
+      <a href="#" class="bottom-nav__item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="12" y1="5" x2="12" y2="19"/>
+          <line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        <span>追加</span>
+      </a>
+      <a href="#" class="bottom-nav__item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="20" x2="18" y2="10"/>
+          <line x1="12" y1="20" x2="12" y2="4"/>
+          <line x1="6" y1="20" x2="6" y2="14"/>
+        </svg>
+        <span>統計</span>
+      </a>
+    </nav>
+  </div>
+</body>
+</html>

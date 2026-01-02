@@ -1,60 +1,99 @@
 ---
-description: Phase 2 ドキュメントからHTMLモックを並列生成
-allowed-tools: Read, Write, Edit, Glob, Grep, Task, WebSearch, WebFetch
+description: 承認されたデザインで全画面のHTMLモックを生成
+allowed-tools: Read, Write, Edit, Glob, Grep, Task
 ---
 
-# Phase 3: HTMLモック生成（サブエージェント並列実行）
+# Phase 4: HTMLモック生成（全画面）
 
 ## 前提
-以下のドキュメントが完了済みであること:
-- `docs/requirements/business-requirements.md`
-- `docs/architecture/architecture.md`
-- `docs/screens/flow.md`
-- `docs/screens/components.md`
-- `docs/auth/roles.md`
-- その他 Phase 2 で生成された全ドキュメント
+- Phase 3a で生成したデザインサンプルが承認済み
+- 採用パターン番号が決定している
+- Phase 3b で画面遷移図（flow.md）が生成済み
 
 ---
 
 ## 参照ドキュメント（必須）
-- docs/requirements/business-requirements.md
-- docs/screens/flow.md
-- docs/screens/components.md
-- docs/auth/roles.md
-- docs/api/endpoints/*.md
+
+| ドキュメント | 用途 |
+|-------------|------|
+| docs/requirements/business-requirements.md | アプリ概要・機能一覧 |
+| docs/requirements/functions/_index.md | 機能一覧・依存関係 |
+| docs/requirements/functions/**/*.md | 各機能の詳細仕様 |
+| docs/screens/flow.md | 画面遷移図（生成すべき画面一覧） |
+| mock/sample/pattern-{N}/ | 採用デザインパターン |
+
+---
 
 ## 実行方法
 - このタスクは **ultrathink** で実行すること
 - 各HTMLファイルは **subAgent** で並列実行すること
 
 ## 出力先
-`mock/` ディレクトリに出力
+`mock/` ディレクトリに出力（`sample/` は残す）
 
 ---
 
-## 1. ファイル構成
+## 1. 実行前の確認（必須）
+
+### Step 1: 採用パターンの確認
+
+**ユーザーに以下を質問すること:**
+
+```
+Phase 3a で生成したデザインサンプルのうち、どのパターンを採用しますか？
+
+mock/sample/ ディレクトリに生成されたパターンから番号で回答してください:
+```
+
+**回答を得るまで次のステップに進まないこと。**
+
+### Step 2: 必須ドキュメントの読み込み
+
+```
+1. Read docs/screens/flow.md
+   → 生成すべき全画面のファイル名と遷移関係を特定
+
+2. Read docs/requirements/functions/_index.md
+   → 機能一覧と依存関係を把握
+
+3. Read mock/sample/pattern-{N}/style.css
+   → 採用パターンのカラー変数・スタイルを抽出
+```
+
+### Step 3: 画面一覧の整理
+
+flow.md から以下を整理:
+- 画面名 → ファイル名のマッピング
+- 各画面の遷移元・遷移先
+- 対応する機能ID（F-XXX）
+- 画面タイプ（認証/一覧/詳細/フォーム等）
+
+---
+
+## 2. ファイル構成
 
 ```
 /mock
+├── sample/                 # Phase 3a の成果物（残す）
 ├── index.html              # エントリーポイント（リダイレクト専用）
 ├── login.html              # ログイン画面
 ├── register.html           # 会員登録画面
-├── dashboard.html          # ダッシュボード
-├── [機能名].html           # 各機能画面
+├── [メイン画面].html        # メイン画面
+├── [機能名].html           # 各機能画面（flow.mdから特定）
 ├── settings.html           # 設定画面
 ├── css/
-│   └── style.css           # 共通スタイル
+│   └── style.css           # 共通スタイル（採用パターンベース）
 ├── js/
 │   └── main.js             # 共通JS（サイドバー開閉等）
 └── components/             # 共通パーツ確認用（オプション）
     └── styleguide.html
 ```
 
-※ 具体的なファイル名は `flow.md` の画面遷移図から決定すること
+※ 具体的なファイル名は `docs/screens/flow.md` の画面遷移図から決定すること
 
 ---
 
-## 2. 固定仕様：YouTube型レスポンシブサイドバー
+## 3. 固定仕様：YouTube型レスポンシブサイドバー
 
 ### レイアウト図
 ```
@@ -72,78 +111,55 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Task, WebSearch, WebFetch
 ```
 
 ### 実装要件
-- スマホ: ボトムナビゲーション（3-5項目）
+- スマホ: ハンバーガーメニュー（オーバーレイで開閉）
 - タブレット: 左アイコンバー（ホバーで展開）
 - PC: 左サイドバー（常時展開）
 
 ---
 
-## 3. メインコンテンツレイアウト
+## 4. メインコンテンツレイアウト
 
 各画面の特性に応じて以下から選択:
 
-| 画面タイプ | レイアウト | 参考 |
-|-----------|-----------|------|
-| 一覧画面 | リスト型 or グリッド型 | YouTube Home |
-| 詳細画面 | 2カラム（メイン + サイド） | 記事詳細 |
-| フォーム画面 | センター寄せフォーム | 設定画面 |
-| 管理画面 | テーブル型 | Airtable |
-| ダッシュボード | カード型グリッド | 統計表示 |
+| 画面タイプ | レイアウト | 該当画面例 |
+|-----------|-----------|-----------|
+| 認証系 | センターカード（サイドバーなし） | login, register, password-reset |
+| 一覧系 | タブ付きリスト or グリッド | ホーム画面（カード一覧） |
+| 詳細系 | フルスクリーン or モーダル | カード学習画面 |
+| フォーム系 | センター寄せフォーム | カード入力、設定 |
+| ダッシュボード | カード型グリッド | 統計画面 |
+| 管理系 | リスト型 | タグ管理 |
 
 ---
 
-## 4. デザイン仕様
+## 5. 生成手順
 
-### カラー
-- `business-requirements.md` にブランドカラー指定があれば使用
-- なければ: ニュートラルグレー + アクセントカラー（青系）
+### Step 1: 共通ファイル生成
 
-### コンポーネント
-- `components.md` の定義に従う
-- ボタン: Primary / Secondary / Danger
-- フォーム要素: 定義されたバリデーションを視覚化
-- モーダル / 通知: 定義に従って実装
+1. `css/style.css`
+   - 採用パターンの `:root` 変数を引き継ぐ
+   - 共通コンポーネントスタイルを追加
 
-### レスポンシブ設計
-- モバイルファースト
-- ブレークポイント: 768px / 1024px
+2. `js/main.js`
+   - サイドバー開閉
+   - モーダル制御
+   - フォームバリデーション表示
 
----
+### Step 2: 各画面を並列生成
 
-## 5. 技術仕様
-
-### CSS
-- 外部ライブラリなし（Pure CSS）
-- CSS Variables で色・サイズ管理
-- BEM風の命名規則
-
-### JavaScript
-- Vanilla JS のみ
-- サイドバー開閉
-- モーダル制御
-- フォームバリデーション表示（視覚的フィードバック）
+```
+Task: index.html 生成
+Task: login.html 生成
+Task: register.html 生成
+Task: [メイン画面].html 生成
+Task: [機能1].html 生成
+Task: [機能2].html 生成
+...
+```
 
 ---
 
-## 6. チェックリスト（各画面共通）
-
-### レイアウト
-- [ ] 3段階レスポンシブ（スマホ/タブレット/PC）
-- [ ] ハンバーガーメニュー開閉機能
-- [ ] 現在ページのアクティブ状態ハイライト
-
-### フォーム実装
-- [ ] `entities.md` の属性定義に基づくフィールド
-- [ ] `business-rules.md` のバリデーションを視覚的に表現
-- [ ] エラー状態の表示
-
-### 認証状態の表現
-- [ ] ログイン前/後で異なるヘッダー表示
-- [ ] ロール別の表示切替（コメントで明示）
-
----
-
-## 7. 各ファイルの実装指示
+## 6. 各ファイルの実装指示
 
 ### index.html
 ```html
@@ -156,335 +172,120 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Task, WebSearch, WebFetch
 </html>
 ```
 
-### 認証画面（login.html, register.html）
+### 認証画面（login.html, register.html, password-reset.html）
 - サイドバーなし
 - センター配置のカード型フォーム
 - ロゴ + フォーム + フッターリンク
 
-### メイン画面（dashboard.html 等）
+### メイン画面（ホーム等）
 - YouTube型サイドバー適用
-- ヘッダー: ロゴ + 検索（任意） + ユーザーメニュー
+- ヘッダー: ハンバーガーメニュー + アプリ名 + アクションボタン
 - メインコンテンツ: 画面タイプに応じたレイアウト
 
 ### コメント規約
+各画面の冒頭に以下を記載:
+
 ```html
 <!--
   画面: [画面名]
-  機能: business-requirements.md (F-001)
-  ロール: user, admin
-  前の画面: login.html
-  次の画面: [機能名].html
+  機能: F-XXX ([機能名])
+  前の画面: [遷移元].html
+  次の画面: [遷移先].html
 -->
 ```
 
 ---
 
-## 8. 出力フォーマット
+## 7. 技術仕様
 
-### css/style.css
+### CSS
+- 外部ライブラリなし（Pure CSS）
+- CSS Variables で色・サイズ管理
+- BEM風の命名規則
+- モバイルファーストのメディアクエリ
+
+### JavaScript
+- Vanilla JS のみ
+- サイドバー開閉
+- モーダル制御
+- フォームバリデーション表示（視覚的フィードバック）
+
+### ブレークポイント
 ```css
-:root {
-  /* Colors */
-  --color-primary: #3b82f6;
-  --color-secondary: #64748b;
-  --color-danger: #ef4444;
-  --color-success: #22c55e;
-  --color-warning: #f59e0b;
-
-  /* Backgrounds */
-  --bg-primary: #ffffff;
-  --bg-secondary: #f8fafc;
-  --bg-sidebar: #1e293b;
-
-  /* Text */
-  --text-primary: #0f172a;
-  --text-secondary: #475569;
-  --text-inverse: #f8fafc;
-
-  /* Spacing */
-  --sidebar-width-collapsed: 64px;
-  --sidebar-width-expanded: 240px;
-  --header-height: 56px;
-  --bottom-nav-height: 56px;
-
-  /* Breakpoints */
-  --breakpoint-tablet: 768px;
-  --breakpoint-desktop: 1024px;
-}
-
-/* Base styles */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background: var(--bg-secondary);
-  color: var(--text-primary);
-}
-
-/* Layout - Mobile First */
-.layout {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-}
-
-.main-content {
-  flex: 1;
-  padding: 16px;
-  padding-bottom: calc(var(--bottom-nav-height) + 16px);
-}
-
-/* Sidebar - Hidden on mobile */
-.sidebar {
-  display: none;
-}
-
-/* Bottom Navigation - Mobile only */
-.bottom-nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: var(--bottom-nav-height);
-  background: var(--bg-primary);
-  border-top: 1px solid #e2e8f0;
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-}
-
-/* Tablet styles */
-@media (min-width: 768px) {
-  .bottom-nav {
-    display: none;
-  }
-
-  .sidebar {
-    display: flex;
-    flex-direction: column;
-    position: fixed;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: var(--sidebar-width-collapsed);
-    background: var(--bg-sidebar);
-    transition: width 0.2s;
-    z-index: 100;
-  }
-
-  .sidebar:hover {
-    width: var(--sidebar-width-expanded);
-  }
-
-  .sidebar__label {
-    display: none;
-    opacity: 0;
-    transition: opacity 0.2s;
-  }
-
-  .sidebar:hover .sidebar__label {
-    display: inline;
-    opacity: 1;
-  }
-
-  .main-content {
-    margin-left: var(--sidebar-width-collapsed);
-    padding-bottom: 16px;
-  }
-}
-
-/* Desktop styles */
-@media (min-width: 1024px) {
-  .sidebar {
-    width: var(--sidebar-width-expanded);
-  }
-
-  .sidebar__label {
-    display: inline;
-    opacity: 1;
-  }
-
-  .main-content {
-    margin-left: var(--sidebar-width-expanded);
-  }
-}
-
-/* Components */
-.btn {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 500;
-  transition: background 0.2s;
-}
-
-.btn--primary {
-  background: var(--color-primary);
-  color: white;
-}
-
-.btn--secondary {
-  background: var(--bg-secondary);
-  color: var(--text-primary);
-  border: 1px solid #e2e8f0;
-}
-
-.btn--danger {
-  background: var(--color-danger);
-  color: white;
-}
-
-/* Form elements */
-.form-group {
-  margin-bottom: 16px;
-}
-
-.form-label {
-  display: block;
-  margin-bottom: 4px;
-  font-weight: 500;
-  font-size: 14px;
-}
-
-.form-input {
-  width: 100%;
-  padding: 10px 12px;
-  border: 1px solid #e2e8f0;
-  border-radius: 6px;
-  font-size: 16px;
-}
-
-.form-input:focus {
-  outline: none;
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-.form-input--error {
-  border-color: var(--color-danger);
-}
-
-.form-error {
-  color: var(--color-danger);
-  font-size: 12px;
-  margin-top: 4px;
-}
-
-/* Cards */
-.card {
-  background: var(--bg-primary);
-  border-radius: 8px;
-  padding: 16px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-/* Auth layout */
-.auth-layout {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 16px;
-}
-
-.auth-card {
-  width: 100%;
-  max-width: 400px;
-  background: var(--bg-primary);
-  border-radius: 12px;
-  padding: 32px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-```
-
-### js/main.js
-```javascript
-document.addEventListener('DOMContentLoaded', function() {
-  // Sidebar hover behavior (tablet)
-  const sidebar = document.querySelector('.sidebar');
-  if (sidebar) {
-    sidebar.addEventListener('mouseenter', function() {
-      this.classList.add('sidebar--expanded');
-    });
-    sidebar.addEventListener('mouseleave', function() {
-      this.classList.remove('sidebar--expanded');
-    });
-  }
-
-  // Mobile menu toggle
-  const menuToggle = document.querySelector('.menu-toggle');
-  const mobileMenu = document.querySelector('.mobile-menu');
-  if (menuToggle && mobileMenu) {
-    menuToggle.addEventListener('click', function() {
-      mobileMenu.classList.toggle('mobile-menu--open');
-    });
-  }
-
-  // Form validation display
-  const forms = document.querySelectorAll('form[data-validate]');
-  forms.forEach(function(form) {
-    form.addEventListener('submit', function(e) {
-      e.preventDefault();
-      const inputs = form.querySelectorAll('[required]');
-      let isValid = true;
-
-      inputs.forEach(function(input) {
-        const errorEl = input.parentElement.querySelector('.form-error');
-        if (!input.value.trim()) {
-          input.classList.add('form-input--error');
-          if (errorEl) errorEl.style.display = 'block';
-          isValid = false;
-        } else {
-          input.classList.remove('form-input--error');
-          if (errorEl) errorEl.style.display = 'none';
-        }
-      });
-
-      if (isValid) {
-        alert('Form submitted (mock)');
-      }
-    });
-  });
-
-  // Active nav item
-  const currentPath = window.location.pathname.split('/').pop() || 'index.html';
-  const navLinks = document.querySelectorAll('.nav-link, .sidebar__link, .bottom-nav__link');
-  navLinks.forEach(function(link) {
-    const href = link.getAttribute('href');
-    if (href === currentPath) {
-      link.classList.add('active');
-    }
-  });
-});
+/* Mobile first */
+/* Tablet: 768px+ */
+@media (min-width: 768px) { }
+/* Desktop: 1024px+ */
+@media (min-width: 1024px) { }
 ```
 
 ---
 
-## 9. subAgent への個別指示
+## 8. subAgent への指示テンプレート
 
 各 subAgent には以下を渡すこと:
 
-1. 対象ファイル名
-2. 関連する設計ドキュメントの該当部分
-3. 前後の画面情報（遷移先）
-4. 使用するレイアウトパターン
-5. 必要なコンポーネント一覧
-6. css/style.css と js/main.js の内容（共通スタイル・JS）
+```
+【画面名】: [画面名]
+【ファイル】: mock/[ファイル名].html
+
+【参照ドキュメント】
+- docs/screens/flow.md の該当部分
+- docs/requirements/functions/[カテゴリ]/F-XXX-*.md
+
+【採用デザイン】
+- mock/sample/pattern-{N}/style.css のカラー・スタイルを使用
+
+【画面情報】
+- 機能ID: F-XXX
+- 前の画面: [遷移元]（flow.mdより）
+- 次の画面: [遷移先]（flow.mdより）
+
+【レイアウトタイプ】: [認証/一覧/詳細/フォーム等]
+
+【共通ファイル】
+css/style.css と js/main.js を link/script で読み込むこと
+
+【コメント規約】
+画面冒頭に以下を記載:
+<!--
+  画面: [画面名]
+  機能: F-XXX
+  前の画面: [遷移元].html
+  次の画面: [遷移先].html
+-->
+```
+
+---
+
+## 9. チェックリスト
+
+### 全体
+- [ ] **docs/screens/flow.md** の全画面がHTMLとして存在する
+- [ ] 画面遷移のリンクが flow.md と整合している
+- [ ] 採用パターンのスタイルが適用されている
+- [ ] css/style.css が生成されている
+- [ ] js/main.js が生成されている
+
+### 各画面
+- [ ] 3段階レスポンシブ対応（スマホ/タブレット/PC）
+- [ ] 画面冒頭にコメント記載
+- [ ] 適切なレイアウトタイプ使用
+- [ ] サイドバーのホバー展開が動作する
+
+### 認証状態の表現
+- [ ] ログイン前後でヘッダー表示が異なる
+- [ ] 認証系画面はサイドバーなし
 
 ---
 
 ## 完了条件
 
-- [ ] すべての画面がHTMLファイルとして生成されている
-- [ ] css/style.css が生成されている
+- [ ] ユーザーから採用パターン番号を確認済み
+- [ ] docs/screens/flow.md の全画面がHTMLファイルとして生成されている
+- [ ] css/style.css が採用パターンベースで生成されている
 - [ ] js/main.js が生成されている
-- [ ] 3段階レスポンシブが動作する
+- [ ] 3段階レスポンシブが全画面で動作する
 - [ ] サイドバーのホバー展開が動作する
 - [ ] 各画面冒頭にコメントで画面情報が記載されている
 - [ ] flow.md の遷移図と整合している
-- [ ] components.md の定義と整合している
