@@ -1,7 +1,5 @@
 'use client';
 
-import { Layers, Clock, Target, Flame } from 'lucide-react';
-
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTodayStats, useSummaryStats } from '@/hooks/useStats';
@@ -11,10 +9,9 @@ interface StatItemProps {
   unit: string;
   label: string;
   variant?: 'primary' | 'success' | 'warning' | 'default';
-  icon?: React.ReactNode;
 }
 
-function StatItem({ value, unit, label, variant = 'default', icon }: StatItemProps) {
+function StatItem({ value, unit, label, variant = 'default' }: StatItemProps) {
   const variantClasses = {
     primary: 'text-primary',
     success: 'text-green-500',
@@ -24,7 +21,6 @@ function StatItem({ value, unit, label, variant = 'default', icon }: StatItemPro
 
   return (
     <div className="rounded-lg bg-background p-4 text-center">
-      {icon && <div className="mx-auto mb-2 h-6 w-6 text-primary">{icon}</div>}
       <div className={`text-2xl font-bold leading-tight ${variantClasses[variant]}`}>
         {value}
         <span className="ml-0.5 text-sm font-medium text-muted-foreground">{unit}</span>
