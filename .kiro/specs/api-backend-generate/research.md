@@ -88,6 +88,197 @@
 - **リスク2**: subagent生成コードの品質ばらつき → 既存パターンを詳細にプロンプト化
 - **リスク3**: 大規模プロジェクトでの実行時間 → 進捗表示、部分実行オプション
 
+## Existing Code Pattern Analysis
+
+### 型定義パターン (`apps/web/src/types/card.ts`)
+```typescript
+import type { Tag } from './tag';
+import type { ListResponse } from './api';
+
+// エンティティ型: DBカラムに対応、camelCase命名
+export type Card = {
+  id: string;
+  userId: string;           // user_id → userId
+  front: string;
+  back: string;
+  reviewLevel: number;      // review_level → reviewLevel
+  nextReviewAt: string | null;  // nullable
+  createdAt: string;        // ISO 8601形式
+  updatedAt: string;
+};
+
+// 複合型: 関連エンティティを含む
+export type CardWithTags = Card & {
+  tags: Tag[];
+};
+
+// レスポンス型: ListResponseジェネリクス使用
+export type CardListResponse = ListResponse<CardWithTags>;
+
+// 入力型: 作成時の必須/任意フィールド
+export type CreateCardInput = {
+  front: string;
+  back: string;
+  tagIds?: string[];
+};
+
+// 更新型: 全フィールドoptional
+export type UpdateCardInput = Partial<CreateCardInput>;
+
+// フィルター型: クエリパラメータ用
+export type CardFilters = {
+  tagId?: string;
+  status?: CardStatus;
+  limit?: number;
+  offset?: number;
+};
+```
+
+### Zodスキーマパターン (`apps/web/src/validations/card.ts`)
+```typescript
+import { z } from 'zod';
+
+// エンティティスキーマ: 全カラム定義
+export const cardSchema = z.object({
+  id: z.string().uuid(),
+  userId: z.string().uuid(),
+  front: z.string().min(1, '必須項目です').max(10000, '10000文字以内で入力してください'),
+  back: z.string().min(1, '必須項目です').max(10000, '10000文字以内で入力してください'),
+  reviewLevel: z.number().int().min(0).max(6),
+  nextReviewAt: z.string().datetime().nullable(),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime(),
+});
+
+// 作成スキーマ: ユーザー入力フィールドのみ
+export const createCardSchema = z.object({
+  front: z.string().min(1, '必須項目です').max(10000, '10000文字以内で入力してください'),
+  back: z.string().min(1, '必須項目です').max(10000, '10000文字以内で入力してください'),
+  tagIds: z.array(z.string().uuid()).optional(),
+});
+
+// 更新スキーマ: .partial()で全フィールドoptional化
+export const updateCardSchema = createCardSchema.partial();
+
+// クエリスキーマ: ページネーション + フィルタ
+export const cardQuerySchema = z.object({
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+  offset: z.coerce.number().int().min(0).default(0),
+  tagId: z.string().uuid().optional(),
+  status: z.enum(['all', 'due', 'completed']).default('all'),
+});
+
+// 型エクスポート: Zodからの型推論
+export type Card = z.infer<typeof cardSchema>;
+export type CreateCardInput = z.infer<typeof createCardSchema>;
+```
+
+### Server Actionsパターン (`apps/web/src/actions/auth.ts`)
+```typescript
+'use server';  // ファイル先頭に必須
+
+import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
+
+import { createClient } from '@/lib/supabase/server';
+
+// 認証チェックパターン
+export async function getUser() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  return user;
+}
+
+// CRUDアクションパターン（推奨形式）
+export async function createCard(input: CreateCardInput) {
+  const supabase = await createClient();
+
+  // 1. 認証チェック（必須）
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) {
+    throw new Error('Unauthorized');
+  }
+
+  // 2. バリデーション
+  const validated = createCardSchema.parse(input);
+
+  // 3. DB操作
+  const { data, error } = await supabase
+    .from('cards')
+    .insert({ ...validated, user_id: user.id })
+    .select()
+    .single();
+
+  if (error) throw new Error(error.message);
+
+  // 4. キャッシュ無効化
+  revalidatePath('/cards');
+  return data;
+}
+```
+
+### TanStack Queryフックパターン (`hooks/useAuth.ts` ベース)
+```typescript
+'use client';
+
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { createCard, getCards, updateCard, deleteCard } from '@/actions/cards';
+
+// クエリキー定数: factory pattern
+export const cardKeys = {
+  all: ['cards'] as const,
+  lists: () => [...cardKeys.all, 'list'] as const,
+  list: (filters: CardFilters) => [...cardKeys.lists(), filters] as const,
+  detail: (id: string) => [...cardKeys.all, 'detail', id] as const,
+};
+
+// 一覧取得フック
+export function useCards(filters?: CardFilters) {
+  return useQuery({
+    queryKey: cardKeys.list(filters ?? {}),
+    queryFn: () => getCards(filters),
+  });
+}
+
+// ミューテーションフック: キャッシュ無効化付き
+export function useCreateCard() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: createCard,  // Server Actionsを直接渡す
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: cardKeys.lists() });
+    },
+  });
+}
+```
+
+## Test Strategy
+
+### 9.1 ドキュメント解析テスト
+- **テスト対象**: ER図パース、機能仕様抽出
+- **テストケース**:
+  - 正常: Mermaid ER図からエンティティ抽出
+  - 正常: 機能仕様からカテゴリ抽出
+  - 異常: 不正なドキュメント形式でのエラーハンドリング
+  - 境界: 空のドキュメント、部分的なER図
+
+### 9.2 生成コード品質テスト
+- **テスト対象**: 生成ファイルの構文・規約準拠
+- **テストケース**:
+  - TypeScriptコンパイルチェック
+  - Named exportのみ使用確認
+  - any型未使用確認
+  - 認証チェック存在確認（Server Actions/API Routes）
+  - 既存パターンとの整合性
+
+### 9.3 E2Eスキル実行テスト
+- **テスト対象**: スキル全体の動作
+- **テストケース**:
+  - 正常: cards/tags/studyの完全生成
+  - 競合: 既存ファイルへの上書き/マージ/スキップ
+  - オプション: --all, --force の動作確認
+  - 並列: 複数リソース同時生成の完了確認
+
 ## References
 - [Claude Code Task Tool](https://docs.anthropic.com/claude-code) - subagent並列実行パターン
 - [Next.js Server Actions](https://nextjs.org/docs/app/building-your-application/data-fetching/server-actions-and-mutations)

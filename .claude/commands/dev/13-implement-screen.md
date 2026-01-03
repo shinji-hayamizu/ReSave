@@ -1,7 +1,7 @@
 ---
-description: HTMLモックから既存Component/Hooksを使ってUIを実装し、APIとつなぎこむ。
+description: HTMLモックから既存Component/Hooksを使ってUIを実装し、APIとつなぎこむ。引数なしで全画面一括実装。
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash, Task, WebSearch, WebFetch
-argument-hint: [画面名 (例: login, main, stats)]
+argument-hint: [画面名 (省略時: 全画面一括実装)]
 ---
 
 # HTMLモックからUI実装
@@ -19,7 +19,7 @@ argument-hint: [画面名 (例: login, main, stats)]
 ### 実行パターン
 
 1. **Step 1-2（分析・計画）** - メインエージェントで実行
-2. **Step 3-5（コンポーネント・ページ作成）** - サブエージェントで並列実行
+2. **Step 3-5（コンポーネント・ページ作成）** - サブエージェントで並列実行（画面ごとに並列）
 3. **Step 6（確認・レポート）** - メインエージェントで実行
 
 ---
@@ -27,14 +27,36 @@ argument-hint: [画面名 (例: login, main, stats)]
 ## 使用方法
 
 ```bash
-# 基本（画面名指定）
+# 全画面一括実装（引数省略時）
+/dev:13-implement-screen
+
+# 特定画面のみ
 /dev:13-implement-screen login
 
-# 複数画面を一括実装
+# 複数画面を指定
 /dev:13-implement-screen main,stats,tags
 ```
 
-引数: `$ARGUMENTS` = 画面名（カンマ区切りで複数指定可能）
+引数: `$ARGUMENTS` = 画面名（省略時: 全画面一括実装、カンマ区切りで複数指定可能）
+
+### 対象画面の決定ロジック
+
+1. **引数あり**: 指定された画面のみ実装
+2. **引数なし**: `docs/screens/mock/{version}/*.html` の全ファイルを対象に一括実装
+
+```
+# 引数なしの場合、以下を自動検出して全て実装:
+docs/screens/mock/v1/
+├── login.html      → (auth)/login
+├── register.html   → (auth)/register
+├── main.html       → (main)/
+├── card-input.html → (main)/cards/new
+├── tags.html       → (main)/tags
+├── stats.html      → (main)/stats
+├── settings.html   → (main)/settings
+├── profile.html    → (main)/profile
+└── ...
+```
 
 ---
 
