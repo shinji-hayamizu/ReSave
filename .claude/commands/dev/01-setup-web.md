@@ -1,3 +1,9 @@
+---
+description: Web (Next.js) セットアップ。ライブラリインストール、shadcn/ui初期化、テスト環境構築。
+allowed-tools: Read, Write, Edit, Bash, Glob, Grep
+argument-hint: [project root directory (例: /path/to/project)]
+---
+
 # Web (Next.js) セットアップ
 
 apps/web に必要なライブラリをインストールし、初期設定を行う。

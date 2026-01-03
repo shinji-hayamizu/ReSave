@@ -1,3 +1,9 @@
+---
+description: Mobile (Expo) セットアップ。ライブラリインストール、ディレクトリ構造作成、Supabase/TanStack Query設定。
+allowed-tools: Read, Write, Edit, Bash, Glob, Grep
+argument-hint: [project root directory (例: /path/to/project)]
+---
+
 # Mobile (Expo) セットアップ
 
 apps/mobile に必要なライブラリをインストールし、初期設定を行う。
