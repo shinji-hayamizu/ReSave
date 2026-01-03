@@ -1,0 +1,77 @@
+'use client';
+
+import {
+  BarChart,
+  GraduationCap,
+  Home,
+  Library,
+  LogOut,
+  Settings,
+  Tag,
+} from 'lucide-react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+
+import { signOut } from '@/actions/auth';
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+} from '@/components/ui/sidebar';
+
+const navItems = [
+  { title: 'ダッシュボード', href: '/', icon: Home },
+  { title: 'カード', href: '/cards', icon: Library },
+  { title: '学習', href: '/study', icon: GraduationCap },
+  { title: 'タグ', href: '/tags', icon: Tag },
+  { title: '統計', href: '/stats', icon: BarChart },
+  { title: '設定', href: '/settings', icon: Settings },
+];
+
+export function AppSidebar() {
+  const pathname = usePathname();
+
+  return (
+    <Sidebar className="hidden md:flex">
+      <SidebarHeader className="border-b p-4">
+        <Link className="flex items-center gap-2 font-bold" href="/">
+          <span className="text-xl">ReSave</span>
+        </Link>
+      </SidebarHeader>
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {navItems.map((item) => (
+                <SidebarMenuItem key={item.href}>
+                  <SidebarMenuButton asChild isActive={pathname === item.href}>
+                    <Link href={item.href}>
+                      <item.icon className="h-4 w-4" />
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+      <SidebarFooter className="border-t p-2">
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton onClick={() => signOut()}>
+              <LogOut className="h-4 w-4" />
+              <span>ログアウト</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
+    </Sidebar>
+  );
+}
