@@ -32,14 +32,21 @@ const cardInputSchema = z.object({
     .max(TEXT_MAX_LENGTH, `${TEXT_MAX_LENGTH}文字以内で入力してください`),
   back: z
     .string()
-    .max(HIDDEN_TEXT_MAX_LENGTH, `${HIDDEN_TEXT_MAX_LENGTH}文字以内で入力してください`)
-    .default(''),
-  tagIds: z.array(z.string()).max(10, 'タグは10個までです').default([]),
-  sourceUrl: z.string().url('有効なURLを入力してください').or(z.literal('')).default(''),
-  repeatMode: z.enum(['spaced', 'daily', 'weekly', 'none']).default('spaced'),
+    .max(HIDDEN_TEXT_MAX_LENGTH, `${HIDDEN_TEXT_MAX_LENGTH}文字以内で入力してください`),
+  tagIds: z.array(z.string()).max(10, 'タグは10個までです'),
+  sourceUrl: z.string().url('有効なURLを入力してください').or(z.literal('')),
+  repeatMode: z.enum(['spaced', 'daily', 'weekly', 'none']),
 });
 
 type CardInputFormValues = z.infer<typeof cardInputSchema>;
+
+const defaultFormValues: CardInputFormValues = {
+  front: '',
+  back: '',
+  tagIds: [],
+  sourceUrl: '',
+  repeatMode: 'spaced',
+};
 
 interface CardInputFormProps {
   mode: 'create' | 'edit';
@@ -83,27 +90,18 @@ export function CardInputForm({
   const form = useForm<CardInputFormValues>({
     resolver: zodResolver(cardInputSchema),
     defaultValues: {
-      front: '',
-      back: '',
-      tagIds: [],
-      sourceUrl: '',
-      repeatMode: 'spaced',
+      ...defaultFormValues,
       ...defaultValues,
     },
   });
 
   const frontValue = form.watch('front');
-  const backValue = form.watch('back');
   const isSaveDisabled = !frontValue.trim() || isSubmitting;
 
   useEffect(() => {
     if (defaultValues) {
       form.reset({
-        front: '',
-        back: '',
-        tagIds: [],
-        sourceUrl: '',
-        repeatMode: 'spaced',
+        ...defaultFormValues,
         ...defaultValues,
       });
     }
