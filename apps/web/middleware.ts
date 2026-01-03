@@ -39,9 +39,15 @@ export async function middleware(request: NextRequest) {
       request.nextUrl.pathname === path || request.nextUrl.pathname.startsWith(path + '/')
   );
 
-  // 認証ページのパス
+  // 認証ページのパス（認証済みユーザーはホームへリダイレクト）
   const authPaths = ['/login', '/signup', '/reset-password'];
   const isAuthPath = authPaths.some((path) => request.nextUrl.pathname.startsWith(path));
+
+  // パスワード更新ページ（認証済みユーザーのみアクセス可能）
+  const isUpdatePasswordPath = request.nextUrl.pathname === '/update-password';
+
+  // 認証コールバック（内部で認証処理を行うためスキップ）
+  const isAuthCallback = request.nextUrl.pathname.startsWith('/auth/callback');
 
   // API Routesは別途認証（Mobile用）
   const isApiRoute = request.nextUrl.pathname.startsWith('/api/');
@@ -52,7 +58,7 @@ export async function middleware(request: NextRequest) {
     request.nextUrl.pathname.includes('.') ||
     request.nextUrl.pathname === '/favicon.ico';
 
-  if (isStaticAsset) {
+  if (isStaticAsset || isAuthCallback) {
     return supabaseResponse;
   }
 
@@ -61,6 +67,13 @@ export async function middleware(request: NextRequest) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
     url.searchParams.set('redirect', request.nextUrl.pathname);
+    return NextResponse.redirect(url);
+  }
+
+  // パスワード更新ページは認証済みユーザーのみアクセス可能
+  if (isUpdatePasswordPath && !user) {
+    const url = request.nextUrl.clone();
+    url.pathname = '/reset-password';
     return NextResponse.redirect(url);
   }
 
