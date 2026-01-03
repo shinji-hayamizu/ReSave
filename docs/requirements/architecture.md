@@ -1,7 +1,7 @@
 # システムアーキテクチャ
 
 > 関連ドキュメント: [ビジネス要件](./business-requirements.md) | [非機能要件](./non-functional.md)
-> 最終更新: 2026-01-02
+> 最終更新: 2026-01-03
 
 ---
 
@@ -12,14 +12,15 @@
 ```mermaid
 flowchart TB
     subgraph Client["クライアント"]
-        Web["Next.js 15<br/>PWA対応"]
-        Mobile["React Native<br/>（将来対応）"]
+        Web["Next.js 15<br/>PWA対応<br/>(モノレポ)"]
+        Mobile["Expo<br/>(単体プロジェクト)"]
     end
 
     subgraph Vercel["Vercel"]
         SSR["Server Components"]
-        API["API Routes"]
+        API["API Routes<br/>(Mobile用)"]
         Actions["Server Actions"]
+        Admin["管理画面<br/>(/admin/*)"]
     end
 
     subgraph Supabase["Supabase"]
@@ -30,7 +31,8 @@ flowchart TB
     end
 
     Web --> SSR
-    Mobile -.-> API
+    Web --> Admin
+    Mobile --> API
     SSR --> Auth
     SSR --> DB
     Actions --> DB
@@ -43,7 +45,9 @@ flowchart TB
 | 方針 | 詳細 |
 |------|------|
 | **Server First** | Server Componentsをデフォルトとし、`use client`は最小限の葉コンポーネントにのみ使用 |
-| **シンプルさ優先** | 過度な抽象化を避け、将来のRN対応を見据えつつも現時点はWeb特化 |
+| **Webモノレポ** | Next.js単体でメインアプリ・管理画面・API Routesを統合（Turborepo不使用） |
+| **Mobile独立** | Expoは依存関係の競合を避けるため、完全に独立したプロジェクトとして配置 |
+| **共有コードは手動コピー** | 型定義・Zodスキーマは`web/`をマスターとし`mobile/`にコピー |
 | **Supabase活用** | 認証・DB・ストレージをSupabaseに集約し、バックエンド開発コストを最小化 |
 | **PWA対応** | オフライン学習は将来対応。まずはインストール可能なPWAとして提供 |
 
@@ -51,7 +55,7 @@ flowchart TB
 
 ## 2. 技術スタック
 
-### 2.1 フロントエンド
+### 2.1 Web（Next.js）
 
 | 項目 | 選定技術 | バージョン | 選定理由 |
 |-----|---------|-----------|---------|
@@ -63,6 +67,16 @@ flowchart TB
 | アイコン | Lucide React | latest | 軽量、shadcn/uiとの親和性 |
 | アニメーション | tw-animate-css | latest | Tailwind v4対応 |
 | PWA | @serwist/next | latest | next-pwa後継、Service Worker管理 |
+
+### 2.1.1 Mobile（Expo）
+
+| 項目 | 選定技術 | バージョン | 選定理由 |
+|-----|---------|-----------|---------|
+| フレームワーク | Expo | SDK 52+ | 開発効率、OTAアップデート |
+| ナビゲーション | Expo Router | latest | Next.jsライクなファイルベースルーティング |
+| 言語 | TypeScript | 5.x | 型安全、Webとの共通化 |
+| データフェッチ | TanStack Query | latest | Web版と同じパターンで実装可能 |
+| 認証 | Supabase | latest | Web版と同じ認証基盤 |
 
 ### 2.2 状態管理・データフェッチ
 
@@ -95,7 +109,7 @@ flowchart TB
 | 項目 | 選定技術 | 選定理由 |
 |-----|---------|---------|
 | パッケージマネージャ | pnpm | 高速、ディスク効率 |
-| モノレポ | Turborepo | ビルドキャッシュ、将来のRN対応 |
+| モノレポツール | 不使用 | 個人開発では設定の複雑さがメリットを上回るため |
 | Linter | ESLint | コード品質 |
 | Formatter | Prettier | フォーマット統一 |
 | ホスティング | Vercel | Next.js最適化、自動デプロイ |
@@ -118,77 +132,160 @@ flowchart TB
 
 ```
 resave/
-├── apps/
-│   └── web/                          # Next.js (PWA対応)
-│       ├── src/
-│       │   ├── app/
-│       │   │   ├── layout.tsx
-│       │   │   ├── page.tsx          # ダッシュボード（今日の復習）
-│       │   │   ├── manifest.ts       # PWAマニフェスト
-│       │   │   ├── sw.ts             # Service Worker
-│       │   │   ├── (auth)/
-│       │   │   │   ├── login/page.tsx
-│       │   │   │   ├── signup/page.tsx
-│       │   │   │   └── reset-password/page.tsx
-│       │   │   ├── cards/
-│       │   │   │   ├── page.tsx      # カード一覧
-│       │   │   │   ├── new/page.tsx  # カード作成
-│       │   │   │   └── [id]/
-│       │   │   │       ├── page.tsx  # カード詳細
-│       │   │   │       └── edit/page.tsx
-│       │   │   ├── study/
-│       │   │   │   └── page.tsx      # 学習セッション
-│       │   │   ├── tags/
-│       │   │   │   └── page.tsx      # タグ管理
-│       │   │   ├── stats/
-│       │   │   │   └── page.tsx      # 統計
-│       │   │   └── settings/
-│       │   │       └── page.tsx      # 設定
-│       │   ├── components/
-│       │   │   ├── ui/               # shadcn/uiコンポーネント
-│       │   │   ├── cards/            # カード関連
-│       │   │   ├── study/            # 学習関連
-│       │   │   └── layout/           # レイアウト
-│       │   ├── lib/
-│       │   │   ├── supabase/
-│       │   │   │   ├── client.ts     # ブラウザ用クライアント
-│       │   │   │   ├── server.ts     # サーバー用クライアント
-│       │   │   │   └── middleware.ts # Auth middleware
-│       │   │   ├── utils.ts
-│       │   │   └── constants.ts
-│       │   ├── hooks/
-│       │   │   ├── useCards.ts
-│       │   │   ├── useTags.ts
-│       │   │   ├── useStudy.ts
-│       │   │   └── useStats.ts
-│       │   ├── actions/              # Server Actions
-│       │   │   ├── cards.ts
-│       │   │   ├── tags.ts
-│       │   │   └── study.ts
-│       │   └── types/
-│       │       └── index.ts
-│       ├── middleware.ts             # Supabase Auth middleware
-│       ├── next.config.ts
-│       ├── tailwind.config.ts        # v4ではCSS-firstだが互換用
-│       ├── components.json           # shadcn/ui設定
-│       └── package.json
-│
-├── packages/
-│   ├── types/                        # 共通型定義（将来RN対応用）
-│   │   ├── src/
+├── web/                              # Next.js (モノレポ: メイン + 管理画面 + API)
+│   ├── src/
+│   │   ├── app/
+│   │   │   ├── layout.tsx
+│   │   │   ├── page.tsx              # ダッシュボード（今日の復習）
+│   │   │   ├── manifest.ts           # PWAマニフェスト
+│   │   │   ├── sw.ts                 # Service Worker
+│   │   │   ├── globals.css
+│   │   │   │
+│   │   │   ├── (auth)/               # 認証ページ
+│   │   │   │   ├── login/page.tsx
+│   │   │   │   ├── signup/page.tsx
+│   │   │   │   └── reset-password/page.tsx
+│   │   │   │
+│   │   │   ├── cards/
+│   │   │   │   ├── page.tsx          # カード一覧
+│   │   │   │   ├── new/page.tsx      # カード作成
+│   │   │   │   └── [id]/
+│   │   │   │       ├── page.tsx      # カード詳細
+│   │   │   │       └── edit/page.tsx
+│   │   │   │
+│   │   │   ├── study/
+│   │   │   │   └── page.tsx          # 学習セッション
+│   │   │   │
+│   │   │   ├── tags/
+│   │   │   │   └── page.tsx          # タグ管理
+│   │   │   │
+│   │   │   ├── stats/
+│   │   │   │   └── page.tsx          # 統計
+│   │   │   │
+│   │   │   ├── settings/
+│   │   │   │   └── page.tsx          # 設定
+│   │   │   │
+│   │   │   ├── admin/                # 管理画面（/admin/*）
+│   │   │   │   ├── layout.tsx
+│   │   │   │   ├── page.tsx
+│   │   │   │   ├── users/
+│   │   │   │   │   └── page.tsx
+│   │   │   │   └── analytics/
+│   │   │   │       └── page.tsx
+│   │   │   │
+│   │   │   └── api/                  # REST API（Mobile用）
+│   │   │       ├── auth/
+│   │   │       │   └── route.ts
+│   │   │       ├── cards/
+│   │   │       │   ├── route.ts      # GET(一覧), POST(作成)
+│   │   │       │   ├── today/
+│   │   │       │   │   └── route.ts  # GET(今日の復習カード)
+│   │   │       │   └── [id]/
+│   │   │       │       └── route.ts  # GET, PATCH, DELETE
+│   │   │       ├── tags/
+│   │   │       │   ├── route.ts
+│   │   │       │   └── [id]/
+│   │   │       │       └── route.ts
+│   │   │       └── study/
+│   │   │           └── route.ts      # POST(学習結果送信)
+│   │   │
+│   │   ├── components/
+│   │   │   ├── ui/                   # shadcn/uiコンポーネント
+│   │   │   ├── cards/                # カード関連
+│   │   │   ├── study/                # 学習関連
+│   │   │   ├── layout/               # レイアウト
+│   │   │   └── admin/                # 管理画面用
+│   │   │
+│   │   ├── lib/
+│   │   │   ├── supabase/
+│   │   │   │   ├── client.ts         # ブラウザ用クライアント
+│   │   │   │   ├── server.ts         # サーバー用クライアント
+│   │   │   │   └── middleware.ts     # Auth middleware
+│   │   │   ├── api/                  # API関数群
+│   │   │   │   ├── cards.ts
+│   │   │   │   └── tags.ts
+│   │   │   ├── utils.ts
+│   │   │   └── constants.ts
+│   │   │
+│   │   ├── hooks/
+│   │   │   ├── useCards.ts           # TanStack Query
+│   │   │   ├── useTags.ts
+│   │   │   ├── useStudy.ts
+│   │   │   ├── useStats.ts
+│   │   │   └── useAuth.ts
+│   │   │
+│   │   ├── actions/                  # Server Actions
+│   │   │   ├── cards.ts
+│   │   │   ├── tags.ts
+│   │   │   ├── study.ts
+│   │   │   └── auth.ts
+│   │   │
+│   │   ├── types/                    # 型定義（マスター）
 │   │   │   ├── index.ts
 │   │   │   ├── card.ts
 │   │   │   ├── tag.ts
 │   │   │   ├── study.ts
 │   │   │   └── user.ts
-│   │   └── package.json
+│   │   │
+│   │   └── validations/              # Zodスキーマ（マスター）
+│   │       ├── card.ts
+│   │       ├── tag.ts
+│   │       └── user.ts
 │   │
-│   └── utils/                        # 共通ユーティリティ
-│       ├── src/
-│       │   ├── index.ts
-│       │   ├── scheduling.ts         # 間隔スケジューリング
-│       │   └── validation.ts         # Zodスキーマ
-│       └── package.json
+│   ├── middleware.ts                 # Supabase Auth middleware
+│   ├── next.config.ts
+│   ├── tailwind.config.ts
+│   ├── components.json               # shadcn/ui設定
+│   ├── tsconfig.json
+│   └── package.json
+│
+├── mobile/                           # Expo（単体で完結）
+│   ├── app/
+│   │   ├── (tabs)/                   # タブナビゲーション
+│   │   │   ├── _layout.tsx
+│   │   │   ├── index.tsx             # ダッシュボード
+│   │   │   ├── cards.tsx             # カード一覧
+│   │   │   ├── study.tsx             # 学習
+│   │   │   └── settings.tsx          # 設定
+│   │   │
+│   │   ├── (auth)/                   # 認証フロー
+│   │   │   ├── _layout.tsx
+│   │   │   ├── login.tsx
+│   │   │   └── signup.tsx
+│   │   │
+│   │   ├── cards/
+│   │   │   ├── [id].tsx              # カード詳細
+│   │   │   └── new.tsx               # カード作成
+│   │   │
+│   │   └── _layout.tsx               # ルートレイアウト
+│   │
+│   ├── components/
+│   │   ├── ui/                       # 共通UI
+│   │   ├── cards/
+│   │   └── study/
+│   │
+│   ├── lib/
+│   │   ├── api/
+│   │   │   └── client.ts             # API呼び出し関数
+│   │   └── supabase.ts               # 認証用
+│   │
+│   ├── hooks/
+│   │   ├── useCards.ts               # TanStack Query
+│   │   ├── useTags.ts
+│   │   └── useAuth.ts
+│   │
+│   ├── types/                        # web/src/types/からコピー
+│   │   └── index.ts
+│   │
+│   ├── validations/                  # web/src/validations/からコピー
+│   │   └── card.ts
+│   │
+│   ├── constants/
+│   │   └── index.ts                  # API_URL等
+│   │
+│   ├── app.json
+│   ├── tsconfig.json
+│   └── package.json
 │
 ├── supabase/
 │   ├── migrations/
@@ -201,24 +298,28 @@ resave/
 │       ├── ci.yml
 │       └── deploy.yml
 │
-├── package.json
-├── pnpm-workspace.yaml
-├── turbo.json
-└── CLAUDE.md
+├── .gitignore
+├── CLAUDE.md
+└── README.md
 ```
 
 ### 各ディレクトリの役割
 
 | ディレクトリ | 役割 |
 |------------|-----|
-| `apps/web/` | Next.js Webアプリ（PWA対応） |
-| `apps/web/src/app/` | App Router ページ |
-| `apps/web/src/components/` | Reactコンポーネント |
-| `apps/web/src/lib/` | ユーティリティ、Supabaseクライアント |
-| `apps/web/src/hooks/` | TanStack Queryカスタムフック |
-| `apps/web/src/actions/` | Server Actions |
-| `packages/types/` | 共通型定義（将来RN共有用） |
-| `packages/utils/` | 共通ユーティリティ（スケジューリング等） |
+| `web/` | Next.js Webアプリ（PWA対応、管理画面、API Routes） |
+| `web/src/app/` | App Router ページ |
+| `web/src/app/admin/` | 管理画面 |
+| `web/src/app/api/` | REST API（Mobile用エンドポイント） |
+| `web/src/components/` | Reactコンポーネント |
+| `web/src/lib/` | ユーティリティ、Supabaseクライアント |
+| `web/src/hooks/` | TanStack Queryカスタムフック |
+| `web/src/actions/` | Server Actions |
+| `web/src/types/` | 型定義（マスター、mobileにコピー） |
+| `web/src/validations/` | Zodスキーマ（マスター、mobileにコピー） |
+| `mobile/` | Expo アプリ（完全独立） |
+| `mobile/types/` | 型定義（webからコピー） |
+| `mobile/validations/` | Zodスキーマ（webからコピー） |
 | `supabase/` | マイグレーション、シード |
 
 ---
@@ -477,19 +578,41 @@ CREATE POLICY "Users can CRUD own study_logs" ON study_logs
 
 ### 6.1 概要
 
-本プロジェクトでは、**Server Actions**をメインのデータ操作手段として使用。
-TanStack Queryと組み合わせてクライアント側のキャッシュ・楽観的更新を実現。
+**Web（Next.js）** と **Mobile（Expo）** で異なるデータフローを採用。
 
-| 操作 | 方式 |
-|------|------|
-| データ取得（初期） | Server Components で直接Supabase呼び出し |
-| データ取得（リフェッチ） | TanStack Query + Supabaseクライアント |
-| データ変更 | Server Actions + TanStack Query mutation |
+| プラットフォーム | データ取得 | データ変更 |
+|----------------|----------|----------|
+| Web | Server Components + TanStack Query | Server Actions + TanStack Query mutation |
+| Mobile | TanStack Query + REST API | TanStack Query mutation + REST API |
 
-### 6.2 Server Actions
+### 6.2 データフローパターン
+
+#### Web（Server Actions経由）
+```
+画面 → hooks/useCards.ts → actions/cards.ts → Supabase
+```
+- mutationはすべてServer Actionsで実行
+- TanStack QueryのuseMutationからServer Actionsを呼び出す
+
+#### Mobile（REST API経由）
+```
+画面 → hooks/useCards.ts → lib/api/client.ts → fetch('/api/...') → Web API Routes → Supabase
+```
+- MobileはWebのAPI Routesを経由してデータアクセス
+- 認証はSupabase Authで統一（Authorizationヘッダーでトークン送信）
+
+### 6.3 認証フロー（Mobile）
+```
+1. Mobile: Supabase Authでログイン → アクセストークン取得
+2. Mobile: API呼び出し時に Authorization: Bearer {token} を付与
+3. Web API: トークンを検証してユーザー特定
+4. Web API: RLSによりユーザー自身のデータのみ返却
+```
+
+### 6.4 Server Actions（Web用）
 
 ```typescript
-// app/actions/cards.ts
+// web/src/actions/cards.ts
 'use server'
 
 import { createServerClient } from '@/lib/supabase/server'
@@ -515,7 +638,7 @@ export async function submitAssessment(cardId: string, assessment: 'ok' | 'remem
 }
 ```
 
-### 6.3 TanStack Query フック
+### 6.5 TanStack Query フック
 
 ```typescript
 // hooks/useCards.ts
@@ -545,19 +668,48 @@ export function useSubmitAssessment() {
 }
 ```
 
-### 6.4 API Routes（将来のRN対応用）
+### 6.6 API Routes（Mobile用）
 
-将来React Native対応時に必要となるREST APIは、`app/api/`に配置。
+Mobile（Expo）からのアクセス用REST APIを`web/src/app/api/`に配置。
 
 | メソッド | パス | 説明 |
 |---------|-----|-----|
 | GET | /api/cards | カード一覧 |
 | POST | /api/cards | カード作成 |
 | GET | /api/cards/:id | カード詳細 |
-| PUT | /api/cards/:id | カード更新 |
+| PATCH | /api/cards/:id | カード更新 |
 | DELETE | /api/cards/:id | カード削除 |
 | GET | /api/cards/today | 今日の復習カード |
+| GET | /api/tags | タグ一覧 |
+| POST | /api/tags | タグ作成 |
+| PATCH | /api/tags/:id | タグ更新 |
+| DELETE | /api/tags/:id | タグ削除 |
 | POST | /api/study | 学習結果送信 |
+
+#### API認証
+```typescript
+// web/src/app/api/cards/route.ts
+import { createClient } from '@supabase/supabase-js'
+import { NextRequest, NextResponse } from 'next/server'
+
+export async function GET(request: NextRequest) {
+  const authHeader = request.headers.get('Authorization')
+  if (!authHeader?.startsWith('Bearer ')) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  const token = authHeader.split(' ')[1]
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    { global: { headers: { Authorization: `Bearer ${token}` } } }
+  )
+
+  // RLSによりユーザー自身のデータのみ取得
+  const { data, error } = await supabase.from('cards').select('*')
+  // ...
+}
+```
 
 ---
 
@@ -731,6 +883,7 @@ flowchart LR
 
 ### 9.3 環境変数
 
+#### web/.env.local
 ```env
 # 公開可能（クライアントで使用）
 NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
@@ -738,6 +891,13 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
 
 # サーバーのみ
 SUPABASE_SERVICE_ROLE_KEY=eyJ...  # 管理用（通常は不使用）
+```
+
+#### mobile/.env
+```env
+EXPO_PUBLIC_API_URL=http://localhost:3000
+EXPO_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
+EXPO_PUBLIC_SUPABASE_ANON_KEY=eyJ...
 ```
 
 ---
@@ -755,7 +915,7 @@ SUPABASE_SERVICE_ROLE_KEY=eyJ...  # 管理用（通常は不使用）
 ### 10.2 カバレッジ目標
 
 - 全体: 80%以上
-- `packages/utils/scheduling.ts`: 100%（コアロジック）
+- `web/src/lib/scheduling.ts`: 100%（コアロジック）
 - 認証・学習フロー: E2Eで担保
 
 ### 10.3 E2Eシナリオ
@@ -803,9 +963,50 @@ SUPABASE_SERVICE_ROLE_KEY=eyJ...  # 管理用（通常は不使用）
 
 ---
 
-## 13. 今後の検討事項
+## 13. 開発コマンド
 
-- [ ] React Native (Expo) 対応
+### Web開発
+```bash
+cd web && pnpm install && pnpm dev
+```
+
+### Mobile開発
+```bash
+cd mobile && pnpm install && npx expo start
+```
+
+### 共有コードのコピー（型定義・Zodスキーマ）
+```bash
+# web/src/types/ → mobile/types/
+cp -r web/src/types/* mobile/types/
+
+# web/src/validations/ → mobile/validations/
+cp -r web/src/validations/* mobile/validations/
+```
+
+---
+
+## 14. 共有コード管理
+
+### 方針
+- `web/src/types/` と `web/src/validations/` がマスター
+- 変更時は `mobile/` に手動コピー（またはAIにコピー依頼）
+- npmパッケージ化はしない（個人開発では過剰）
+
+### 共有対象
+| 対象 | マスター | コピー先 |
+|------|---------|---------|
+| 型定義 | `web/src/types/` | `mobile/types/` |
+| Zodスキーマ | `web/src/validations/` | `mobile/validations/` |
+
+### 注意点
+- Mobile側の型・スキーマを直接編集しない（常にwebから上書きされる前提）
+- web側で変更したら必ずmobileにコピーすること
+
+---
+
+## 15. 今後の検討事項
+
 - [ ] プッシュ通知（Firebase Cloud Messaging / Expo Push）
 - [ ] オフライン対応（Service Workerでキャッシュ）
 - [ ] 画像添付機能
@@ -814,9 +1015,11 @@ SUPABASE_SERVICE_ROLE_KEY=eyJ...  # 管理用（通常は不使用）
 
 ---
 
-## 14. 参考情報
+## 16. 参考情報
 
 - [Next.js Documentation](https://nextjs.org/docs)
+- [Expo Documentation](https://docs.expo.dev)
+- [Expo Router](https://docs.expo.dev/router/introduction)
 - [Supabase Documentation](https://supabase.com/docs)
 - [Supabase SSR Guide](https://supabase.com/docs/guides/auth/server-side/nextjs)
 - [shadcn/ui](https://ui.shadcn.com)
