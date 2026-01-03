@@ -10,8 +10,7 @@ type RouteParams = {
 };
 
 /**
- * タグ詳細取得エンドポイント (Mobile用)
- * GET /api/tags/:id
+ * タグ詳細取得 (Mobile用)
  */
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
@@ -76,8 +75,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 }
 
 /**
- * タグ更新エンドポイント (Mobile用)
- * PATCH /api/tags/:id
+ * タグ更新 (Mobile用)
  */
 export async function PATCH(request: NextRequest, { params }: RouteParams) {
   try {
@@ -178,8 +176,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 }
 
 /**
- * タグ削除エンドポイント (Mobile用)
- * DELETE /api/tags/:id
+ * タグ削除 (Mobile用)
  */
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {

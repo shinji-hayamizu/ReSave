@@ -3,7 +3,7 @@
 import { createClient } from '@/lib/supabase/server';
 
 /**
- * Today's learning statistics
+ * 今日の学習統計
  */
 export type TodayStats = {
   reviewedCount: number;
@@ -12,7 +12,7 @@ export type TodayStats = {
 };
 
 /**
- * Daily statistics for a specific date
+ * 日別学習統計
  */
 export type DailyStats = {
   date: string;
@@ -21,7 +21,7 @@ export type DailyStats = {
 };
 
 /**
- * Summary statistics across all time
+ * 累計統計サマリー
  */
 export type SummaryStats = {
   totalCards: number;
@@ -31,8 +31,7 @@ export type SummaryStats = {
 };
 
 /**
- * Get today's learning statistics
- * @returns Today's reviewed count, correct count, and time spent
+ * 今日の学習統計を取得
  */
 export async function getTodayStats(): Promise<TodayStats> {
   const supabase = await createClient();
@@ -70,9 +69,7 @@ export async function getTodayStats(): Promise<TodayStats> {
 }
 
 /**
- * Get daily statistics for the past N days
- * @param days Number of days to retrieve
- * @returns Array of daily statistics
+ * 過去N日間の日別統計を取得
  */
 export async function getDailyStats(days: number): Promise<DailyStats[]> {
   const supabase = await createClient();
@@ -134,12 +131,8 @@ export async function getDailyStats(days: number): Promise<DailyStats[]> {
 }
 
 /**
- * Calculate current learning streak
- * Counts consecutive days with at least one study log
- * Today doesn't need to have activity, but yesterday and before must be consecutive
- * @param userId User ID
- * @param supabase Supabase client
- * @returns Current streak count
+ * 現在の学習ストリークを計算
+ * 連続して学習した日数をカウント（今日は活動がなくてもOK）
  */
 async function calculateStreak(
   userId: string,
@@ -184,8 +177,7 @@ async function calculateStreak(
 }
 
 /**
- * Get summary statistics across all time
- * @returns Total cards, total reviews, current streak, and average accuracy
+ * 累計統計サマリーを取得
  */
 export async function getSummaryStats(): Promise<SummaryStats> {
   const supabase = await createClient();

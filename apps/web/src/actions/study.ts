@@ -14,7 +14,7 @@ type ActionResult<T> =
   | { ok: false; error: string };
 
 /**
- * Submit assessment for a card and update review schedule
+ * カード評価を送信し、復習スケジュールを更新
  */
 export async function submitAssessment(
   input: SubmitAssessmentInput
@@ -120,7 +120,7 @@ export async function submitAssessment(
 }
 
 /**
- * Get today's study session information including cards and statistics
+ * 今日の学習セッション情報（カードと統計）を取得
  */
 export async function getStudySession(): Promise<
   ActionResult<{
@@ -203,7 +203,7 @@ export async function getStudySession(): Promise<
 }
 
 /**
- * Calculate user's current study streak
+ * ユーザーの現在の学習ストリークを計算
  */
 async function calculateStreak(
   supabase: Awaited<ReturnType<typeof createClient>>,

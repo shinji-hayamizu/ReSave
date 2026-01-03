@@ -11,7 +11,7 @@ type TagWithCardCount = Tag & {
 };
 
 /**
- * Create a new tag
+ * タグを新規作成
  */
 export async function createTag(input: CreateTagInput): Promise<Tag> {
   const supabase = await createClient();
@@ -53,7 +53,7 @@ export async function createTag(input: CreateTagInput): Promise<Tag> {
 }
 
 /**
- * Update an existing tag
+ * 既存タグを更新
  */
 export async function updateTag(id: string, input: UpdateTagInput): Promise<Tag> {
   const supabase = await createClient();
@@ -100,8 +100,8 @@ export async function updateTag(id: string, input: UpdateTagInput): Promise<Tag>
 }
 
 /**
- * Delete a tag
- * Related card_tags records will be automatically deleted due to CASCADE constraint
+ * タグを削除
+ * 関連するcard_tagsレコードはCASCADE制約により自動削除される
  */
 export async function deleteTag(id: string): Promise<void> {
   const supabase = await createClient();
@@ -125,7 +125,7 @@ export async function deleteTag(id: string): Promise<void> {
 }
 
 /**
- * Get a single tag by ID
+ * IDでタグを1件取得
  */
 export async function getTag(id: string): Promise<Tag> {
   const supabase = await createClient();
@@ -163,7 +163,7 @@ export async function getTag(id: string): Promise<Tag> {
 }
 
 /**
- * Get all tags with card count for the current user
+ * 現在ユーザーのタグ一覧をカード数付きで取得
  */
 export async function getTags(): Promise<TagWithCardCount[]> {
   const supabase = await createClient();

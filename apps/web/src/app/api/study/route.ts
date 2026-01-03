@@ -9,8 +9,7 @@ export const dynamic = 'force-dynamic';
 const REVIEW_INTERVALS = [1, 3, 7, 14, 30, 180];
 
 /**
- * 学習結果送信エンドポイント（Mobile用）
- * POST /api/study
+ * 学習結果送信 (Mobile用)
  */
 export async function POST(request: NextRequest) {
   const authHeader = request.headers.get('Authorization');

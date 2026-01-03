@@ -6,8 +6,7 @@ import { createTagSchema, tagQuerySchema } from '@/validations/tag';
 export const dynamic = 'force-dynamic';
 
 /**
- * タグ一覧取得エンドポイント (Mobile用)
- * GET /api/tags?limit=20&offset=0
+ * タグ一覧取得 (Mobile用)
  */
 export async function GET(request: NextRequest) {
   try {
@@ -101,8 +100,7 @@ export async function GET(request: NextRequest) {
 }
 
 /**
- * タグ作成エンドポイント (Mobile用)
- * POST /api/tags
+ * タグ作成 (Mobile用)
  */
 export async function POST(request: NextRequest) {
   try {
