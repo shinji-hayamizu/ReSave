@@ -41,7 +41,7 @@
 | ID | ルール | 条件 | 結果 |
 |----|-------|-----|-----|
 | BR-F030-01 | 日付境界 | 統計集計時 | ユーザーのタイムゾーンで日付を判定 |
-| BR-F030-02 | 正答率計算 | 評価結果から | (Good + Easy) / 全評価 × 100 |
+| BR-F030-02 | 正答率計算 | 評価結果から | (OK + 覚えた) / 全評価 × 100 |
 | BR-F030-03 | 学習時間 | review_logsから | time_spent_msの合計を分単位で表示 |
 | BR-F030-04 | ストリーク | 連続学習日数 | 1日でも学習すればカウント継続 |
 | BR-F030-05 | ストリーク途切れ | 前日未学習 | ストリークを0にリセット |
@@ -98,25 +98,92 @@ type Summary = {
 
 ## 画面要件
 
-### ホーム画面サマリー
+### 統計画面（stats.html - StatsPage）
+
+#### コンポーネント構成
+
+| コンポーネント | 役割 | 親 |
+|--------------|------|---|
+| StatsPage | ページルート | - |
+| TodaySummary | 今日の学習サマリー | StatsPage |
+| PeriodTabs | 期間切替タブ | StatsPage |
+| StatsChart | 日別学習カード数グラフ | StatsPage |
+| CumulativeStats | 累計統計 | StatsPage |
+
+#### 今日の学習サマリー（TodaySummary）
+
 ```
-┌─────────────────────────────┐
-│  今日の学習                  │
-│                             │
-│  📚 15枚  ✅ 87%  ⏱️ 12分   │
-│  🔥 連続 7日               │
-└─────────────────────────────┘
+┌─────────────────────────────────────────────────┐
+│ 今日の学習                                       │
+├──────────┬──────────┬──────────┬──────────┤
+│  15枚    │   87%    │   12分   │   7日    │
+│ 学習カード │  正答率   │  学習時間  │ 連続学習  │
+└──────────┴──────────┴──────────┴──────────┘
 ```
 
-### 統計詳細画面
-- 期間切替タブ（今日 / 週間 / 月間）
-- 日別学習カード数の棒グラフ
-- 正答率の推移グラフ
-- 累計統計
-  - 総カード数
-  - 総復習回数
-  - 最長ストリーク
-  - 平均正答率
+| 項目 | data-prop | class修飾子 | 説明 |
+|-----|-----------|------------|------|
+| 学習カード数 | reviewedCount | stats-grid__value--primary | 青系 |
+| 正答率 | accuracyRate | stats-grid__value--success | 緑系 |
+| 学習時間 | timeSpentMinutes | (default) | 通常色 |
+| 連続学習日数 | currentStreak | stats-grid__value--warning | 黄系 |
+
+レスポンシブ: モバイル 2x2グリッド → デスクトップ 4x1グリッド
+
+#### 期間切替タブ（PeriodTabs）
+
+| タブ | data-tab | data-action |
+|-----|----------|-------------|
+| 今日 | period-today | onClick:setActivePeriod('today') |
+| 週間 | period-week | onClick:setActivePeriod('week') |
+| 月間 | period-month | onClick:setActivePeriod('month') |
+
+#### 統計グラフ（StatsChart）
+
+```
+┌─────────────────────────────────────────────────┐
+│ 日別学習カード数（過去7日）                        │
+├─────────────────────────────────────────────────┤
+│   10   15    8   20   12    5   15  <- 値      │
+│   ▓    ▓    ▓    ▓    ▓    ▓    ▓   <- バー    │
+│   月   火   水   木   金   土   日   <- ラベル  │
+└─────────────────────────────────────────────────┘
+```
+
+| 要素 | class | 説明 |
+|-----|-------|------|
+| カード | chart-card | グラフ全体のコンテナ |
+| タイトル | chart-card__title | 「日別学習カード数（過去7日）」 |
+| バーコンテナ | chart-placeholder | バー群の親 |
+| バー | chart-bar | 個別バー（リストアイテム） |
+| バー値 | chart-bar__value | 上部の数値 |
+| バー本体 | chart-bar__fill | 高さ可変の塗り部分 |
+| バーラベル | chart-bar__label | 曜日ラベル |
+
+#### 累計統計（CumulativeStats）
+
+| 項目 | data-prop | アイコン | 説明 |
+|-----|-----------|---------|------|
+| 総カード数 | totalCards | lucide:Layers | 登録カード総数 |
+| 総復習回数 | totalReviews | lucide:RotateCcw | 累計復習回数 |
+| 最長ストリーク | longestStreak | lucide:Flame | 過去最長の連続学習日数 |
+| 平均正答率 | averageAccuracy | lucide:Target | 全期間の平均正答率 |
+
+```
+┌─────────┬─────────┬─────────┬─────────┐
+│ [Layers]│[Rotate] │ [Flame] │[Target] │
+│  156枚  │ 1,234回 │  14日   │  82%   │
+│総カード数│総復習回数│最長連続  │平均正答率│
+└─────────┴─────────┴─────────┴─────────┘
+```
+
+レスポンシブ: モバイル 2x2グリッド → デスクトップ 4x1グリッド
+
+#### ユーザーアクション
+
+| 要素 | data-action | 説明 |
+|-----|------------|------|
+| 期間タブ | onClick:setActivePeriod | 表示期間の切り替え |
 
 ### ヒートマップ（将来対応）
 - GitHubのContribution graphのような表示
@@ -138,7 +205,7 @@ const { data: todayLogs } = await supabase
 
 const todayStats = {
   reviewedCount: todayLogs.length,
-  correctCount: todayLogs.filter(l => l.rating === 'good' || l.rating === 'easy').length,
+  correctCount: todayLogs.filter(l => l.rating === 'ok' || l.rating === 'learned').length,
   timeSpentMinutes: Math.round(
     todayLogs.reduce((sum, l) => sum + l.time_spent_ms, 0) / 60000
   )
@@ -166,7 +233,7 @@ BEGIN
   SELECT
     DATE(reviewed_at) as date,
     COUNT(*) as reviewed_count,
-    COUNT(*) FILTER (WHERE rating IN ('good', 'easy')) as correct_count,
+    COUNT(*) FILTER (WHERE rating IN ('ok', 'learned')) as correct_count,
     ROUND(SUM(time_spent_ms) / 60000) as time_spent_minutes
   FROM review_logs
   WHERE user_id = p_user_id
@@ -207,3 +274,11 @@ function calculateStreak(dailyStats: DailyStats[]): number {
 - 【要確認】ストリークの開始時間（深夜0時固定 or ユーザー設定）
 - 【要確認】統計のエクスポート機能が必要か
 - 【仮定】タイムゾーンはデバイスの設定に従うと仮定
+
+---
+
+## 変更履歴
+
+| 日付 | バージョン | 変更内容 | 作成者 |
+|------|-----------|----------|--------|
+| 2026-01-03 | 1.1 | HTMLモック(stats.html)に基づき画面要件を詳細化。評価値をF-022に合わせてok/learnedに修正 | Claude Code |

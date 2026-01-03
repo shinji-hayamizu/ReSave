@@ -131,45 +131,96 @@ type CardTag = {
 
 ## 画面要件
 
-### クイック入力（ホーム画面内）
+### クイック入力（main.html - QuickInputForm）
+
+ホーム画面上部にインライン配置。
 
 ```
-┌─────────────────────────────────┐
-│ [クイック入力]                   │
-│ テキスト: ___________________   │
-│ 隠し:    ___________________   │
-│                       [保存]   │
-└─────────────────────────────────┘
+┌─────────────────────────────────────────────┐
+│ [覚えたいこと____] [答え（任意）___] [+][編集] │
+└─────────────────────────────────────────────┘
 ```
 
-- 展開式またはインライン表示
-- 最小限の入力項目のみ
-- 即座に保存
+#### コンポーネント構成
 
-### 詳細入力画面
+| コンポーネント | 役割 | 親 |
+|--------------|------|---|
+| QuickInputForm | クイック入力エリア | HomePage |
+| TextInput (question) | テキスト入力 | QuickInputForm |
+| TextInput (answer) | 隠しテキスト入力 | QuickInputForm |
+| SaveButton | 保存ボタン（+アイコン） | QuickInputForm |
+| DetailButton | 詳細入力へ（編集アイコン） | QuickInputForm |
 
-```
-┌─────────────────────────────────┐
-│ « 戻る                          │
-├─────────────────────────────────┤
-│ ●テキスト            0 / 500    │
-│ [________________________]     │
-│                                │
-│ 隠しテキスト                     │
-│ [________________________]     │
-│                                │
-│          [保存] ● 必須項目       │
-│ ────────────────────────────── │
-│ タグ      [タグを選択]          │
-│ ソース    [http://          ]  │
-│ リピート  [間隔反復          ]  │
-│           ⓘ 間隔反復について    │
-│          [保存]                 │
-└─────────────────────────────────┘
-```
+#### 入力フィールド
 
-- 「戻る」リンクでホーム画面に戻る
-- 必須項目入力後、いつでも保存可能
+| フィールド | id | placeholder | maxlength | required |
+|-----------|-----|------------|-----------|----------|
+| テキスト | quick-text | 覚えたいこと | 500 | Yes |
+| 隠しテキスト | quick-hidden | 答え（任意） | 2000 | No |
+
+#### ボタン/アクション
+
+| 要素 | class | data-action | 説明 |
+|-----|-------|------------|------|
+| 保存 | btn-icon--primary | onClick:handleSave | カード保存（テキスト未入力時disabled） |
+| 詳細入力 | btn-icon--secondary | onClick:openDetailModal | 詳細入力画面へ遷移 |
+
+### 詳細入力画面（card-input.html - CardInputPage）
+
+独立した入力画面。必須項目（テキスト）のみで保存可能。
+
+#### コンポーネント構成
+
+| コンポーネント | 役割 | 親 |
+|--------------|------|---|
+| CardInputPage | ページルート | - |
+| BackLink | 戻るリンク | CardInputPage |
+| CardInputForm | 入力フォーム | CardInputPage |
+| RequiredSection | 必須項目セクション | CardInputForm |
+| OptionalSection | オプション項目セクション | CardInputForm |
+| DangerSection | 削除セクション（編集時のみ） | CardInputForm |
+| TextInput | テキストエリア | RequiredSection |
+| TagSelector | タグ選択 | OptionalSection |
+| SourceUrlInput | ソースURL入力 | OptionalSection |
+| RepeatSelector | リピート設定 | OptionalSection |
+
+#### 入力フィールド
+
+| フィールド | id | type | maxlength | required | 説明 |
+|-----------|-----|------|-----------|----------|------|
+| テキスト | card-text | textarea | 500 | Yes | カード表面 |
+| 隠しテキスト | card-hidden | textarea | 2000 | No | カード裏面 |
+| タグ | - | TagSelector | - | No | 最大10個 |
+| ソース | card-source | url | - | No | https://... |
+| リピート | card-repeat | select | - | No | 間隔反復/毎日/毎週/なし |
+
+#### リピート設定オプション
+
+| value | label | 説明 |
+|-------|-------|------|
+| spaced | 間隔反復 | デフォルト（1,3,7,14,30,180日） |
+| daily | 毎日 | 毎日復習 |
+| weekly | 毎週 | 週1回復習 |
+| none | なし | 復習スケジュールなし |
+
+#### 状態バリエーション
+
+| 状態 | data-show-if | 表示 |
+|-----|-------------|------|
+| 作成モード | mode === 'create' | DangerSection非表示 |
+| 編集モード | mode === 'edit' | DangerSection表示（削除ボタン） |
+| 文字数警告 | length >= 90% | カウンター黄色 |
+| 文字数上限 | length >= 100% | カウンター赤色 |
+
+#### ユーザーアクション
+
+| 要素 | data-action | 説明 |
+|-----|------------|------|
+| 戻るリンク | onClick:navigateBack | main.htmlへ戻る |
+| 保存ボタン（必須） | onClick:handleSaveRequired | テキストのみで保存 |
+| 保存ボタン（全体） | onClick:handleSaveAll | 全項目で保存 |
+| 削除ボタン | onClick:handleDelete | カード削除（確認付き） |
+| 間隔反復について | onClick:showRepeatInfo | 説明モーダル表示 |
 
 ## 技術仕様
 
