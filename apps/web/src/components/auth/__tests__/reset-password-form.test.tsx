@@ -48,27 +48,21 @@ describe('ResetPasswordForm', () => {
       });
     });
 
-    it(
-      '不正な形式のメールアドレスでエラーが表示される',
-      async () => {
-        const user = userEvent.setup();
-        render(<ResetPasswordForm />);
+    it('不正な形式のメールアドレスでエラーが表示される', async () => {
+      const user = userEvent.setup();
+      render(<ResetPasswordForm />);
 
-        const emailInput = screen.getByLabelText('メールアドレス');
-        await user.type(emailInput, 'invalid-email');
-        await user.click(screen.getByRole('button', { name: 'リセットリンクを送信' }));
+      const emailInput = screen.getByLabelText('メールアドレス');
+      // test@test はHTML5のemail validationは通るがZodのemail()は通らない（TLD必須）
+      await user.type(emailInput, 'test@test');
+      await user.click(screen.getByRole('button', { name: 'リセットリンクを送信' }));
 
-        await waitFor(
-          () => {
-            expect(
-              screen.getByText('有効なメールアドレスを入力してください')
-            ).toBeInTheDocument();
-          },
-          { timeout: 10000 }
-        );
-      },
-      15000
-    );
+      await waitFor(() => {
+        expect(
+          screen.getByText('有効なメールアドレスを入力してください')
+        ).toBeInTheDocument();
+      });
+    });
   });
 
   describe('リセット処理', () => {

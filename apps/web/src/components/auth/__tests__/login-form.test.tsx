@@ -57,28 +57,22 @@ describe('LoginForm', () => {
       });
     });
 
-    it(
-      '不正なメールアドレス形式でエラーが表示される',
-      async () => {
-        const user = userEvent.setup();
-        render(<LoginForm />);
+    it('不正なメールアドレス形式でエラーが表示される', async () => {
+      const user = userEvent.setup();
+      render(<LoginForm />);
 
-        const emailInput = screen.getByLabelText('メールアドレス');
-        await user.type(emailInput, 'invalid-email');
-        await user.type(screen.getByLabelText('パスワード'), 'password123');
-        await user.click(screen.getByRole('button', { name: 'ログイン' }));
+      const emailInput = screen.getByLabelText('メールアドレス');
+      // test@test はHTML5のemail validationは通るがZodのemail()は通らない（TLD必須）
+      await user.type(emailInput, 'test@test');
+      await user.type(screen.getByLabelText('パスワード'), 'password123');
+      await user.click(screen.getByRole('button', { name: 'ログイン' }));
 
-        await waitFor(
-          () => {
-            expect(
-              screen.getByText('有効なメールアドレスを入力してください')
-            ).toBeInTheDocument();
-          },
-          { timeout: 10000 }
-        );
-      },
-      15000
-    );
+      await waitFor(() => {
+        expect(
+          screen.getByText('有効なメールアドレスを入力してください')
+        ).toBeInTheDocument();
+      });
+    });
   });
 
   describe('ログイン処理', () => {
