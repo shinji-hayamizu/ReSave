@@ -6,24 +6,23 @@ export function AppInfo() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>App Information</CardTitle>
-        <CardDescription>About ReSave</CardDescription>
+        <CardTitle>アプリ情報</CardTitle>
+        <CardDescription>ReSaveについて</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid gap-2">
           <div className="flex justify-between">
-            <span className="text-sm font-medium">Version</span>
+            <span className="text-sm font-medium">バージョン</span>
             <span className="text-sm text-muted-foreground">{APP_VERSION}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-sm font-medium">App Name</span>
+            <span className="text-sm font-medium">アプリ名</span>
             <span className="text-sm text-muted-foreground">ReSave</span>
           </div>
         </div>
         <div className="pt-2 text-sm text-muted-foreground">
           <p>
-            ReSave is a spaced repetition flashcard app based on the forgetting curve. Learn
-            efficiently by reviewing cards at optimal intervals.
+            ReSaveは忘却曲線に基づいた間隔反復学習アプリです。最適なタイミングでカードを復習することで、効率的に学習できます。
           </p>
         </div>
       </CardContent>

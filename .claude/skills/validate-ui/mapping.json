@@ -1,0 +1,177 @@
+{
+  "$schema": "mapping-schema.json",
+  "description": "ファイルパス → 関連機能仕様のマッピング",
+  "version": "1.0.0",
+
+  "mappings": {
+    "auth": {
+      "patterns": [
+        "apps/web/src/app/(auth)/**",
+        "apps/web/src/components/auth/**"
+      ],
+      "specs": {
+        "login": ["F-002-user-login"],
+        "signup": ["F-001-user-registration"],
+        "reset-password": ["F-003-password-reset"],
+        "update-password": ["F-003-password-reset"],
+        "splash": []
+      },
+      "defaultSpecs": ["F-001-user-registration", "F-002-user-login", "F-003-password-reset"]
+    },
+
+    "card": {
+      "patterns": [
+        "apps/web/src/app/(main)/cards/**",
+        "apps/web/src/components/cards/**"
+      ],
+      "specs": {
+        "new": ["F-013-card-create"],
+        "edit": ["F-014-card-edit"],
+        "card-input-form": ["F-013-card-create", "F-014-card-edit"],
+        "tag-selector": ["F-016-card-tagging"],
+        "repeat-selector": ["F-013-card-create", "F-014-card-edit"],
+        "delete-card-dialog": ["F-015-card-delete"]
+      },
+      "defaultSpecs": ["F-013-card-create", "F-014-card-edit", "F-015-card-delete", "F-016-card-tagging"]
+    },
+
+    "home": {
+      "patterns": [
+        "apps/web/src/app/(main)/page.tsx",
+        "apps/web/src/components/home/**"
+      ],
+      "specs": {
+        "page": ["F-013-card-create", "F-020-review-today"],
+        "quick-input-form": ["F-013-card-create"],
+        "card-tabs": ["F-020-review-today"],
+        "card-list": ["F-020-review-today"],
+        "home-study-card": ["F-021-card-study"],
+        "today-summary": ["F-030-daily-stats"]
+      },
+      "defaultSpecs": ["F-013-card-create", "F-020-review-today"]
+    },
+
+    "review": {
+      "patterns": [
+        "apps/web/src/app/(main)/review/**",
+        "apps/web/src/components/review/**"
+      ],
+      "specs": {
+        "page": ["F-020-review-today", "F-021-card-study"],
+        "study-card": ["F-021-card-study"],
+        "rating-buttons": ["F-022-self-assessment"]
+      },
+      "defaultSpecs": ["F-020-review-today", "F-021-card-study", "F-022-self-assessment"]
+    },
+
+    "tags": {
+      "patterns": [
+        "apps/web/src/app/(main)/tags/**",
+        "apps/web/src/components/tags/**"
+      ],
+      "specs": {
+        "page": ["F-017-tag-management"],
+        "tag-item": ["F-017-tag-management"],
+        "tag-form-modal": ["F-017-tag-management"],
+        "delete-confirm-modal": ["F-017-tag-management"],
+        "color-palette": ["F-017-tag-management"]
+      },
+      "defaultSpecs": ["F-017-tag-management", "F-018-tag-filter"]
+    },
+
+    "stats": {
+      "patterns": [
+        "apps/web/src/app/(main)/stats/**",
+        "apps/web/src/components/stats/**"
+      ],
+      "specs": {
+        "page": ["F-030-daily-stats"],
+        "daily-stats-chart": ["F-030-daily-stats"],
+        "cumulative-stats": ["F-030-daily-stats"],
+        "period-tabs": ["F-030-daily-stats"],
+        "today-summary": ["F-030-daily-stats"]
+      },
+      "defaultSpecs": ["F-030-daily-stats"]
+    },
+
+    "settings": {
+      "patterns": [
+        "apps/web/src/app/(main)/settings/**",
+        "apps/web/src/components/settings/**"
+      ],
+      "specs": {
+        "learning-settings": ["F-023-interval-scheduling"],
+        "notification-settings": [],
+        "account-settings": [],
+        "data-management": ["F-050-data-sync"]
+      },
+      "defaultSpecs": []
+    },
+
+    "layout": {
+      "patterns": [
+        "apps/web/src/components/layout/**",
+        "apps/web/src/app/(main)/layout.tsx"
+      ],
+      "specs": {},
+      "defaultSpecs": []
+    },
+
+    "ui": {
+      "patterns": [
+        "apps/web/src/components/ui/**"
+      ],
+      "specs": {
+        "study-card": ["F-021-card-study"],
+        "rating-buttons": ["F-022-self-assessment"],
+        "tag-badge": ["F-016-card-tagging", "F-018-tag-filter"]
+      },
+      "defaultSpecs": []
+    }
+  },
+
+  "specCategories": {
+    "auth": ["F-001-user-registration", "F-002-user-login", "F-003-password-reset"],
+    "card": ["F-013-card-create", "F-014-card-edit", "F-015-card-delete", "F-016-card-tagging"],
+    "tag": ["F-017-tag-management", "F-018-tag-filter"],
+    "review": ["F-020-review-today", "F-021-card-study", "F-022-self-assessment", "F-023-interval-scheduling"],
+    "stats": ["F-030-daily-stats"],
+    "sync": ["F-050-data-sync"]
+  },
+
+  "specPaths": {
+    "F-001-user-registration": "docs/requirements/functions/auth/F-001-user-registration.md",
+    "F-002-user-login": "docs/requirements/functions/auth/F-002-user-login.md",
+    "F-003-password-reset": "docs/requirements/functions/auth/F-003-password-reset.md",
+    "F-013-card-create": "docs/requirements/functions/card/F-013-card-create.md",
+    "F-014-card-edit": "docs/requirements/functions/card/F-014-card-edit.md",
+    "F-015-card-delete": "docs/requirements/functions/card/F-015-card-delete.md",
+    "F-016-card-tagging": "docs/requirements/functions/card/F-016-card-tagging.md",
+    "F-017-tag-management": "docs/requirements/functions/tag/F-017-tag-management.md",
+    "F-018-tag-filter": "docs/requirements/functions/tag/F-018-tag-filter.md",
+    "F-020-review-today": "docs/requirements/functions/review/F-020-review-today.md",
+    "F-021-card-study": "docs/requirements/functions/review/F-021-card-study.md",
+    "F-022-self-assessment": "docs/requirements/functions/review/F-022-self-assessment.md",
+    "F-023-interval-scheduling": "docs/requirements/functions/review/F-023-interval-scheduling.md",
+    "F-030-daily-stats": "docs/requirements/functions/stats/F-030-daily-stats.md",
+    "F-050-data-sync": "docs/requirements/functions/sync/F-050-data-sync.md"
+  },
+
+  "screenUrls": {
+    "F-001-user-registration": "/signup",
+    "F-002-user-login": "/login",
+    "F-003-password-reset": "/reset-password",
+    "F-013-card-create": ["/", "/cards/new"],
+    "F-014-card-edit": "/cards/{id}/edit",
+    "F-015-card-delete": "/cards/{id}/edit",
+    "F-016-card-tagging": ["/cards/new", "/cards/{id}/edit"],
+    "F-017-tag-management": "/tags",
+    "F-018-tag-filter": "/",
+    "F-020-review-today": "/",
+    "F-021-card-study": "/",
+    "F-022-self-assessment": "/",
+    "F-023-interval-scheduling": "/settings",
+    "F-030-daily-stats": ["/", "/stats"],
+    "F-050-data-sync": "/settings"
+  }
+}

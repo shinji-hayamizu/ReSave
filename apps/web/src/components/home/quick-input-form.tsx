@@ -2,17 +2,21 @@
 
 import { useState } from 'react';
 
-import { Plus } from 'lucide-react';
+import { Edit, Plus } from 'lucide-react';
+import Link from 'next/link';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { useCreateCard } from '@/hooks/useCards';
+import { cn } from '@/lib/utils';
 
 interface QuickInputFormProps {
   className?: string;
 }
+
+const MAX_FRONT_LENGTH = 500;
+const MAX_BACK_LENGTH = 2000;
 
 export function QuickInputForm({ className }: QuickInputFormProps) {
   const [front, setFront] = useState('');
@@ -22,7 +26,7 @@ export function QuickInputForm({ className }: QuickInputFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!front.trim() || !back.trim()) {
+    if (!front.trim()) {
       return;
     }
 
@@ -39,31 +43,54 @@ export function QuickInputForm({ className }: QuickInputFormProps) {
     }
   };
 
+  const isSubmitDisabled = createCard.isPending || !front.trim();
+
   return (
     <form className={className} onSubmit={handleSubmit}>
-      <div className="bg-card rounded-xl shadow-sm p-4 space-y-3">
-        <Input
-          placeholder="問題を入力..."
-          value={front}
-          onChange={(e) => setFront(e.target.value)}
-          disabled={createCard.isPending}
-        />
-        <Textarea
-          placeholder="答えを入力..."
-          value={back}
-          onChange={(e) => setBack(e.target.value)}
-          disabled={createCard.isPending}
-          rows={2}
-        />
-        <div className="flex justify-end">
-          <Button
-            type="submit"
-            size="sm"
-            disabled={createCard.isPending || !front.trim() || !back.trim()}
-          >
-            <Plus className="h-4 w-4" />
-            カードを追加
-          </Button>
+      <div className="bg-card rounded-xl shadow-sm px-4 pt-2 pb-4">
+        <div className="grid grid-cols-[1fr_auto] gap-0">
+          <Input
+            className="rounded-r-none border-r-0 mb-1"
+            placeholder="覚えたいこと"
+            maxLength={MAX_FRONT_LENGTH}
+            value={front}
+            onChange={(e) => setFront(e.target.value)}
+            disabled={createCard.isPending}
+          />
+          <div className="row-span-2 flex flex-col gap-1">
+            <Button
+              type="submit"
+              size="icon"
+              className={cn(
+                'flex-1 rounded-l-none rounded-br-none h-auto',
+                isSubmitDisabled && 'opacity-50'
+              )}
+              disabled={isSubmitDisabled}
+              title="保存"
+            >
+              <Plus className="h-5 w-5" />
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              size="icon"
+              className="flex-1 rounded-l-none rounded-tr-none border-t-0 h-auto"
+              title="詳細入力"
+              asChild
+            >
+              <Link href="/cards/new">
+                <Edit className="h-5 w-5" />
+              </Link>
+            </Button>
+          </div>
+          <Input
+            className="rounded-r-none border-r-0"
+            placeholder="答え（任意）"
+            maxLength={MAX_BACK_LENGTH}
+            value={back}
+            onChange={(e) => setBack(e.target.value)}
+            disabled={createCard.isPending}
+          />
         </div>
       </div>
     </form>

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { memo, useState } from 'react'
 import { Eye, EyeOff, Pencil } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -15,7 +15,7 @@ interface StudyCardProps {
   className?: string
 }
 
-export function StudyCard({
+export const StudyCard = memo(function StudyCard({
   question,
   answer,
   tags,
@@ -95,6 +95,6 @@ export function StudyCard({
       )}
     </div>
   )
-}
+})
 
 export type { StudyCardProps }

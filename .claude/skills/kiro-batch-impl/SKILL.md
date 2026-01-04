@@ -191,5 +191,5 @@ Phase 6 - Testing:
 
 ### 特定タスクで失敗が続く場
 
-1. `--from={task-id}` オプションで該当タスクから再開
+1. `--from={task-id}` オプションで該当タスクから再開えｂで
 2. または手動で `/kiro:spec-impl {feature} {task-id}` を実行

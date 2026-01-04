@@ -315,8 +315,8 @@ export async function getTodayCards(): Promise<CardWithTags[]> {
       )
     `)
     .eq('user_id', user.id)
-    .lte('next_review_at', today)
-    .order('next_review_at', { ascending: true });
+    .or(`next_review_at.lte.${today},and(next_review_at.is.null,review_level.eq.0)`)
+    .order('next_review_at', { ascending: true, nullsFirst: true });
 
   if (error) {
     throw new Error(`Failed to fetch today's cards: ${error.message}`);

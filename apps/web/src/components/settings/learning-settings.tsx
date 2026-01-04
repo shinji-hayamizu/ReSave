@@ -21,12 +21,12 @@ export function LearningSettings() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Learning Settings</CardTitle>
-        <CardDescription>Configure your daily learning preferences</CardDescription>
+        <CardTitle>学習設定</CardTitle>
+        <CardDescription>毎日の学習に関する設定</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="daily-new-cards">Daily New Cards Limit</Label>
+          <Label htmlFor="daily-new-cards">1日の新規カード上限</Label>
           <Input
             id="daily-new-cards"
             type="number"
@@ -37,7 +37,7 @@ export function LearningSettings() {
             className="w-32"
           />
           <p className="text-sm text-muted-foreground">
-            Maximum number of new cards to learn per day (1-100)
+            1日に学習する新規カードの最大枚数（1〜100枚）
           </p>
         </div>
       </CardContent>

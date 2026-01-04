@@ -75,6 +75,10 @@ export async function POST(request: NextRequest) {
       nextReviewAt = nextDate.toISOString();
     } else if (assessment === 'remembered') {
       nextReviewAt = null;
+      // reviewLevel=0のままだとdueに分類されるため、完了として認識させる
+      if (newReviewLevel === 0) {
+        newReviewLevel = 1;
+      }
     }
 
     const { data: updatedCard, error: updateError } = await supabase

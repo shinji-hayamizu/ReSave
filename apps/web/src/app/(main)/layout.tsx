@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 
+import { AppHeader } from '@/components/layout/app-header';
 import { AppSidebar } from '@/components/layout/app-sidebar';
-import { MobileNav } from '@/components/layout/mobile-nav';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import { createClient } from '@/lib/supabase/server';
 
@@ -23,9 +23,9 @@ export default async function MainLayout({
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
-        <main className="flex-1 pb-16 md:pb-0">{children}</main>
+        <AppHeader />
+        <main className="flex-1">{children}</main>
       </SidebarInset>
-      <MobileNav />
     </SidebarProvider>
   );
 }

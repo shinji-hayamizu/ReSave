@@ -55,7 +55,9 @@ export default function DashboardPage() {
     const completed: typeof todayCards = [];
 
     for (const card of todayCards) {
-      if (card.nextReviewAt === null) {
+      if (card.nextReviewAt === null && card.reviewLevel === 0) {
+        due.push(card);
+      } else if (card.nextReviewAt === null) {
         completed.push(card);
       } else if (card.reviewLevel === 0) {
         due.push(card);

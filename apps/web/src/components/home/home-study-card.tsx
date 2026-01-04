@@ -1,5 +1,6 @@
 'use client';
 
+import { memo, useCallback } from 'react';
 import { toast } from 'sonner';
 
 import type { Rating } from '@/components/ui/rating-buttons';
@@ -26,7 +27,7 @@ const ratingToAssessment: Record<Rating, Assessment> = {
   again: 'again',
 };
 
-export function HomeStudyCard({
+export const HomeStudyCard = memo(function HomeStudyCard({
   id,
   front,
   back,
@@ -37,17 +38,20 @@ export function HomeStudyCard({
 }: HomeStudyCardProps) {
   const submitAssessment = useSubmitAssessment();
 
-  const handleRate = async (rating: Rating) => {
-    try {
-      await submitAssessment.mutateAsync({
-        cardId: id,
-        assessment: ratingToAssessment[rating],
-      });
-      onAssessmentComplete?.();
-    } catch {
-      toast.error('評価の記録に失敗しました');
-    }
-  };
+  const handleRate = useCallback(
+    async (rating: Rating) => {
+      try {
+        await submitAssessment.mutateAsync({
+          cardId: id,
+          assessment: ratingToAssessment[rating],
+        });
+        onAssessmentComplete?.();
+      } catch {
+        toast.error('評価の記録に失敗しました');
+      }
+    },
+    [id, submitAssessment, onAssessmentComplete]
+  );
 
   return (
     <StudyCard
@@ -72,4 +76,4 @@ export function HomeStudyCard({
       }
     />
   );
-}
+});

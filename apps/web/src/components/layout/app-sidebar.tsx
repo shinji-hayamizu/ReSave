@@ -26,7 +26,7 @@ import {
 } from '@/components/ui/sidebar';
 
 const navItems = [
-  { title: 'ダッシュボード', href: '/', icon: Home },
+  { title: 'ホーム', href: '/', icon: Home },
   { title: 'カード', href: '/cards', icon: Library },
   { title: '学習', href: '/study', icon: GraduationCap },
   { title: 'タグ', href: '/tags', icon: Tag },
@@ -38,7 +38,7 @@ export function AppSidebar() {
   const pathname = usePathname();
 
   return (
-    <Sidebar className="hidden md:flex">
+    <Sidebar>
       <SidebarHeader className="border-b p-4">
         <Link className="flex items-center gap-2 font-bold" href="/">
           <span className="text-xl">ReSave</span>

@@ -1,3 +1,5 @@
+import { memo } from 'react'
+
 import { cn } from '@/lib/utils'
 
 interface TagBadgeProps {
@@ -5,7 +7,7 @@ interface TagBadgeProps {
   className?: string
 }
 
-export function TagBadge({ children, className }: TagBadgeProps) {
+export const TagBadge = memo(function TagBadge({ children, className }: TagBadgeProps) {
   return (
     <span
       className={cn(
@@ -18,6 +20,6 @@ export function TagBadge({ children, className }: TagBadgeProps) {
       {children}
     </span>
   )
-}
+})
 
 export type { TagBadgeProps }

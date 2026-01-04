@@ -5,18 +5,16 @@ export function DataManagement() {
     <Card className="opacity-60">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          Data Management
+          データ管理
           <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-normal text-muted-foreground">
-            Coming in v1.3
+            v1.3で追加予定
           </span>
         </CardTitle>
-        <CardDescription>Export, import, and manage your data</CardDescription>
+        <CardDescription>データのエクスポート、インポート、管理</CardDescription>
       </CardHeader>
       <CardContent>
         <p className="text-sm text-muted-foreground">
-          Data management features will be available in a future update. You will be able to export
-          your cards and learning progress, import data from other apps, and manage your account
-          data.
+          データ管理機能は今後のアップデートで追加予定です。カードや学習進捗のエクスポート、他のアプリからのデータインポート、アカウントデータの管理ができるようになります。
         </p>
       </CardContent>
     </Card>

@@ -5,17 +5,16 @@ export function NotificationSettings() {
     <Card className="opacity-60">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          Notification Settings
+          通知設定
           <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-normal text-muted-foreground">
-            Coming in v1.2
+            v1.2で追加予定
           </span>
         </CardTitle>
-        <CardDescription>Configure push notifications and reminders</CardDescription>
+        <CardDescription>プッシュ通知とリマインダーの設定</CardDescription>
       </CardHeader>
       <CardContent>
         <p className="text-sm text-muted-foreground">
-          Notification settings will be available in a future update. You will be able to set daily
-          reminders and study notifications.
+          通知設定は今後のアップデートで追加予定です。毎日のリマインダーや学習通知を設定できるようになります。
         </p>
       </CardContent>
     </Card>
