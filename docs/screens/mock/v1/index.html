@@ -8,16 +8,31 @@
 </head>
 <body>
   <!--
-    ReSave - 基盤シェル (index.html)
-    パターン: Professional Blue
-    アーキテクチャ: iframe でコンテンツ読み込み
-    レスポンシブ: 3段階 (モバイル/タブレット/デスクトップ)
+    @screen: AppShell (index.html)
+    @description: ReSaveアプリの基盤シェル。サイドバー、ヘッダー、コンテンツエリアを含むメインレイアウト
+    @pattern: Professional Blue
+    @architecture: Next.js App Router - layout.tsx として実装
+    @responsive: 3段階 (モバイル < 768px / タブレット 768-1024px / デスクトップ > 1024px)
+    @auth: 認証必須 - 未認証時は /login にリダイレクト
   -->
 
-  <!-- [Component: AppLayout] -->
+  <!--
+    @api: GET /api/auth/session - ユーザーセッション取得
+    @api: POST /api/auth/logout - ログアウト処理
+  -->
+
+  <!-- @section: AppLayout - メインレイアウトコンテナ -->
+  <!-- @component: AppLayout -->
+  <!-- @file: app/(authenticated)/layout.tsx -->
   <div class="layout" data-component="AppLayout">
 
-    <!-- [Component: SidebarOverlay] -->
+    <!--
+      @section: SidebarOverlay - モバイル時のサイドバー背景オーバーレイ
+      @component: SidebarOverlay
+      @conditional: isSidebarOpen && isMobile ? visible : hidden
+      @state: isSidebarOpen: boolean - サイドバーの開閉状態
+      @event: onClick - closeSidebar - サイドバーを閉じる
+    -->
     <div
       class="sidebar-overlay"
       id="sidebar-overlay"
@@ -25,18 +40,41 @@
       data-action="onClick:closeSidebar"
       data-show-if="isSidebarOpen"
     ></div>
-    <!-- [/Component: SidebarOverlay] -->
+    <!-- @end-component: SidebarOverlay -->
 
-    <!-- [Component: Sidebar] -->
+    <!--
+      @section: Sidebar - サイドナビゲーション
+      @component: Sidebar
+      @file: components/layout/Sidebar.tsx
+      @state: isCollapsed: boolean - サイドバーの折りたたみ状態 (デスクトップ)
+      @state: isSidebarOpen: boolean - サイドバーの開閉状態 (モバイル)
+      @props: currentPath: string - 現在のパス (アクティブ判定用)
+    -->
     <aside class="sidebar" id="sidebar" data-component="Sidebar" data-state="collapsed">
+      <!-- @section: SidebarLogo - ロゴエリア -->
       <div class="sidebar__logo">
-        <svg data-icon="lucide:Layers" class="sidebar__logo-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></svg>
+        <!-- @icon: lucide-react Menu (hamburger) -->
+        <svg data-icon="lucide:Menu" class="sidebar__logo-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+        <!-- @conditional: isCollapsed ? hidden : visible -->
         <span class="sidebar__logo-text">ReSave</span>
       </div>
 
-      <!-- [Component: SidebarNav] -->
+      <!--
+        @section: SidebarNav - ナビゲーションリンク
+        @component: SidebarNav
+        @file: components/layout/SidebarNav.tsx
+      -->
       <nav class="sidebar__nav" data-component="SidebarNav">
-        <!-- [ListItem: NavItem] - この要素が .map() される -->
+        <!--
+          @loop: navItems.map((item) => <NavItem key={item.id} {...item} />)
+          @data: navItems: Array<{ id: string, to: string, icon: LucideIcon, label: string }>
+          @component: NavItem
+          @props: to: string - リンク先パス
+          @props: icon: LucideIcon - アイコンコンポーネント
+          @props: label: string - ラベルテキスト
+          @props: isActive: boolean - アクティブ状態 (pathname === to で判定)
+          @event: onClick - handleNavClick - ナビゲーション処理 (モバイル時はサイドバーも閉じる)
+        -->
         <a
           href="#"
           class="sidebar__link active"
@@ -46,84 +84,142 @@
           data-action="onClick:handleNavClick"
           data-props="to,icon,label,isActive"
         >
+          <!-- @icon: lucide-react Home -->
           <svg data-icon="lucide:Home" data-prop="icon" class="sidebar__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          <!-- @conditional: isCollapsed ? hidden : visible -->
           <span class="sidebar__label" data-prop="label">ホーム</span>
         </a>
 
         <a href="#" class="sidebar__link" data-page="tags" data-list-item data-key="navId">
+          <!-- @icon: lucide-react Tag -->
           <svg data-icon="lucide:Tag" class="sidebar__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r=".5" fill="currentColor"/></svg>
           <span class="sidebar__label">タグ</span>
         </a>
 
         <a href="#" class="sidebar__link" data-page="stats" data-list-item data-key="navId">
+          <!-- @icon: lucide-react BarChart3 -->
           <svg data-icon="lucide:BarChart3" class="sidebar__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>
           <span class="sidebar__label">統計</span>
         </a>
 
         <a href="#" class="sidebar__link" data-page="settings" data-list-item data-key="navId">
+          <!-- @icon: lucide-react Settings -->
           <svg data-icon="lucide:Settings" class="sidebar__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
           <span class="sidebar__label">設定</span>
         </a>
-        <!-- [/ListItem: NavItem] -->
+        <!-- @end-loop: navItems -->
 
         <div class="sidebar__divider"></div>
 
+        <!--
+          @section: LogoutButton - ログアウトボタン
+          @event: onClick - handleLogout - ログアウト処理
+          @api: POST /api/auth/logout - ログアウトAPI呼び出し
+          @redirect: /login - ログアウト後のリダイレクト先
+        -->
         <a
           href="#"
           class="sidebar__link"
           data-action="onClick:handleLogout"
         >
+          <!-- @icon: lucide-react LogOut -->
           <svg data-icon="lucide:LogOut" class="sidebar__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
           <span class="sidebar__label">ログアウト</span>
         </a>
       </nav>
-      <!-- [/Component: SidebarNav] -->
+      <!-- @end-component: SidebarNav -->
     </aside>
-    <!-- [/Component: Sidebar] -->
+    <!-- @end-component: Sidebar -->
 
-    <!-- [Component: MainContent] -->
+    <!--
+      @section: MainContent - メインコンテンツエリア
+      @component: MainContent
+      @file: components/layout/MainContent.tsx
+      @children: Router outlet または children props
+    -->
     <main class="main" data-component="MainContent">
 
-      <!-- [Component: Header] -->
+      <!--
+        @section: Header - ヘッダー
+        @component: Header
+        @file: components/layout/Header.tsx
+        @props: title: string - ページタイトル (オプション)
+        @props: user: User - ユーザー情報
+      -->
       <header class="header" data-component="Header">
         <div class="header__left">
+          <!--
+            @section: MobileMenuButton - モバイルメニューボタン
+            @conditional: isMobile ? visible : hidden
+            @event: onClick - toggleSidebar - サイドバーの開閉切替
+            @state: isSidebarOpen: boolean - サイドバーの開閉状態
+          -->
           <button
             class="header__menu-btn mobile-only"
             data-action="onClick:toggleSidebar"
           >
+            <!-- @icon: lucide-react Menu -->
             <svg data-icon="lucide:Menu" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
           </button>
           <h1 class="header__title">ReSave</h1><span class="header__subtitle">- 記憶を科学する -</span>
         </div>
         <div class="header__right">
+          <!--
+            @section: NewCardButton - 新規カード作成ボタン
+            @component: Button (shadcn/ui)
+            @event: onClick - openNewCardModal または router.push('/cards/new')
+            @variant: primary
+          -->
           <button
             class="btn btn--primary"
             data-action="onClick:openNewCardModal"
           >
+            <!-- @icon: lucide-react Plus -->
             <svg data-icon="lucide:Plus" class="btn__icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+            <!-- @conditional: isDesktop ? visible : hidden -->
             <span class="desktop-only">新規カード</span>
           </button>
 
-          <!-- [Component: UserAvatar] -->
+          <!--
+            @section: UserAvatar - ユーザーアバター
+            @component: UserAvatar
+            @file: components/layout/UserAvatar.tsx
+            @props: userInitial: string - ユーザー名の頭文字 (user.name?.charAt(0) || 'U')
+            @props: avatarUrl: string | null - アバター画像URL (オプション)
+            @event: onClick - openUserMenu - ユーザーメニューを開く
+            @state: isUserMenuOpen: boolean - ユーザーメニューの開閉状態
+          -->
           <div
             class="header__avatar"
             data-component="UserAvatar"
             data-prop="userInitial"
             data-action="onClick:openUserMenu"
           >U</div>
-          <!-- [/Component: UserAvatar] -->
+          <!-- @end-component: UserAvatar -->
         </div>
       </header>
-      <!-- [/Component: Header] -->
+      <!-- @end-component: Header -->
 
-      <!-- Content Frame (iframe) - Reactでは children または Router で置換 -->
+      <!--
+        @section: ContentArea - コンテンツ表示エリア
+        @implementation: Next.js App Router では {children} として実装
+        @note: モックではiframe使用、実装時はRouter outletまたはchildren
+        @routes:
+          - /main (main.html) - ホーム画面
+          - /tags (tags.html) - タグ管理画面
+          - /stats (stats.html) - 統計画面
+          - /settings (settings.html) - 設定画面
+          - /cards/new (card-new.html) - カード新規作成
+          - /cards/:id (card-detail.html) - カード詳細
+          - /review (review.html) - 復習画面
+      -->
       <iframe id="content-frame" class="content-frame" src="main.html" title="Content"></iframe>
 
     </main>
-    <!-- [/Component: MainContent] -->
+    <!-- @end-component: MainContent -->
 
   </div>
-  <!-- [/Component: AppLayout] -->
+  <!-- @end-component: AppLayout -->
 
   <script src="js/main.js"></script>
 </body>

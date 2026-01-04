@@ -1,5 +1,19 @@
 <!DOCTYPE html>
 <html lang="ja">
+<!--
+  @screen: プロフィール画面
+  @path: /profile
+  @feature: F-005（予定）
+  @description: ユーザープロフィール表示・学習サマリー確認画面
+
+  @api: GET /api/user/profile - ユーザー情報取得
+  @api: GET /api/stats/summary - 学習サマリー取得
+  @api: PATCH /api/user/profile - ユーザー情報更新（v1.1予定）
+
+  @navigation:
+    - from: index.html (サイドバーのプロフィールリンク)
+    - to: index.html (戻る)
+-->
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -144,34 +158,83 @@
   </style>
 </head>
 <body class="content-body">
-  <!--
-    画面: ユーザー詳細
-    機能: F-005（予定）
-    参照仕様: -
-    前の画面: index.html (サイドバーから)
-    次の画面: index.html (戻る)
-  -->
 
-  <!-- [Component: ProfilePage] -->
+  <!--
+    ================================================================================
+    ProfilePage コンポーネント
+    ================================================================================
+    @component: ProfilePage
+    @type: Server Component（データ取得後にClient Componentへ渡す）
+
+    @api-fetch:
+      - GET /api/user/profile -> UserProfile型
+      - GET /api/stats/summary -> LearningSummary型
+
+    @loading: Suspense境界でSkeleton表示
+    @error: error.tsxでエラーハンドリング
+  -->
   <div class="content-wrapper" data-component="ProfilePage">
 
-    <!-- ========================================
-         [Component: ProfileHeader]
-         ======================================== -->
+    <!--
+      ================================================================================
+      ProfileHeader コンポーネント
+      ================================================================================
+      @component: ProfileHeader
+      @type: Server Component
+
+      @props:
+        - user: UserProfile
+          - displayName: string - ユーザー表示名
+          - email: string - メールアドレス
+          - avatarUrl: string | null - アバター画像URL
+          - createdAt: string - 登録日時（ISO8601）
+
+      @computed:
+        - avatarInitial: displayName.charAt(0).toUpperCase()
+        - formattedRegisteredAt: createdAtをローカライズ表示（例: "2024年1月1日 登録"）
+
+      @conditional:
+        - avatarUrl存在時: img要素でアバター表示
+        - avatarUrl未設定時: イニシャルアバター表示（現在の実装）
+    -->
     <div class="profile-header" data-component="ProfileHeader">
+      <!-- @conditional: avatarUrl ? <img> : イニシャル表示 -->
       <div class="profile-header__avatar" data-prop="avatarInitial">U</div>
       <h1 class="profile-header__name" data-prop="displayName">User</h1>
       <p class="profile-header__email" data-prop="email">user@example.com</p>
+      <!-- @computed: formatDate(user.createdAt) + " 登録" -->
       <p class="profile-header__registered" data-prop="registeredAt">2024年1月1日 登録</p>
     </div>
-    <!-- [/Component: ProfileHeader] -->
+    <!-- [/ProfileHeader] -->
 
-    <!-- ========================================
-         [Component: LearningSummary]
-         ======================================== -->
+    <!--
+      ================================================================================
+      LearningSummary コンポーネント
+      ================================================================================
+      @component: LearningSummary
+      @type: Server Component
+
+      @props:
+        - stats: LearningSummary
+          - totalCards: number - 総カード数
+          - totalReviews: number - 総復習回数
+          - currentStreak: number - 現在の連続学習日数
+          - longestStreak: number - 最長連続学習日数
+
+      @computed:
+        - formattedTotalReviews: totalReviews.toLocaleString()（カンマ区切り）
+
+      @conditional:
+        - stats未取得時: Skeleton表示
+        - stats.totalCards === 0時: 「まだカードがありません」メッセージ表示も検討
+    -->
     <div class="profile-section" data-component="LearningSummary">
       <h2 class="profile-section__title">学習サマリー</h2>
       <div class="profile-section__content">
+        <!--
+          @layout: 2列グリッド（モバイル）、4列グリッド（480px以上）
+          @responsive: CSSで対応済み
+        -->
         <div class="stats-grid">
           <div class="stat-item">
             <span class="stat-item__label">総カード数</span>
@@ -179,6 +242,7 @@
           </div>
           <div class="stat-item">
             <span class="stat-item__label">総復習回数</span>
+            <!-- @computed: stats.totalReviews.toLocaleString() -->
             <span class="stat-item__value" data-prop="totalReviews">1,234<span class="stat-item__unit">回</span></span>
           </div>
           <div class="stat-item">
@@ -192,21 +256,59 @@
         </div>
       </div>
     </div>
-    <!-- [/Component: LearningSummary] -->
+    <!-- [/LearningSummary] -->
 
-    <!-- ========================================
-         [Component: ProfileEdit]
-         v1.1で対応予定（グレーアウト）
-         ======================================== -->
+    <!--
+      ================================================================================
+      ProfileEdit コンポーネント
+      ================================================================================
+      @component: ProfileEdit
+      @type: Client Component（'use client'）
+      @status: v1.1で対応予定（現在はdisabled状態で表示のみ）
+
+      @props:
+        - user: UserProfile（初期値用）
+        - isEnabled: boolean - 機能有効フラグ（v1.1でtrue）
+
+      @state:
+        - displayName: string - 編集中の表示名
+        - avatarFile: File | null - 選択されたアバター画像
+        - isSubmitting: boolean - 送信中フラグ
+
+      @event-handlers:
+        - handleDisplayNameChange: (e: ChangeEvent<HTMLInputElement>) => void
+        - handleAvatarChange: () => void - ファイル選択ダイアログを開く
+        - handleSave: () => void - プロフィール更新を実行
+
+      @api-mutation:
+        - PATCH /api/user/profile
+          - body: { displayName?: string, avatar?: File }
+          - onSuccess: プロフィール情報を再取得、成功トースト表示
+          - onError: エラートースト表示
+
+      @validation:
+        - displayName: 必須、1-50文字
+        - avatar: 画像ファイルのみ、最大5MB
+
+      @conditional:
+        - isEnabled === false時: 全入力disabled、"近日公開"バッジ表示（現在の状態）
+        - isSubmitting時: ボタンにローディングスピナー表示
+    -->
     <div class="profile-section" data-component="ProfileEdit">
       <h2 class="profile-section__title">
         プロフィール編集
+        <!-- @conditional: !isEnabled時のみ表示 -->
         <span class="coming-soon-badge">近日公開</span>
       </h2>
       <div class="profile-section__content">
         <div class="edit-form">
           <div class="form-group">
             <label class="form-label" for="display-name">表示名</label>
+            <!--
+              @state: displayName
+              @event: onChange={handleDisplayNameChange}
+              @disabled: !isEnabled
+            -->
             <input
               type="text"
               id="display-name"
@@ -217,6 +319,11 @@
             >
           </div>
           <div class="form-group">
+            <!--
+              @event: onClick={handleAvatarChange}
+              @disabled: !isEnabled
+              @note: input[type="file"]を隠しておき、このボタンクリックでトリガー
+            -->
             <button
               type="button"
               class="btn btn--secondary"
@@ -227,6 +334,11 @@
             </button>
           </div>
           <div class="form-actions">
+            <!--
+              @event: onClick={handleSave}
+              @disabled: !isEnabled || isSubmitting
+              @conditional: isSubmitting時 -> "保存中..." + スピナー表示
+            -->
             <button
               type="button"
               class="btn btn--primary"
@@ -239,10 +351,10 @@
         </div>
       </div>
     </div>
-    <!-- [/Component: ProfileEdit] -->
+    <!-- [/ProfileEdit] -->
 
   </div>
-  <!-- [/Component: ProfilePage] -->
+  <!-- [/ProfilePage] -->
 
   <script src="js/main.js"></script>
 </body>

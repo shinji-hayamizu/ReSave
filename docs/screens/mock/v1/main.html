@@ -7,19 +7,55 @@
 </head>
 <body class="content-body">
   <!--
-    画面: ホーム (main.html)
-    機能: F-013 (カード作成), F-021 (カード学習), F-022 (自己評価)
+    @screen: ホーム画面（メインダッシュボード）
+    @path: /
+    @description: カードの作成・学習・復習を行うメイン画面
+    @features: F-013 (カード作成), F-021 (カード学習), F-022 (自己評価)
+
+    @state-management:
+      - activeTab: 'new' | 'review' | 'completed' - 現在選択中のタブ
+      - question: string - クイック入力の問題テキスト
+      - answer: string - クイック入力の答えテキスト
+      - cards: Card[] - 各タブのカードリスト
+      - openCardIds: Set<string> - 開いているカードのID一覧
+
+    @api-dependencies:
+      - GET /api/cards?status=new - 未学習カード取得
+      - GET /api/cards?status=review - 復習中カード取得
+      - GET /api/cards?status=completed - 完了カード取得
+      - POST /api/cards - カード作成
+      - POST /api/cards/:id/rate - カード評価
   -->
 
-  <!-- [Component: HomePage] -->
+  <!-- ================================================================
+       @component: HomePage
+       @description: ホーム画面のルートコンポーネント
+       @file: app/(main)/page.tsx
+       ================================================================ -->
   <div class="content-wrapper" data-component="HomePage">
 
-    <!-- ========================================
-         [Component: QuickInputForm]
-         機能: F-013 (カード作成)
-         ======================================== -->
+    <!-- ================================================================
+         @component: QuickInputForm
+         @description: カードを素早く作成するためのインライン入力フォーム
+         @file: components/cards/QuickInputForm.tsx
+         @feature: F-013 (カード作成)
+
+         @props: なし（内部状態で管理）
+
+         @state:
+           - question: string - 問題テキスト (useState)
+           - answer: string - 答えテキスト (useState)
+           - isSubmitting: boolean - 送信中フラグ (useMutation)
+
+         @api:
+           - POST /api/cards - Server Action: createCard
+           - mutation成功時: カードリストを再取得 (invalidateQueries)
+         ================================================================ -->
     <div class="input-area" data-component="QuickInputForm">
+      <!-- @event: onSubmit - フォーム送信時にカード作成API呼び出し -->
       <form class="input-row" data-action="onSubmit:handleQuickSubmit">
+        <!-- @state: question - 入力値をuseStateで管理 -->
+        <!-- @validation: maxLength=500, required -->
         <input
           type="text"
           id="quick-text"
@@ -29,6 +65,8 @@
           data-prop="question"
           data-action="onChange:setQuestion"
         >
+        <!-- @state: answer - 入力値をuseStateで管理 -->
+        <!-- @validation: maxLength=2000, optional -->
         <input
           type="text"
           id="quick-hidden"
@@ -39,6 +77,8 @@
           data-action="onChange:setAnswer"
         >
         <div class="input-actions">
+          <!-- @condition: disabled={!question || isSubmitting} -->
+          <!-- @event: onClick - カード作成API呼び出し -->
           <button
             type="submit"
             class="btn-icon btn-icon--primary"
@@ -49,6 +89,8 @@
           >
             <svg data-icon="lucide:Plus" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
           </button>
+          <!-- @event: onClick - 詳細入力モーダルを開く -->
+          <!-- @navigation: /cards/new へ遷移、またはモーダル表示 -->
           <button
             type="button"
             class="btn-icon btn-icon--secondary"
@@ -62,10 +104,25 @@
     </div>
     <!-- [/Component: QuickInputForm] -->
 
-    <!-- ========================================
-         [Component: CardTabs]
-         ======================================== -->
+    <!-- ================================================================
+         @component: CardTabs
+         @description: カードの状態別タブ切り替え
+         @file: components/cards/CardTabs.tsx
+
+         @props:
+           - activeTab: 'new' | 'review' | 'completed'
+           - counts: { new: number, review: number, completed: number }
+           - onTabChange: (tab: string) => void
+
+         @state:
+           - activeTab: 親コンポーネントから受け取る or useSearchParams
+
+         @api:
+           - GET /api/cards/counts - 各タブのカード数を取得
+         ================================================================ -->
     <div class="tabs" data-component="CardTabs" data-props="activeTab,counts">
+      <!-- @condition: className={activeTab === 'new' ? 'tab active' : 'tab'} -->
+      <!-- @event: onClick={() => onTabChange('new')} -->
       <button
         class="tab active"
         data-tab="tab-new"
@@ -73,6 +130,8 @@
       >
         未学習<span class="tab__count" data-prop="newCount">5</span>
       </button>
+      <!-- @condition: className={activeTab === 'review' ? 'tab active' : 'tab'} -->
+      <!-- @event: onClick={() => onTabChange('review')} -->
       <button
         class="tab"
         data-tab="tab-review"
@@ -80,6 +139,8 @@
       >
         復習中<span class="tab__count" data-prop="reviewCount">15</span>
       </button>
+      <!-- @condition: className={activeTab === 'completed' ? 'tab active' : 'tab'} -->
+      <!-- @event: onClick={() => onTabChange('completed')} -->
       <button
         class="tab"
         data-tab="tab-completed"
@@ -90,19 +151,54 @@
     </div>
     <!-- [/Component: CardTabs] -->
 
-    <!-- ========================================
-         [Component: CardList]
-         カードリスト - 未学習タブ (F-021)
-         ======================================== -->
+    <!-- ================================================================
+         @section: 未学習タブコンテンツ
+         @condition: {activeTab === 'new' && <CardList ... />}
+         ================================================================ -->
     <div
       class="tab-content"
       id="tab-new"
       style="display: block;"
       data-show-if="activeTab === 'new'"
     >
+      <!-- ================================================================
+           @component: CardList
+           @description: カードの一覧表示コンポーネント
+           @file: components/cards/CardList.tsx
+           @feature: F-021 (カード学習)
+
+           @props:
+             - cards: Card[] - 表示するカードの配列
+             - onRate: (cardId: string, rating: Rating) => void
+             - onEdit: (cardId: string) => void
+             - showRatingButtons?: boolean - 評価ボタン表示フラグ
+
+           @api:
+             - GET /api/cards?status=new - useQuery で取得
+           ================================================================ -->
       <div class="card-list" data-component="CardList" data-list="cards" data-props="cards,onRate,onEdit">
 
-        <!-- [ListItem: StudyCard] - この要素が cards.map() される -->
+        <!-- ================================================================
+             @component: StudyCard
+             @description: 個別の学習カードコンポーネント
+             @file: components/cards/StudyCard.tsx
+             @feature: F-021 (カード学習), F-022 (自己評価)
+
+             @props:
+               - card: Card - カードデータ
+               - nextIntervals: { ok: string, again: string } - 次回復習間隔
+               - onRate: (rating: Rating) => void
+               - onEdit: () => void
+               - isCompleted?: boolean - 完了状態フラグ
+
+             @state:
+               - isOpen: boolean - 答え表示状態 (useState)
+
+             @api:
+               - POST /api/cards/:id/rate - Server Action: rateCard
+
+             @list-rendering: cards.map(card => <StudyCard key={card.id} ... />)
+             ================================================================ -->
         <div
           class="study-card"
           data-component="StudyCard"
@@ -110,18 +206,44 @@
           data-key="cardId"
           data-props="card,nextIntervals,onRate,onEdit,onToggle"
         >
-          <!-- [Component: CardTopBar] -->
+          <!-- @component: CardTopBar - カード上部（評価ボタン + タグ） -->
           <div class="study-card__topbar" data-component="CardTopBar">
-            <!-- [Component: RatingButtons] -->
+            <!-- ================================================================
+                 @component: RatingButtons
+                 @description: 自己評価ボタングループ
+                 @file: components/cards/RatingButtons.tsx
+                 @feature: F-022 (自己評価)
+
+                 @props:
+                   - nextIntervals: { ok: string, again: string }
+                   - onRate: (rating: Rating) => void
+                   - disabled?: boolean
+
+                 @condition: {!isCompleted && <RatingButtons ... />}
+
+                 @api:
+                   - POST /api/cards/:id/rate - 評価送信
+                   - mutation成功時: カードリスト再取得
+
+                 @business-logic:
+                   - ok: review_level +1、次の間隔へ進む
+                   - learned: 完了状態に移行 (next_review_at = NULL)
+                   - again: review_level = 0 にリセット
+                 ================================================================ -->
             <div class="rating-buttons" data-component="RatingButtons" data-show-if="!isCompleted">
+              <!-- @event: onClick={() => onRate('ok')} -->
+              <!-- @api: POST /api/cards/:id/rate { rating: 'ok' } -->
               <button
                 class="rating-btn rating-btn--ok"
                 data-rating="ok"
                 data-action="onClick:onRate('ok')"
               >
                 <span class="rating-btn__label">OK</span>
+                <!-- @prop: nextIntervals.ok から動的に表示 -->
                 <span class="rating-btn__preview" data-prop="nextInterval.ok">3日後</span>
               </button>
+              <!-- @event: onClick={() => onRate('learned')} -->
+              <!-- @api: POST /api/cards/:id/rate { rating: 'learned' } -->
               <button
                 class="rating-btn rating-btn--learned"
                 data-rating="learned"
@@ -130,19 +252,32 @@
                 <span class="rating-btn__label">覚えた</span>
                 <span class="rating-btn__preview">完了</span>
               </button>
+              <!-- @event: onClick={() => onRate('again')} -->
+              <!-- @api: POST /api/cards/:id/rate { rating: 'again' } -->
               <button
                 class="rating-btn rating-btn--again"
                 data-rating="again"
                 data-action="onClick:onRate('again')"
               >
                 <span class="rating-btn__label">もう一度</span>
+                <!-- @prop: nextIntervals.again から動的に表示 -->
                 <span class="rating-btn__preview" data-prop="nextInterval.again">1日後</span>
               </button>
             </div>
             <!-- [/Component: RatingButtons] -->
 
-            <!-- [Component: TagList] -->
+            <!-- ================================================================
+                 @component: TagList
+                 @description: カードに紐づくタグ一覧
+                 @file: components/cards/TagList.tsx
+
+                 @props:
+                   - tags: Tag[] - タグの配列
+
+                 @list-rendering: tags.map(tag => <span key={tag.id} ... />)
+                 ================================================================ -->
             <div class="study-card__tags" data-component="TagList" data-list="tags">
+              <!-- @list-item: tags.map(tag => ...) -->
               <span class="study-card__tag" data-list-item data-key="tagId" data-prop="tagName">地理</span>
               <span class="study-card__tag" data-list-item data-key="tagId" data-prop="tagName">日本</span>
             </div>
@@ -150,9 +285,13 @@
           </div>
           <!-- [/Component: CardTopBar] -->
 
+          <!-- @section: カード表面（問題） -->
           <div class="study-card__front">
             <div class="study-card__header">
+              <!-- @prop: card.question -->
               <p class="study-card__text" data-prop="question">日本の首都は？</p>
+              <!-- @event: onClick={() => onEdit(card.id)} -->
+              <!-- @navigation: /cards/:id/edit へ遷移 -->
               <button
                 class="study-card__edit"
                 title="編集"
@@ -163,22 +302,30 @@
             </div>
           </div>
 
+          <!-- @event: onClick={() => setIsOpen(!isOpen)} -->
+          <!-- @state: isOpen を toggle -->
           <button
             class="study-card__toggle"
             data-action="onClick:onToggle"
           >
+            <!-- @condition: {!isOpen && <EyeIcon />} -->
             <svg data-icon="lucide:Eye" data-show-if="!isOpen" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
+            <!-- @condition: {isOpen && <EyeOffIcon />} -->
             <svg data-icon="lucide:EyeOff" data-show-if="isOpen" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"/><path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"/><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"/><path d="m2 2 20 20"/></svg>
+            <!-- @condition: {isOpen ? '答えを隠す' : '答えを見る'} -->
             <span data-prop="toggleLabel">答えを見る</span>
           </button>
 
+          <!-- @section: カード裏面（答え） -->
+          <!-- @condition: {isOpen && <div className="study-card__back">...} -->
           <div class="study-card__back" data-show-if="isOpen">
+            <!-- @prop: card.answer -->
             <p class="study-card__answer" data-prop="answer">東京</p>
           </div>
         </div>
-        <!-- [/ListItem: StudyCard] -->
+        <!-- [/Component: StudyCard] -->
 
-        <!-- サンプルカード 2 -->
+        <!-- @sample-data: サンプルカード 2（実装時は削除） -->
         <div class="study-card" data-list-item data-key="cardId">
           <div class="study-card__topbar">
             <div class="rating-buttons">
@@ -217,7 +364,8 @@
           </div>
         </div>
 
-        <!-- サンプルカード 3 (開いた状態) -->
+        <!-- @sample-data: サンプルカード 3（開いた状態 - 実装時は削除） -->
+        <!-- @note: className="study-card open" は isOpen=true の状態 -->
         <div class="study-card open" data-list-item data-key="cardId" data-state="open">
           <div class="study-card__topbar">
             <div class="rating-buttons">
@@ -256,7 +404,11 @@
           </div>
         </div>
 
-        <!-- [State: empty] カードが0件の場合 -->
+        <!-- ================================================================
+             @component: EmptyState
+             @description: カードが0件の場合の空状態表示
+             @condition: {cards.length === 0 && <EmptyState />}
+             ================================================================ -->
         <div class="card-list__empty" data-state="empty" data-show-if="cards.length === 0" style="display: none;">
           <svg data-icon="lucide:Inbox" class="card-list__empty-icon" xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
           <p>カードがありません</p>
@@ -266,9 +418,13 @@
     </div>
     <!-- [/Component: CardList] -->
 
-    <!-- ========================================
-         復習中タブ
-         ======================================== -->
+    <!-- ================================================================
+         @section: 復習中タブコンテンツ
+         @condition: {activeTab === 'review' && <CardList ... />}
+
+         @api: GET /api/cards?status=review - 復習中カード取得
+         @note: 未学習タブと同じCardListコンポーネントを再利用
+         ================================================================ -->
     <div
       class="tab-content"
       id="tab-review"
@@ -276,12 +432,14 @@
       data-show-if="activeTab === 'review'"
     >
       <div class="card-list" data-list="reviewCards">
-        <!-- 復習カードも同じ StudyCard コンポーネントを使用 -->
+        <!-- @note: 復習カードも同じ StudyCard コンポーネントを使用 -->
+        <!-- @difference: nextIntervals の値が異なる（review_level に応じて変化） -->
         <div class="study-card" data-list-item data-key="cardId">
           <div class="study-card__topbar">
             <div class="rating-buttons">
               <button class="rating-btn rating-btn--ok" data-rating="ok">
                 <span class="rating-btn__label">OK</span>
+                <!-- @note: review_level によって間隔が変わる（例: 7日後） -->
                 <span class="rating-btn__preview">7日後</span>
               </button>
               <button class="rating-btn rating-btn--learned" data-rating="learned">
@@ -315,11 +473,13 @@
           </div>
         </div>
 
+        <!-- @sample-data: サンプルカード（実装時は削除） -->
         <div class="study-card" data-list-item data-key="cardId">
           <div class="study-card__topbar">
             <div class="rating-buttons">
               <button class="rating-btn rating-btn--ok" data-rating="ok">
                 <span class="rating-btn__label">OK</span>
+                <!-- @note: review_level が高いと間隔も長い（例: 14日後） -->
                 <span class="rating-btn__preview">14日後</span>
               </button>
               <button class="rating-btn rating-btn--learned" data-rating="learned">
@@ -355,9 +515,14 @@
       </div>
     </div>
 
-    <!-- ========================================
-         完了タブ (評価ボタンなし)
-         ======================================== -->
+    <!-- ================================================================
+         @section: 完了タブコンテンツ
+         @condition: {activeTab === 'completed' && <CardList ... />}
+
+         @api: GET /api/cards?status=completed - 完了カード取得
+         @note: 完了カードは評価ボタン(RatingButtons)を非表示
+         @props: showRatingButtons={false}
+         ================================================================ -->
     <div
       class="tab-content"
       id="tab-completed"
@@ -365,8 +530,10 @@
       data-show-if="activeTab === 'completed'"
     >
       <div class="card-list" data-list="completedCards">
-        <!-- 完了カードは RatingButtons なし -->
+        <!-- @note: 完了カードは RatingButtons なし（isCompleted=true） -->
+        <!-- @condition: {!isCompleted && <RatingButtons />} でボタン非表示 -->
         <div class="study-card" data-list-item data-key="cardId" data-props="isCompleted:true">
+          <!-- @note: study-card__topbar--tags-only クラスでタグのみ表示 -->
           <div class="study-card__topbar study-card__topbar--tags-only">
             <div class="study-card__tags">
               <span class="study-card__tag">数学</span>
@@ -389,6 +556,7 @@
           </div>
         </div>
 
+        <!-- @sample-data: サンプルカード（実装時は削除） -->
         <div class="study-card" data-list-item data-key="cardId">
           <div class="study-card__topbar study-card__topbar--tags-only">
             <div class="study-card__tags">

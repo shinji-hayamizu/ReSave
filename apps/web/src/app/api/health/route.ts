@@ -108,3 +108,4 @@ function detectEnvironment(url: string | undefined): string {
   return 'custom';
 }
 
+

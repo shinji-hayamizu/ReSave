@@ -494,6 +494,115 @@ Task: [各機能画面].html 生成 (参照: 対応機能仕様)
 
 **Step 1.4 で抽出したdata属性パターンを統一して使用すること。**
 
+### AI向けコメント規約（重要）
+
+React実装時にAIが正確に変換できるよう、以下のコメントを必ず記載すること。
+
+#### コンポーネント説明コメント
+```html
+<!-- [Component: CardList]
+  @description カード一覧を表示するコンポーネント。タブで「全て/復習予定/新規」を切り替え可能
+  @props
+    - cards: Card[] - 表示するカードの配列
+    - activeTab: 'all' | 'review' | 'new' - 現在選択中のタブ
+    - onTabChange: (tab) => void - タブ切り替え時のコールバック
+  @state
+    - isLoading: boolean - データ読み込み中かどうか
+  @events
+    - onCardClick: カードクリック時に詳細画面へ遷移
+    - onDeleteClick: 削除ボタンクリック時に確認モーダル表示
+-->
+<div data-component="CardList">
+  ...
+</div>
+<!-- [/Component: CardList] -->
+```
+
+#### 条件分岐の説明コメント
+```html
+<!-- [Condition: hasCards]
+  @description カードが1件以上存在する場合に表示
+  @logic cards.length > 0
+-->
+<div data-show-if="hasCards">...</div>
+
+<!-- [Condition: !hasCards]
+  @description カードが0件の場合の空状態表示
+  @logic cards.length === 0
+  @action 「カードを作成」ボタンで /cards/new へ遷移
+-->
+<div data-show-if="!hasCards">...</div>
+```
+
+#### リスト・ループの説明コメント
+```html
+<!-- [List: cards]
+  @description カード一覧をループ表示
+  @source cards: Card[] (APIから取得)
+  @key card.id
+  @sort next_review_at ASC (復習日が近い順)
+-->
+<ul data-list="cards">
+  <!-- [ListItem: CardItem]
+    @description 個別カードの表示。クリックで学習画面へ遷移
+    @props card: Card
+  -->
+  <li data-list-item data-key="cardId">...</li>
+</ul>
+```
+
+#### 状態バリエーションの説明コメント
+```html
+<!-- [State: loading]
+  @description データ取得中のローディング表示
+  @trigger useQueryのisLoading === true
+  @duration API応答まで（通常1-2秒）
+-->
+<div data-state="loading">...</div>
+
+<!-- [State: error]
+  @description エラー発生時の表示
+  @trigger useQueryのisError === true
+  @recovery 「再試行」ボタンでrefetch()を実行
+-->
+<div data-state="error">...</div>
+```
+
+#### フォームの説明コメント
+```html
+<!-- [Form: CardForm]
+  @description カード作成・編集フォーム
+  @validation Zodスキーマ: cardFormSchema
+  @submit Server Action: createCard / updateCard
+  @fields
+    - front: 表面テキスト（必須、最大500文字）
+    - back: 裏面テキスト（必須、最大2000文字）
+    - tags: タグ選択（任意、最大10個）
+  @onSuccess /cards へリダイレクト + toast表示
+  @onError フォーム上部にエラーメッセージ表示
+-->
+<form data-component="CardForm" data-action="onSubmit:handleSubmit">
+  ...
+</form>
+```
+
+#### モーダル・ダイアログの説明コメント
+```html
+<!-- [Modal: DeleteConfirmDialog]
+  @description カード削除確認ダイアログ
+  @trigger 削除ボタンクリック時
+  @props
+    - isOpen: boolean
+    - cardTitle: string - 削除対象のカードタイトル
+    - onConfirm: () => void - 削除実行
+    - onCancel: () => void - キャンセル
+  @a11y ESCキーで閉じる、フォーカストラップ有効
+-->
+<div data-component="DeleteConfirmDialog" role="dialog" aria-modal="true">
+  ...
+</div>
+```
+
 ### コンポーネント境界の明示
 ```html
 <!-- 抽出したマーカー形式を使用 -->

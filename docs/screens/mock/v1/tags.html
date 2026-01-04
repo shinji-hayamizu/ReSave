@@ -1,3 +1,42 @@
+<!--
+  @screen: タグ管理画面
+  @path: /tags
+  @feature: F-017 タグ管理
+  @spec: docs/requirements/functions/tag/F-017-tag-management.md
+
+  @description:
+    ユーザーが作成したタグの一覧表示・作成・編集・削除を行う画面。
+    タグにはカラーを設定でき、カードの分類・整理に使用する。
+
+  @api:
+    - GET /api/tags - タグ一覧取得（カード数含む）
+    - POST /api/tags - タグ作成
+    - PATCH /api/tags/:id - タグ更新
+    - DELETE /api/tags/:id - タグ削除
+
+  @state:
+    - tags: Tag[] - タグ一覧データ
+    - isFormModalOpen: boolean - 作成/編集モーダルの開閉状態
+    - isDeleteModalOpen: boolean - 削除確認モーダルの開閉状態
+    - formMode: 'create' | 'edit' - モーダルのモード
+    - selectedTag: Tag | null - 編集/削除対象のタグ
+    - formData: { name: string, color: TagColor } - フォーム入力値
+    - errors: { tagName?: string } - バリデーションエラー
+
+  @types:
+    Tag: { id: string, name: string, color: TagColor, card_count: number }
+    TagColor: 'blue' | 'green' | 'purple' | 'orange' | 'pink' | 'cyan' | 'yellow' | 'gray'
+
+  @hooks:
+    - useTags() - タグ一覧取得 (TanStack Query)
+    - useCreateTag() - タグ作成 mutation
+    - useUpdateTag() - タグ更新 mutation
+    - useDeleteTag() - タグ削除 mutation
+
+  @navigation:
+    - from: サイドバー「タグ」リンク
+    - to: なし（モーダル操作のみ）
+-->
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -360,22 +399,44 @@
   </style>
 </head>
 <body class="content-body">
-  <!--
-    画面: タグ管理
-    機能: F-017
-    参照仕様: docs/requirements/functions/tag/F-017-tag-management.md
-    前の画面: index.html (サイドバーから)
-    次の画面: index.html (戻る)
-  -->
 
-  <!-- [Component: TagManagementPage] -->
+  <!--
+    @component: TagManagementPage
+    @type: Page Component (Server Component with Client boundaries)
+    @path: app/(main)/tags/page.tsx
+
+    @props: none (fetches data internally)
+
+    @state:
+      - isFormModalOpen: boolean - useState(false)
+      - isDeleteModalOpen: boolean - useState(false)
+      - formMode: 'create' | 'edit' - useState('create')
+      - selectedTag: Tag | null - useState(null)
+
+    @data-fetching:
+      - useTags() から tags を取得
+      - isLoading, isError 状態のハンドリング必要
+
+    @handlers:
+      - openCreateModal: () => { setFormMode('create'); setSelectedTag(null); setIsFormModalOpen(true) }
+      - openEditModal: (tag: Tag) => { setFormMode('edit'); setSelectedTag(tag); setIsFormModalOpen(true) }
+      - openDeleteModal: (tag: Tag) => { setSelectedTag(tag); setIsDeleteModalOpen(true) }
+      - closeFormModal: () => setIsFormModalOpen(false)
+      - closeDeleteModal: () => setIsDeleteModalOpen(false)
+  -->
   <div class="content-wrapper" data-component="TagManagementPage">
 
-    <!-- ========================================
-         Page Header
-         ======================================== -->
+    <!--
+      @section: Page Header
+      @contains: タイトル + タグ追加ボタン
+    -->
     <div class="page-header">
       <h1 class="page-header__title">タグ管理</h1>
+      <!--
+        @event: onClick
+        @handler: openCreateModal()
+        @action: 作成モーダルを開く（formMode='create', selectedTag=null）
+      -->
       <button
         class="btn btn--primary"
         data-action="onClick:openCreateModal"
@@ -385,13 +446,41 @@
       </button>
     </div>
 
-    <!-- ========================================
-         [Component: TagList]
-         タグ一覧
-         ======================================== -->
+    <!--
+      @component: TagList
+      @type: Client Component
+      @path: components/tags/TagList.tsx
+
+      @props:
+        - tags: Tag[] - タグ一覧データ
+        - onEdit: (tag: Tag) => void - 編集ボタンクリック時
+        - onDelete: (tag: Tag) => void - 削除ボタンクリック時
+
+      @api: GET /api/tags
+      @response: { data: Tag[], pagination: { total, limit, offset } }
+
+      @conditional-render:
+        - tags.length > 0: タグ一覧を表示
+        - tags.length === 0: 空状態を表示
+
+      @iteration:
+        - tags.map((tag) => <TagItem key={tag.id} ... />)
+    -->
     <div class="tag-list" data-component="TagList" data-list="tags">
 
-      <!-- [ListItem: TagItem] - Sample 1: 英語 -->
+      <!--
+        @component: TagItem
+        @type: Client Component
+        @path: components/tags/TagItem.tsx
+
+        @props:
+          - tag: Tag - { id, name, color, card_count }
+          - onEdit: () => void - 編集クリック時のコールバック
+          - onDelete: () => void - 削除クリック時のコールバック
+
+        @note: このブロックは tags.map() でレンダリング
+      -->
+      <!-- [Sample 1: 英語] -->
       <div
         class="tag-item"
         data-component="TagItem"
@@ -399,12 +488,20 @@
         data-key="tagId"
         data-props="tag,onEdit,onDelete"
       >
+        <!-- @prop: tag.color -> tag-color--{color} クラスを動的に適用 -->
         <span class="tag-item__chip tag-color--blue" data-prop="tagColor">英語</span>
         <div class="tag-item__info">
+          <!-- @prop: tag.name -->
           <div class="tag-item__name" data-prop="tagName">英語</div>
+          <!-- @prop: tag.card_count -->
           <div class="tag-item__count"><span data-prop="cardCount">15</span>枚のカード</div>
         </div>
         <div class="tag-item__actions">
+          <!--
+            @event: onClick
+            @handler: onEdit(tag)
+            @action: 編集モーダルを開く
+          -->
           <button
             class="tag-item__action"
             title="編集"
@@ -412,6 +509,11 @@
           >
             <svg data-icon="lucide:Edit" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
           </button>
+          <!--
+            @event: onClick
+            @handler: onDelete(tag)
+            @action: 削除確認モーダルを開く
+          -->
           <button
             class="tag-item__action tag-item__action--danger"
             title="削除"
@@ -421,9 +523,9 @@
           </button>
         </div>
       </div>
-      <!-- [/ListItem: TagItem] -->
+      <!-- [/TagItem] -->
 
-      <!-- [ListItem: TagItem] - Sample 2: TOEIC -->
+      <!-- [Sample 2: TOEIC] - 同様のTagItemコンポーネント -->
       <div class="tag-item" data-list-item data-key="tagId">
         <span class="tag-item__chip tag-color--green">TOEIC</span>
         <div class="tag-item__info">
@@ -440,7 +542,7 @@
         </div>
       </div>
 
-      <!-- [ListItem: TagItem] - Sample 3: プログラミング -->
+      <!-- [Sample 3: プログラミング] - 同様のTagItemコンポーネント -->
       <div class="tag-item" data-list-item data-key="tagId">
         <span class="tag-item__chip tag-color--purple">プログラミング</span>
         <div class="tag-item__info">
@@ -457,7 +559,7 @@
         </div>
       </div>
 
-      <!-- [ListItem: TagItem] - Sample 4: 日本史 -->
+      <!-- [Sample 4: 日本史] - 同様のTagItemコンポーネント -->
       <div class="tag-item" data-list-item data-key="tagId">
         <span class="tag-item__chip tag-color--orange">日本史</span>
         <div class="tag-item__info">
@@ -474,7 +576,11 @@
         </div>
       </div>
 
-      <!-- [State: empty] タグが0件の場合 -->
+      <!--
+        @conditional: tags.length === 0
+        @component: EmptyState
+        @note: タグが0件の場合に表示
+      -->
       <div class="tag-list__empty" data-state="empty" data-show-if="tags.length === 0" style="display: none;">
         <svg class="tag-list__empty-icon" data-icon="lucide:Tags" xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 6.3 6.3a2.4 2.4 0 0 1 0 3.4L17 19"/><path d="M9.586 5.586A2 2 0 0 0 8.172 5H3a1 1 0 0 0-1 1v5.172a2 2 0 0 0 .586 1.414L8.29 18.29a2.426 2.426 0 0 0 3.42 0l3.58-3.58a2.426 2.426 0 0 0 0-3.42z"/><circle cx="6.5" cy="9.5" r=".5" fill="currentColor"/></svg>
         <p class="tag-list__empty-title">タグがありません</p>
@@ -482,16 +588,46 @@
       </div>
 
     </div>
-    <!-- [/Component: TagList] -->
+    <!-- [/TagList] -->
 
   </div>
-  <!-- [/Component: TagManagementPage] -->
+  <!-- [/TagManagementPage] -->
 
 
-  <!-- ========================================
-       [Component: TagFormModal]
-       タグ作成/編集モーダル
-       ======================================== -->
+  <!--
+    @component: TagFormModal
+    @type: Client Component
+    @path: components/tags/TagFormModal.tsx
+
+    @props:
+      - isOpen: boolean - モーダルの開閉状態
+      - mode: 'create' | 'edit' - 作成モード or 編集モード
+      - tag: Tag | null - 編集時は既存タグデータ、作成時はnull
+      - onSave: (data: { name: string, color: TagColor }) => void - 保存時コールバック
+      - onClose: () => void - 閉じる時コールバック
+
+    @state:
+      - name: string - useState(tag?.name ?? '')
+      - color: TagColor - useState(tag?.color ?? 'blue')
+      - errors: { name?: string } - バリデーションエラー
+
+    @api:
+      - mode='create': POST /api/tags { name, color }
+      - mode='edit': PATCH /api/tags/:id { name, color }
+
+    @mutation:
+      - useCreateTag() - 作成時
+      - useUpdateTag() - 更新時
+
+    @validation:
+      - name: 必須、1-30文字
+      - color: TagColor型のいずれか
+
+    @conditional-render:
+      - isOpen === false: null を返す（非表示）
+      - mode === 'create': タイトル「タグを追加」
+      - mode === 'edit': タイトル「タグを編集」
+  -->
   <div
     class="modal-overlay"
     id="tag-form-modal"
@@ -500,7 +636,14 @@
   >
     <div class="modal" role="dialog" aria-labelledby="modal-title" aria-modal="true">
       <div class="modal__header">
+        <!--
+          @conditional: mode === 'create' ? 'タグを追加' : 'タグを編集'
+        -->
         <h2 class="modal__title" id="modal-title" data-prop="modalTitle">タグを追加</h2>
+        <!--
+          @event: onClick
+          @handler: onClose()
+        -->
         <button
           class="modal__close"
           title="閉じる"
@@ -510,10 +653,22 @@
         </button>
       </div>
       <div class="modal__body">
+        <!--
+          @event: onSubmit
+          @handler: handleSave(e)
+          @action: e.preventDefault() してバリデーション後に onSave を呼ぶ
+        -->
         <form data-action="onSubmit:handleSave">
+          <!-- @section: タグ名入力 -->
           <div class="form-group">
             <label class="form-label" for="tag-name">タグ名</label>
             <div class="form-input-wrapper">
+              <!--
+                @state: name
+                @event: onChange
+                @handler: setName(e.target.value)
+                @validation: 必須、最大30文字
+              -->
               <input
                 type="text"
                 id="tag-name"
@@ -523,15 +678,30 @@
                 data-prop="tagName"
                 data-action="onChange:setTagName"
               >
+              <!-- @computed: `${name.length}/30` -->
               <span class="form-input-counter" data-prop="charCount">0/30</span>
             </div>
-            <!-- [State: error] バリデーションエラー -->
+            <!--
+              @conditional: errors.name が存在する場合に表示
+            -->
             <p class="form-error" data-state="error" data-show-if="errors.tagName" style="display: none;">タグ名を入力してください</p>
           </div>
 
+          <!-- @section: カラー選択 -->
           <div class="form-group">
             <label class="form-label">色</label>
+            <!--
+              @component: ColorPalette (インライン実装可)
+              @state: color
+              @colors: blue, green, purple, orange, pink, cyan, yellow, gray
+            -->
             <div class="color-palette" data-prop="selectedColor">
+              <!--
+                @iteration: colors.map で生成可能
+                @selected-class: color === 'blue' ? 'selected' : ''
+                @event: onClick
+                @handler: setColor('blue')
+              -->
               <button
                 type="button"
                 class="color-option color-swatch--blue selected"
@@ -592,13 +762,24 @@
           </div>
         </form>
       </div>
+      <!-- @section: フッターボタン -->
       <div class="modal__footer">
+        <!--
+          @event: onClick
+          @handler: onClose()
+        -->
         <button
           class="btn btn--secondary"
           data-action="onClick:onClose"
         >
           キャンセル
         </button>
+        <!--
+          @event: onClick
+          @handler: handleSave()
+          @action: バリデーション成功時に mutation 実行、成功後 onClose()
+          @loading: mutation.isPending 時は disabled + ローディング表示
+        -->
         <button
           class="btn btn--primary"
           data-action="onClick:handleSave"
@@ -608,13 +789,32 @@
       </div>
     </div>
   </div>
-  <!-- [/Component: TagFormModal] -->
+  <!-- [/TagFormModal] -->
 
 
-  <!-- ========================================
-       [Component: DeleteConfirmModal]
-       削除確認モーダル
-       ======================================== -->
+  <!--
+    @component: DeleteConfirmModal
+    @type: Client Component
+    @path: components/tags/DeleteConfirmModal.tsx
+
+    @props:
+      - isOpen: boolean - モーダルの開閉状態
+      - tag: Tag | null - 削除対象のタグ
+      - onConfirm: () => void - 削除実行時コールバック
+      - onClose: () => void - 閉じる時コールバック
+
+    @api: DELETE /api/tags/:id
+
+    @mutation:
+      - useDeleteTag()
+
+    @behavior:
+      - 削除実行後、タグ一覧を再取得（invalidateQueries）
+      - カードからタグの紐付けが解除されるが、カード自体は削除されない
+
+    @conditional-render:
+      - isOpen === false: null を返す（非表示）
+  -->
   <div
     class="modal-overlay"
     id="delete-confirm-modal"
@@ -624,6 +824,10 @@
     <div class="modal" role="alertdialog" aria-labelledby="delete-modal-title" aria-describedby="delete-modal-desc" aria-modal="true">
       <div class="modal__header">
         <h2 class="modal__title" id="delete-modal-title">タグを削除</h2>
+        <!--
+          @event: onClick
+          @handler: onClose()
+        -->
         <button
           class="modal__close"
           title="閉じる"
@@ -637,20 +841,34 @@
           このタグを削除しますか？
         </p>
         <p class="modal__message">
+          <!-- @prop: tag.name -->
           <strong data-prop="tagName">英語</strong> (<span data-prop="cardCount">15</span>枚のカードに紐付け)
+          <!-- @prop: tag.card_count -->
         </p>
+        <!-- @section: 警告メッセージ（常に表示） -->
         <div class="modal__warning">
           <svg data-icon="lucide:Info" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
           <span>紐付いているカードは削除されません。タグの関連付けのみが解除されます。</span>
         </div>
       </div>
+      <!-- @section: フッターボタン -->
       <div class="modal__footer">
+        <!--
+          @event: onClick
+          @handler: onClose()
+        -->
         <button
           class="btn btn--secondary"
           data-action="onClick:onClose"
         >
           キャンセル
         </button>
+        <!--
+          @event: onClick
+          @handler: onConfirm()
+          @action: deleteTag mutation 実行、成功後 onClose()
+          @loading: mutation.isPending 時は disabled + ローディング表示
+        -->
         <button
           class="btn btn--danger"
           data-action="onClick:onConfirm"
@@ -660,7 +878,7 @@
       </div>
     </div>
   </div>
-  <!-- [/Component: DeleteConfirmModal] -->
+  <!-- [/DeleteConfirmModal] -->
 
 
   <script src="js/main.js"></script>

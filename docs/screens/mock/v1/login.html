@@ -223,20 +223,58 @@
 </head>
 <body>
   <!--
-    画面: ログイン
-    機能: F-002
-    参照仕様: docs/requirements/functions/auth/F-002-user-login.md
-    前の画面: splash.html, register.html
-    次の画面: main.html (認証成功時)
+  ================================================================================
+  @screen: ログイン画面 (LoginPage)
+  @function: F-002 ユーザーログイン
+  @spec: docs/requirements/functions/auth/F-002-user-login.md
+  ================================================================================
+
+  @description:
+    - メールアドレス/パスワードによるログイン認証
+    - Googleソーシャルログイン（v1.1で実装予定）
+    - パスワード表示/非表示トグル
+    - エラーメッセージ表示（認証エラー、メール未確認）
+
+  @navigation:
+    - 前の画面: splash.html, register.html
+    - 次の画面: main.html (認証成功時)
+    - 関連画面: password-reset.html (パスワードリセット), register.html (新規登録)
+
+  @state:
+    - email: string - メールアドレス入力値
+    - password: string - パスワード入力値
+    - isPasswordVisible: boolean - パスワード表示/非表示状態
+    - isLoading: boolean - ログイン処理中フラグ
+    - errorType: 'auth' | 'unverified' | null - エラー種別
+    - errorMessage: string | null - エラーメッセージ
+
+  @api:
+    - POST /api/auth/login - ログイン処理 (Supabase Auth signInWithPassword)
+    - POST /api/auth/resend-verification - 確認メール再送信
+
+  @errors:
+    - E-F002-01: 認証情報不正（メールアドレスまたはパスワードが違う）
+    - E-F002-02: メール未確認（確認メール再送リンク表示）
+
+  @hooks:
+    - useLogin() - ログイン処理フック (TanStack Query mutation)
+
+  @components:
+    - LoginPage (このファイル)
+      - LoginCard
+        - LoginForm
+          - PasswordInput (パスワード入力+表示トグル)
+        - GoogleLoginButton (v1.1)
+  ================================================================================
   -->
 
-  <!-- [Component: LoginPage] -->
+  <!-- @component: LoginPage - ページ全体のコンテナ -->
   <div class="login-page" data-component="LoginPage">
 
-    <!-- [Component: LoginCard] -->
+    <!-- @component: LoginCard - ログインカード -->
     <div class="login-card" data-component="LoginCard">
 
-      <!-- Logo -->
+      <!-- @section: Logo - アプリロゴ（静的コンテンツ） -->
       <div class="login-card__logo">
         <svg class="login-card__logo-icon" data-icon="lucide:BookOpen" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
@@ -244,14 +282,25 @@
         </svg>
         <span class="login-card__logo-text">ReSave</span>
       </div>
+      <!-- @/section: Logo -->
 
+      <!-- @section: Header - タイトル・サブタイトル（静的コンテンツ） -->
       <h1 class="login-card__title">ログイン</h1>
       <p class="login-card__subtitle">アカウントにログインしてください</p>
+      <!-- @/section: Header -->
 
-      <!-- [Component: LoginForm] -->
+      <!--
+      @component: LoginForm
+      @event: onSubmit - handleLogin(e: FormEvent)
+      @validation: email(必須, メール形式), password(必須, 8文字以上)
+      -->
       <form class="login-form" data-component="LoginForm" data-action="onSubmit:handleLogin">
 
-        <!-- [State: error] E-F002-01: 認証情報不正 -->
+        <!--
+        @conditional: errorType === 'auth'
+        @error: E-F002-01 認証情報不正
+        @display: 認証失敗時のみ表示
+        -->
         <div
           class="form-alert form-alert--error"
           data-state="visible"
@@ -260,8 +309,15 @@
         >
           メールアドレスまたはパスワードが正しくありません
         </div>
+        <!-- @/conditional: errorType === 'auth' -->
 
-        <!-- [State: warning] E-F002-02: メール未確認 -->
+        <!--
+        @conditional: errorType === 'unverified'
+        @error: E-F002-02 メール未確認
+        @display: メール未確認時のみ表示
+        @event: onClick(確認メール再送リンク) - resendVerificationEmail()
+        @api: POST /api/auth/resend-verification
+        -->
         <div
           class="form-alert form-alert--warning"
           data-show-if="errorType === 'unverified'"
@@ -271,8 +327,15 @@
           メールアドレスの確認が完了していません。
           <a href="#" class="form-alert__link" data-action="onClick:resendVerification">確認メールを再送する</a>
         </div>
+        <!-- @/conditional: errorType === 'unverified' -->
 
-        <!-- Email Input -->
+        <!--
+        @field: email
+        @state: email: string
+        @event: onChange - setEmail(e.target.value)
+        @validation: required, email format
+        @autocomplete: email
+        -->
         <div class="form-group">
           <label class="form-label" for="email">メールアドレス</label>
           <input
@@ -287,10 +350,22 @@
             data-action="onChange:setEmail"
           >
         </div>
+        <!-- @/field: email -->
 
-        <!-- Password Input -->
+        <!--
+        @field: password
+        @state: password: string, isPasswordVisible: boolean
+        @event: onChange - setPassword(e.target.value)
+        @validation: required, minLength(8)
+        @autocomplete: current-password
+        -->
         <div class="form-group">
           <label class="form-label" for="password">パスワード</label>
+          <!--
+          @component: PasswordInput
+          @state: isPasswordVisible: boolean - パスワード表示状態
+          @event: onClick(toggle) - togglePasswordVisibility()
+          -->
           <div class="password-input-wrapper" data-component="PasswordInput">
             <input
               type="password"
@@ -303,18 +378,23 @@
               data-prop="password"
               data-action="onChange:setPassword"
             >
+            <!--
+            @event: onClick - togglePasswordVisibility()
+            @state-toggle: isPasswordVisible
+            @behavior: type="password" <-> type="text"
+            -->
             <button
               type="button"
               class="password-toggle"
               title="パスワードを表示"
               data-action="onClick:togglePasswordVisibility"
             >
-              <!-- Show Icon -->
+              <!-- @conditional: !isPasswordVisible - 表示アイコン -->
               <svg class="password-toggle__icon--show" data-icon="lucide:Eye" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/>
                 <circle cx="12" cy="12" r="3"/>
               </svg>
-              <!-- Hide Icon -->
+              <!-- @conditional: isPasswordVisible - 非表示アイコン -->
               <svg class="password-toggle__icon--hide" data-icon="lucide:EyeOff" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"/>
                 <path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"/>
@@ -323,28 +403,45 @@
               </svg>
             </button>
           </div>
+          <!-- @/component: PasswordInput -->
         </div>
+        <!-- @/field: password -->
 
-        <!-- Forgot Password Link -->
+        <!--
+        @link: パスワードリセット画面へ
+        @navigation: -> password-reset.html
+        -->
         <a href="password-reset.html" class="login-form__forgot">パスワードを忘れた方</a>
 
-        <!-- Login Button -->
+        <!--
+        @button: ログインボタン
+        @event: onClick/onSubmit - handleLogin()
+        @state: disabled={isLoading}
+        @api: POST /api/auth/login (Supabase Auth signInWithPassword)
+        @loading: isLoading時にスピナー表示 + "ログイン中..."
+        @success: router.push('/main') または router.push('/')
+        -->
         <button type="submit" class="btn btn--primary btn--block btn--lg" data-action="onClick:handleLogin">
           ログイン
         </button>
 
       </form>
-      <!-- [/Component: LoginForm] -->
+      <!-- @/component: LoginForm -->
 
-      <!-- Divider -->
+      <!-- @section: Divider - 区切り線（静的コンテンツ） -->
       <div class="login-divider">
         <div class="login-divider__line"></div>
         <span class="login-divider__text">または</span>
         <div class="login-divider__line"></div>
       </div>
+      <!-- @/section: Divider -->
 
-      <!-- Google Login (v1.1 Placeholder) -->
-      <!-- [Component: GoogleLoginButton] - v1.1で実装予定 -->
+      <!--
+      @component: GoogleLoginButton
+      @status: v1.1で実装予定（現在disabled）
+      @event: onClick - handleGoogleLogin()
+      @api: Supabase Auth signInWithOAuth({ provider: 'google' })
+      -->
       <button
         type="button"
         class="btn btn--google btn--block"
@@ -361,19 +458,23 @@
         </svg>
         Googleでログイン
       </button>
-      <!-- [/Component: GoogleLoginButton] -->
+      <!-- @/component: GoogleLoginButton -->
 
-      <!-- Register Link -->
+      <!--
+      @section: Footer - 新規登録リンク
+      @navigation: -> register.html
+      -->
       <div class="login-card__footer">
         アカウントをお持ちでない方は
         <a href="register.html" class="login-card__footer-link">新規登録はこちら</a>
       </div>
+      <!-- @/section: Footer -->
 
     </div>
-    <!-- [/Component: LoginCard] -->
+    <!-- @/component: LoginCard -->
 
   </div>
-  <!-- [/Component: LoginPage] -->
+  <!-- @/component: LoginPage -->
 
   <script src="js/main.js"></script>
   <script>
