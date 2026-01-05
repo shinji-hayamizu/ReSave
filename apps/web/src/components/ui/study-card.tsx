@@ -1,7 +1,7 @@
 'use client'
 
 import { memo, useState } from 'react'
-import { Eye, EyeOff, Pencil } from 'lucide-react'
+import { ChevronDown, ChevronUp, Pencil } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 
@@ -71,12 +71,12 @@ export const StudyCard = memo(function StudyCard({
           >
             {isOpen ? (
               <>
-                <EyeOff className="h-4 w-4" />
+                <ChevronUp className="h-4 w-4" />
                 <span>答えを隠す</span>
               </>
             ) : (
               <>
-                <Eye className="h-4 w-4" />
+                <ChevronDown className="h-4 w-4" />
                 <span>答えを見る</span>
               </>
             )}

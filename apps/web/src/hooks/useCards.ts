@@ -71,7 +71,7 @@ export function useCreateCard() {
       const optimisticCard: CardWithTags = {
         id: `temp-${Date.now()}`,
         front: input.front,
-        back: input.back,
+        back: input.back ?? '',
         reviewLevel: 0,
         nextReviewAt: new Date().toISOString(),
         createdAt: new Date().toISOString(),

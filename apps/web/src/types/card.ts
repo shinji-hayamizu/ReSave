@@ -32,7 +32,7 @@ export type CardListResponse = ListResponse<CardWithTags>;
  */
 export type CreateCardInput = {
   front: string;
-  back: string;
+  back?: string;
   tagIds?: string[];
 };
 

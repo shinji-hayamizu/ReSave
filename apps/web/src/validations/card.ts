@@ -13,7 +13,7 @@ export const cardSchema = z.object({
 
 export const createCardSchema = z.object({
   front: z.string().min(1, '必須項目です').max(10000, '10000文字以内で入力してください'),
-  back: z.string().min(1, '必須項目です').max(10000, '10000文字以内で入力してください'),
+  back: z.string().max(10000, '10000文字以内で入力してください').optional().default(''),
   tagIds: z.array(z.string().uuid()).optional(),
 });
 
