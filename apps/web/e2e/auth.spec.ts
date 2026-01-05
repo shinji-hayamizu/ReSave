@@ -5,7 +5,7 @@ test.describe('認証フロー', () => {
     await page.goto('/');
 
     await expect(page).toHaveURL(/\/login/);
-    await expect(page.getByRole('heading', { name: 'ログイン' })).toBeVisible();
+    await expect(page.getByText('ログイン', { exact: true }).first()).toBeVisible();
   });
 
   test('未認証時: 設定画面アクセスでログイン画面へリダイレクト', async ({ page }) => {
@@ -32,7 +32,7 @@ test.describe('認証フロー', () => {
     await expect(page.getByLabel('メールアドレス')).toBeVisible();
     await expect(page.getByLabel('パスワード')).toBeVisible();
     await expect(page.getByRole('button', { name: 'ログイン' })).toBeVisible();
-    await expect(page.getByText('新規登録はこちら')).toBeVisible();
+    await expect(page.getByRole('link', { name: '新規登録' })).toBeVisible();
   });
 
   test('ログイン画面: 空フォーム送信時にバリデーションエラー', async ({ page }) => {
@@ -59,8 +59,8 @@ test.describe('認証フロー', () => {
 
     await expect(page.getByLabel('メールアドレス')).toBeVisible();
     await expect(page.getByLabel('パスワード', { exact: true })).toBeVisible();
-    await expect(page.getByLabel('パスワード確認')).toBeVisible();
-    await expect(page.getByRole('button', { name: '登録' })).toBeVisible();
+    await expect(page.getByLabel('パスワード（確認）')).toBeVisible();
+    await expect(page.getByRole('button', { name: '新規登録' })).toBeVisible();
   });
 
   test('新規登録画面: パスワード不一致でバリデーションエラー', async ({ page }) => {
@@ -68,8 +68,8 @@ test.describe('認証フロー', () => {
 
     await page.getByLabel('メールアドレス').fill('test@example.com');
     await page.getByLabel('パスワード', { exact: true }).fill('Password123!');
-    await page.getByLabel('パスワード確認').fill('DifferentPassword123!');
-    await page.getByRole('button', { name: '登録' }).click();
+    await page.getByLabel('パスワード（確認）').fill('DifferentPassword123!');
+    await page.getByRole('button', { name: '新規登録' }).click();
 
     await expect(page.getByText('パスワードが一致しません')).toBeVisible();
   });
@@ -85,7 +85,7 @@ test.describe('認証フロー', () => {
   test('ログイン画面から新規登録画面へ遷移', async ({ page }) => {
     await page.goto('/login');
 
-    await page.getByText('新規登録はこちら').click();
+    await page.getByRole('link', { name: '新規登録' }).click();
 
     await expect(page).toHaveURL(/\/signup/);
   });

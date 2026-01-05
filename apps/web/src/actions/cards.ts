@@ -315,7 +315,7 @@ export async function getTodayCards(): Promise<CardWithTags[]> {
       )
     `)
     .eq('user_id', user.id)
-    .or(`next_review_at.lte.${today},and(next_review_at.is.null,review_level.eq.0)`)
+    .or(`next_review_at.lte.${today},next_review_at.is.null`)
     .order('next_review_at', { ascending: true, nullsFirst: true });
 
   if (error) {
