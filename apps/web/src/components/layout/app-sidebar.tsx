@@ -2,6 +2,7 @@
 
 import {
   BarChart,
+  BookOpen,
   GraduationCap,
   Home,
   Library,
@@ -40,8 +41,8 @@ export function AppSidebar() {
   return (
     <Sidebar>
       <SidebarHeader className="border-b p-4">
-        <Link className="flex items-center gap-2 font-bold" href="/">
-          <span className="text-xl">ReSave</span>
+        <Link className="flex items-center" href="/">
+          <BookOpen className="h-6 w-6 text-primary" />
         </Link>
       </SidebarHeader>
       <SidebarContent>

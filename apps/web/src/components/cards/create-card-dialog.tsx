@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Plus } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -17,11 +17,26 @@ import { useCreateCard } from '@/hooks/useCards';
 
 interface CreateCardDialogProps {
   trigger?: React.ReactNode;
+  defaultValues?: {
+    front?: string;
+    back?: string;
+  };
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-export function CreateCardDialog({ trigger }: CreateCardDialogProps) {
-  const [open, setOpen] = useState(false);
+export function CreateCardDialog({
+  trigger,
+  defaultValues,
+  open: controlledOpen,
+  onOpenChange: controlledOnOpenChange,
+}: CreateCardDialogProps) {
+  const [internalOpen, setInternalOpen] = useState(false);
   const createCard = useCreateCard();
+
+  const isControlled = controlledOpen !== undefined;
+  const open = isControlled ? controlledOpen : internalOpen;
+  const setOpen = isControlled ? controlledOnOpenChange! : setInternalOpen;
 
   const handleSubmit = async (data: CardInputFormValues) => {
     try {
@@ -44,21 +59,35 @@ export function CreateCardDialog({ trigger }: CreateCardDialogProps) {
     </Button>
   );
 
+  const dialogContent = (
+    <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
+      <DialogHeader>
+        <DialogTitle>新規カード作成</DialogTitle>
+      </DialogHeader>
+      <CardInputForm
+        mode="create"
+        onSubmit={handleSubmit}
+        isSubmitting={createCard.isPending}
+        defaultValues={defaultValues}
+        key={open ? 'open' : 'closed'}
+      />
+    </DialogContent>
+  );
+
+  if (isControlled) {
+    return (
+      <Dialog open={open} onOpenChange={setOpen}>
+        {dialogContent}
+      </Dialog>
+    );
+  }
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {trigger ?? defaultTrigger}
       </DialogTrigger>
-      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
-        <DialogHeader>
-          <DialogTitle>新規カード作成</DialogTitle>
-        </DialogHeader>
-        <CardInputForm
-          mode="create"
-          onSubmit={handleSubmit}
-          isSubmitting={createCard.isPending}
-        />
-      </DialogContent>
+      {dialogContent}
     </Dialog>
   );
 }
