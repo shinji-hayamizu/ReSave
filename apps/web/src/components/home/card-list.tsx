@@ -2,9 +2,10 @@
 
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { FileQuestion, RotateCcw } from 'lucide-react';
-import { memo, useCallback, useMemo, useRef } from 'react';
+import { memo, useCallback, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
+import { EditCardDialog } from '@/components/cards/edit-card-dialog';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Skeleton } from '@/components/ui/skeleton';
 import { StudyCard } from '@/components/ui/study-card';
@@ -66,10 +67,12 @@ const ResetButton = memo(function ResetButton({ onReset, disabled }: ResetButton
 const CardItem = memo(function CardItem({
   card,
   onReset,
+  onEdit,
   isResetting,
 }: {
   card: CardWithTags;
   onReset: (id: string) => void;
+  onEdit: (card: CardWithTags) => void;
   isResetting: boolean;
 }) {
   const tags = useMemo(() => {
@@ -89,12 +92,17 @@ const CardItem = memo(function CardItem({
     onReset(card.id);
   }, [card.id, onReset]);
 
+  const handleEdit = useCallback(() => {
+    onEdit(card);
+  }, [card, onEdit]);
+
   return (
     <StudyCard
       answer={card.back}
       question={card.front}
       ratingButtons={<ResetButton disabled={isResetting} onReset={handleReset} />}
       tags={tags}
+      onEdit={handleEdit}
     />
   );
 });
@@ -103,11 +111,13 @@ function VirtualizedCardList({
   cards,
   className,
   onReset,
+  onEdit,
   isResetting,
 }: {
   cards: CardWithTags[];
   className?: string;
   onReset: (id: string) => void;
+  onEdit: (card: CardWithTags) => void;
   isResetting: boolean;
 }) {
   const parentRef = useRef<HTMLDivElement>(null);
@@ -141,7 +151,7 @@ function VirtualizedCardList({
                   transform: `translateY(${virtualItem.start}px)`,
                 }}
               >
-                <CardItem card={card} isResetting={isResetting} onReset={onReset} />
+                <CardItem card={card} isResetting={isResetting} onEdit={onEdit} onReset={onReset} />
               </div>
             );
           })}
@@ -159,6 +169,8 @@ export const CardList = memo(function CardList({
 }: CardListProps) {
   const resetCard = useResetCard();
   const shouldVirtualize = (cards?.length ?? 0) > VIRTUALIZATION_THRESHOLD;
+  const [editingCard, setEditingCard] = useState<CardWithTags | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   const handleReset = useCallback(
     async (id: string) => {
@@ -171,6 +183,18 @@ export const CardList = memo(function CardList({
     },
     [resetCard]
   );
+
+  const handleEdit = useCallback((card: CardWithTags) => {
+    setEditingCard(card);
+    setIsEditDialogOpen(true);
+  }, []);
+
+  const handleEditDialogClose = useCallback((open: boolean) => {
+    setIsEditDialogOpen(open);
+    if (!open) {
+      setEditingCard(null);
+    }
+  }, []);
 
   if (isLoading) {
     return <CardListSkeleton />;
@@ -189,27 +213,43 @@ export const CardList = memo(function CardList({
 
   if (shouldVirtualize) {
     return (
-      <VirtualizedCardList
-        cards={cards}
-        className={className}
-        isResetting={resetCard.isPending}
-        onReset={handleReset}
-      />
+      <>
+        <VirtualizedCardList
+          cards={cards}
+          className={className}
+          isResetting={resetCard.isPending}
+          onEdit={handleEdit}
+          onReset={handleReset}
+        />
+        <EditCardDialog
+          card={editingCard}
+          open={isEditDialogOpen}
+          onOpenChange={handleEditDialogClose}
+        />
+      </>
     );
   }
 
   return (
-    <div className={className}>
-      <div className="space-y-4">
-        {cards.map((card) => (
-          <CardItem
-            key={card.id}
-            card={card}
-            isResetting={resetCard.isPending}
-            onReset={handleReset}
-          />
-        ))}
+    <>
+      <div className={className}>
+        <div className="space-y-4">
+          {cards.map((card) => (
+            <CardItem
+              key={card.id}
+              card={card}
+              isResetting={resetCard.isPending}
+              onEdit={handleEdit}
+              onReset={handleReset}
+            />
+          ))}
+        </div>
       </div>
-    </div>
+      <EditCardDialog
+        card={editingCard}
+        open={isEditDialogOpen}
+        onOpenChange={handleEditDialogClose}
+      />
+    </>
   );
 });

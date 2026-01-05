@@ -18,6 +18,7 @@ interface HomeStudyCardProps {
   tags?: Tag[];
   intervals?: { ok?: string; again?: string };
   onAssessmentComplete?: () => void;
+  onEdit?: () => void;
   className?: string;
 }
 
@@ -34,6 +35,7 @@ export const HomeStudyCard = memo(function HomeStudyCard({
   tags = [],
   intervals,
   onAssessmentComplete,
+  onEdit,
   className,
 }: HomeStudyCardProps) {
   const submitAssessment = useSubmitAssessment();
@@ -74,6 +76,7 @@ export const HomeStudyCard = memo(function HomeStudyCard({
           </>
         ) : undefined
       }
+      onEdit={onEdit}
     />
   );
 });

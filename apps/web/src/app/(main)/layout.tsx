@@ -20,7 +20,7 @@ export default async function MainLayout({
   }
 
   return (
-    <SidebarProvider defaultOpen={false}>
+    <SidebarProvider defaultOpen={true}>
       <AppSidebar />
       <div className="flex min-h-svh w-full flex-col">
         <AppHeader />

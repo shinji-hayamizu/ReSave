@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { FileQuestion } from 'lucide-react';
 
+import { EditCardDialog } from '@/components/cards/edit-card-dialog';
 import {
   CardList,
   CardTabs,
@@ -13,6 +14,7 @@ import {
 import { EmptyState } from '@/components/ui/empty-state';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTodayCards } from '@/hooks/useCards';
+import type { CardWithTags } from '@/types/card';
 
 const REVIEW_INTERVALS = [1, 3, 7, 14, 30, 180];
 
@@ -42,7 +44,21 @@ function StudyCardsSkeleton() {
 
 export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState<CardTabValue>('due');
+  const [editingCard, setEditingCard] = useState<CardWithTags | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const { data: todayCards, isLoading } = useTodayCards();
+
+  const handleEdit = useCallback((card: CardWithTags) => {
+    setEditingCard(card);
+    setIsEditDialogOpen(true);
+  }, []);
+
+  const handleEditDialogClose = useCallback((open: boolean) => {
+    setIsEditDialogOpen(open);
+    if (!open) {
+      setEditingCard(null);
+    }
+  }, []);
 
   const categorizedCards = useMemo(() => {
     if (!todayCards) {
@@ -111,10 +127,17 @@ export default function DashboardPage() {
                   again: '1日後',
                 }}
                 tags={card.tags}
+                onEdit={() => handleEdit(card)}
               />
             ))}
           </div>
         )}
+
+        <EditCardDialog
+          card={editingCard}
+          open={isEditDialogOpen}
+          onOpenChange={handleEditDialogClose}
+        />
     </div>
   );
 }
