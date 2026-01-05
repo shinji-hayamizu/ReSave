@@ -1,13 +1,16 @@
 'use client';
 
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { FileQuestion } from 'lucide-react';
+import { FileQuestion, RotateCcw } from 'lucide-react';
 import { memo, useCallback, useMemo, useRef } from 'react';
+import { toast } from 'sonner';
 
 import { EmptyState } from '@/components/ui/empty-state';
 import { Skeleton } from '@/components/ui/skeleton';
 import { StudyCard } from '@/components/ui/study-card';
 import { TagBadge } from '@/components/ui/tag-badge';
+import { useResetCard } from '@/hooks/useCards';
+import { cn } from '@/lib/utils';
 import type { CardWithTags } from '@/types/card';
 
 const VIRTUALIZATION_THRESHOLD = 50;
@@ -37,7 +40,38 @@ const CardListSkeleton = memo(function CardListSkeleton() {
   );
 });
 
-const CardItem = memo(function CardItem({ card }: { card: CardWithTags }) {
+interface ResetButtonProps {
+  onReset: () => void;
+  disabled?: boolean;
+}
+
+const ResetButton = memo(function ResetButton({ onReset, disabled }: ResetButtonProps) {
+  return (
+    <button
+      type="button"
+      disabled={disabled}
+      className={cn(
+        'flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium',
+        'transition-colors disabled:opacity-50 disabled:pointer-events-none',
+        'bg-amber-500/10 text-amber-600 hover:bg-amber-500 hover:text-white'
+      )}
+      onClick={onReset}
+    >
+      <RotateCcw className="h-4 w-4" />
+      <span className="font-semibold">覚え直し</span>
+    </button>
+  );
+});
+
+const CardItem = memo(function CardItem({
+  card,
+  onReset,
+  isResetting,
+}: {
+  card: CardWithTags;
+  onReset: (id: string) => void;
+  isResetting: boolean;
+}) {
   const tags = useMemo(() => {
     if (card.tags.length === 0) {
       return undefined;
@@ -51,10 +85,15 @@ const CardItem = memo(function CardItem({ card }: { card: CardWithTags }) {
     );
   }, [card.tags]);
 
+  const handleReset = useCallback(() => {
+    onReset(card.id);
+  }, [card.id, onReset]);
+
   return (
     <StudyCard
       answer={card.back}
       question={card.front}
+      ratingButtons={<ResetButton disabled={isResetting} onReset={handleReset} />}
       tags={tags}
     />
   );
@@ -63,9 +102,13 @@ const CardItem = memo(function CardItem({ card }: { card: CardWithTags }) {
 function VirtualizedCardList({
   cards,
   className,
+  onReset,
+  isResetting,
 }: {
   cards: CardWithTags[];
   className?: string;
+  onReset: (id: string) => void;
+  isResetting: boolean;
 }) {
   const parentRef = useRef<HTMLDivElement>(null);
 
@@ -98,7 +141,7 @@ function VirtualizedCardList({
                   transform: `translateY(${virtualItem.start}px)`,
                 }}
               >
-                <CardItem card={card} />
+                <CardItem card={card} isResetting={isResetting} onReset={onReset} />
               </div>
             );
           })}
@@ -114,7 +157,20 @@ export const CardList = memo(function CardList({
   emptyMessage = 'カードがありません',
   className,
 }: CardListProps) {
+  const resetCard = useResetCard();
   const shouldVirtualize = (cards?.length ?? 0) > VIRTUALIZATION_THRESHOLD;
+
+  const handleReset = useCallback(
+    async (id: string) => {
+      try {
+        await resetCard.mutateAsync(id);
+        toast.success('カードを未学習に戻しました');
+      } catch {
+        toast.error('カードのリセットに失敗しました');
+      }
+    },
+    [resetCard]
+  );
 
   if (isLoading) {
     return <CardListSkeleton />;
@@ -132,14 +188,26 @@ export const CardList = memo(function CardList({
   }
 
   if (shouldVirtualize) {
-    return <VirtualizedCardList cards={cards} className={className} />;
+    return (
+      <VirtualizedCardList
+        cards={cards}
+        className={className}
+        isResetting={resetCard.isPending}
+        onReset={handleReset}
+      />
+    );
   }
 
   return (
     <div className={className}>
       <div className="space-y-4">
         {cards.map((card) => (
-          <CardItem key={card.id} card={card} />
+          <CardItem
+            key={card.id}
+            card={card}
+            isResetting={resetCard.isPending}
+            onReset={handleReset}
+          />
         ))}
       </div>
     </div>

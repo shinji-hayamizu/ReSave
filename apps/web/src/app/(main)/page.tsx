@@ -77,7 +77,7 @@ export default function DashboardPage() {
   const activeCards = categorizedCards[activeTab];
 
   return (
-    <div className="p-4 md:p-6 space-y-6">
+    <div className="py-4 md:py-6 space-y-6">
         <QuickInputForm />
 
         <CardTabs counts={counts} value={activeTab} onChange={setActiveTab} />

@@ -1,10 +1,11 @@
 'use client';
 
-import { LogOut, Menu, Plus, Settings } from 'lucide-react';
+import { LogOut, Menu, Settings } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
 import { signOut } from '@/actions/auth';
+import { CreateCardDialog } from '@/components/cards/create-card-dialog';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
@@ -28,8 +29,9 @@ export function AppHeader() {
   };
 
   return (
-    <header className="sticky top-0 z-40 flex h-14 items-center justify-between border-b bg-background px-4">
-      <div className="flex items-center gap-2">
+    <header className="sticky top-0 z-40 border-b bg-background">
+      <div className="mx-auto flex h-14 max-w-2xl items-center justify-between px-4 md:px-6">
+        <div className="flex items-center gap-2">
         <Button
           variant="ghost"
           size="icon"
@@ -45,12 +47,7 @@ export function AppHeader() {
         </span>
       </div>
       <div className="flex items-center gap-2">
-        <Button asChild size="sm">
-          <Link href="/cards/new">
-            <Plus className="h-4 w-4" />
-            <span className="hidden sm:inline">新規カード</span>
-          </Link>
-        </Button>
+        <CreateCardDialog />
 
         {mounted ? (
           <DropdownMenu>
@@ -88,6 +85,7 @@ export function AppHeader() {
             </Avatar>
           </Button>
         )}
+        </div>
       </div>
     </header>
   );

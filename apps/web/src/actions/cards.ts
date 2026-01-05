@@ -294,6 +294,50 @@ export async function getCards(filters?: CardFilters): Promise<CardListResponse>
 }
 
 /**
+ * カードを未学習状態にリセット（覚え直し用）
+ */
+export async function resetCardToUnlearned(id: string): Promise<Card> {
+  const supabase = await createClient();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    throw new Error('Unauthorized');
+  }
+
+  const now = new Date().toISOString();
+
+  const { data: card, error } = await supabase
+    .from('cards')
+    .update({
+      review_level: 0,
+      next_review_at: now,
+      updated_at: now,
+    })
+    .eq('id', id)
+    .eq('user_id', user.id)
+    .select()
+    .single();
+
+  if (error) {
+    throw new Error(`Failed to reset card: ${error.message}`);
+  }
+
+  revalidatePath('/');
+  revalidatePath('/cards');
+
+  return {
+    id: card.id,
+    userId: card.user_id,
+    front: card.front,
+    back: card.back,
+    reviewLevel: card.review_level,
+    nextReviewAt: card.next_review_at,
+    createdAt: card.created_at,
+    updatedAt: card.updated_at,
+  };
+}
+
+/**
  * 今日復習予定のカードを取得
  */
 export async function getTodayCards(): Promise<CardWithTags[]> {

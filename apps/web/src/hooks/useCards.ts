@@ -10,6 +10,7 @@ import {
   getCard,
   getCards,
   getTodayCards,
+  resetCardToUnlearned,
   updateCard,
 } from '@/actions/cards';
 import type {
@@ -253,6 +254,44 @@ export function useDeleteCard() {
     onSettled: (_, __, deletedId) => {
       qc.invalidateQueries({ queryKey: cardKeys.lists() });
       qc.invalidateQueries({ queryKey: cardKeys.detail(deletedId) });
+      qc.invalidateQueries({ queryKey: cardKeys.today() });
+    },
+  });
+}
+
+type ResetCardContext = {
+  previousLists: [QueryKey, CardListResponse | undefined][];
+  previousToday: CardWithTags[] | undefined;
+};
+
+export function useResetCard() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => resetCardToUnlearned(id),
+    onMutate: async (id): Promise<ResetCardContext> => {
+      await qc.cancelQueries({ queryKey: cardKeys.lists() });
+      await qc.cancelQueries({ queryKey: cardKeys.today() });
+
+      const previousLists = qc.getQueriesData<CardListResponse>({
+        queryKey: cardKeys.lists(),
+      });
+      const previousToday = qc.getQueryData<CardWithTags[]>(cardKeys.today());
+
+      return { previousLists, previousToday };
+    },
+    onError: (_, __, context) => {
+      if (context?.previousLists) {
+        context.previousLists.forEach(([queryKey, data]) => {
+          qc.setQueryData(queryKey, data);
+        });
+      }
+      if (context?.previousToday) {
+        qc.setQueryData(cardKeys.today(), context.previousToday);
+      }
+      toast.error('カードのリセットに失敗しました');
+    },
+    onSettled: () => {
+      qc.invalidateQueries({ queryKey: cardKeys.lists() });
       qc.invalidateQueries({ queryKey: cardKeys.today() });
     },
   });
