@@ -10,7 +10,6 @@ import {
   HomeStudyCard,
   QuickInputForm,
 } from '@/components/home';
-import { PageHeader } from '@/components/layout/page-header';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTodayCards } from '@/hooks/useCards';
@@ -78,12 +77,7 @@ export default function DashboardPage() {
   const activeCards = categorizedCards[activeTab];
 
   return (
-    <div>
-      <PageHeader
-        description="今日の復習カードを確認しましょう"
-        title="ダッシュボード"
-      />
-      <div className="p-4 md:p-6 space-y-6">
+    <div className="p-4 md:p-6 space-y-6">
         <QuickInputForm />
 
         <CardTabs counts={counts} value={activeTab} onChange={setActiveTab} />
@@ -121,7 +115,6 @@ export default function DashboardPage() {
             ))}
           </div>
         )}
-      </div>
     </div>
   );
 }
