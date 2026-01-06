@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ReSave - Login</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* Login Page Specific Styles */
+    .login-page {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: var(--bg-secondary);
+    }
+
+    .login-card {
+      width: 100%;
+      max-width: 400px;
+      background: var(--bg-primary);
+      border-radius: var(--border-radius-lg);
+      box-shadow: var(--shadow-lg);
+      padding: 40px 32px;
+    }
+
+    .login-card__logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+
+    .login-card__logo-icon {
+      width: 40px;
+      height: 40px;
+      color: var(--color-primary);
+    }
+
+    .login-card__logo-text {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .login-card__title {
+      font-size: 20px;
+      font-weight: 600;
+      text-align: center;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+
+    .login-card__subtitle {
+      font-size: 14px;
+      text-align: center;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+
+    /* Form Error Alert */
+    .form-alert {
+      display: none;
+      padding: 12px 16px;
+      border-radius: var(--border-radius);
+      margin-bottom: 20px;
+      font-size: 14px;
+    }
+
+    .form-alert--error {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: var(--color-danger);
+    }
+
+    .form-alert--warning {
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      color: var(--color-warning);
+    }
+
+    .form-alert[data-state="visible"] {
+      display: block;
+    }
+
+    .form-alert__link {
+      color: inherit;
+      font-weight: 600;
+      text-decoration: underline;
+    }
+
+    /* Password Input with Toggle */
+    .password-input-wrapper {
+      position: relative;
+    }
+
+    .password-input-wrapper .form-input {
+      padding-right: 48px;
+    }
+
+    .password-toggle {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-secondary);
+      padding: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color var(--transition-fast);
+    }
+
+    .password-toggle:hover {
+      color: var(--text-primary);
+    }
+
+    .password-toggle svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .password-toggle__icon--hide {
+      display: none;
+    }
+
+    .password-input-wrapper[data-state="visible"] .password-toggle__icon--show {
+      display: none;
+    }
+
+    .password-input-wrapper[data-state="visible"] .password-toggle__icon--hide {
+      display: block;
+    }
+
+    /* Form Input Error State */
+    .form-input--error {
+      border-color: var(--color-danger);
+    }
+
+    .form-input--error:focus {
+      border-color: var(--color-danger);
+      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+    }
+
+    /* Login Form Links */
+    .login-form__forgot {
+      display: block;
+      text-align: right;
+      font-size: 13px;
+      color: var(--color-primary);
+      text-decoration: none;
+      margin-top: 8px;
+      margin-bottom: 24px;
+      transition: color var(--transition-fast);
+    }
+
+    .login-form__forgot:hover {
+      color: var(--color-primary-hover);
+      text-decoration: underline;
+    }
+
+    /* Divider */
+    .login-divider {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin: 24px 0;
+    }
+
+    .login-divider__line {
+      flex: 1;
+      height: 1px;
+      background: var(--border-color);
+    }
+
+    .login-divider__text {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* Google Login Button */
+    .btn--google {
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+      gap: 12px;
+    }
+
+    .btn--google:hover {
+      background: var(--bg-secondary);
+    }
+
+    .btn--google svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    /* Register Link */
+    .login-card__footer {
+      text-align: center;
+      margin-top: 24px;
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .login-card__footer-link {
+      color: var(--color-primary);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color var(--transition-fast);
+    }
+
+    .login-card__footer-link:hover {
+      color: var(--color-primary-hover);
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <!--
+  ================================================================================
+  @screen: ログイン画面 (LoginPage)
+  @function: F-002 ユーザーログイン
+  @spec: docs/requirements/functions/auth/F-002-user-login.md
+  ================================================================================
+
+  @description:
+    - メールアドレス/パスワードによるログイン認証
+    - Googleソーシャルログイン（v1.1で実装予定）
+    - パスワード表示/非表示トグル
+    - エラーメッセージ表示（認証エラー、メール未確認）
+
+  @navigation:
+    - 前の画面: splash.html, register.html
+    - 次の画面: main.html (認証成功時)
+    - 関連画面: password-reset.html (パスワードリセット), register.html (新規登録)
+
+  @state:
+    - email: string - メールアドレス入力値
+    - password: string - パスワード入力値
+    - isPasswordVisible: boolean - パスワード表示/非表示状態
+    - isLoading: boolean - ログイン処理中フラグ
+    - errorType: 'auth' | 'unverified' | null - エラー種別
+    - errorMessage: string | null - エラーメッセージ
+
+  @api:
+    - POST /api/auth/login - ログイン処理 (Supabase Auth signInWithPassword)
+    - POST /api/auth/resend-verification - 確認メール再送信
+
+  @errors:
+    - E-F002-01: 認証情報不正（メールアドレスまたはパスワードが違う）
+    - E-F002-02: メール未確認（確認メール再送リンク表示）
+
+  @hooks:
+    - useLogin() - ログイン処理フック (TanStack Query mutation)
+
+  @components:
+    - LoginPage (このファイル)
+      - LoginCard
+        - LoginForm
+          - PasswordInput (パスワード入力+表示トグル)
+        - GoogleLoginButton (v1.1)
+  ================================================================================
+  -->
+
+  <!-- @component: LoginPage - ページ全体のコンテナ -->
+  <div class="login-page" data-component="LoginPage">
+
+    <!-- @component: LoginCard - ログインカード -->
+    <div class="login-card" data-component="LoginCard">
+
+      <!-- @section: Logo - アプリロゴ（静的コンテンツ） -->
+      <div class="login-card__logo">
+        <svg class="login-card__logo-icon" data-icon="lucide:BookOpen" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+          <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+        </svg>
+        <span class="login-card__logo-text">ReSave</span>
+      </div>
+      <!-- @/section: Logo -->
+
+      <!-- @section: Header - タイトル・サブタイトル（静的コンテンツ） -->
+      <h1 class="login-card__title">ログイン</h1>
+      <p class="login-card__subtitle">アカウントにログインしてください</p>
+      <!-- @/section: Header -->
+
+      <!--
+      @component: LoginForm
+      @event: onSubmit - handleLogin(e: FormEvent)
+      @validation: email(必須, メール形式), password(必須, 8文字以上)
+      -->
+      <form class="login-form" data-component="LoginForm" data-action="onSubmit:handleLogin">
+
+        <!--
+        @conditional: errorType === 'auth'
+        @error: E-F002-01 認証情報不正
+        @display: 認証失敗時のみ表示
+        -->
+        <div
+          class="form-alert form-alert--error"
+          data-state="visible"
+          data-show-if="errorType === 'auth'"
+          role="alert"
+        >
+          メールアドレスまたはパスワードが正しくありません
+        </div>
+        <!-- @/conditional: errorType === 'auth' -->
+
+        <!--
+        @conditional: errorType === 'unverified'
+        @error: E-F002-02 メール未確認
+        @display: メール未確認時のみ表示
+        @event: onClick(確認メール再送リンク) - resendVerificationEmail()
+        @api: POST /api/auth/resend-verification
+        -->
+        <div
+          class="form-alert form-alert--warning"
+          data-show-if="errorType === 'unverified'"
+          role="alert"
+          style="display: none;"
+        >
+          メールアドレスの確認が完了していません。
+          <a href="#" class="form-alert__link" data-action="onClick:resendVerification">確認メールを再送する</a>
+        </div>
+        <!-- @/conditional: errorType === 'unverified' -->
+
+        <!--
+        @field: email
+        @state: email: string
+        @event: onChange - setEmail(e.target.value)
+        @validation: required, email format
+        @autocomplete: email
+        -->
+        <div class="form-group">
+          <label class="form-label" for="email">メールアドレス</label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            class="form-input"
+            placeholder="メールアドレスを入力"
+            required
+            autocomplete="email"
+            data-prop="email"
+            data-action="onChange:setEmail"
+          >
+        </div>
+        <!-- @/field: email -->
+
+        <!--
+        @field: password
+        @state: password: string, isPasswordVisible: boolean
+        @event: onChange - setPassword(e.target.value)
+        @validation: required, minLength(8)
+        @autocomplete: current-password
+        -->
+        <div class="form-group">
+          <label class="form-label" for="password">パスワード</label>
+          <!--
+          @component: PasswordInput
+          @state: isPasswordVisible: boolean - パスワード表示状態
+          @event: onClick(toggle) - togglePasswordVisibility()
+          -->
+          <div class="password-input-wrapper" data-component="PasswordInput">
+            <input
+              type="password"
+              id="password"
+              name="password"
+              class="form-input"
+              placeholder="パスワードを入力"
+              required
+              autocomplete="current-password"
+              data-prop="password"
+              data-action="onChange:setPassword"
+            >
+            <!--
+            @event: onClick - togglePasswordVisibility()
+            @state-toggle: isPasswordVisible
+            @behavior: type="password" <-> type="text"
+            -->
+            <button
+              type="button"
+              class="password-toggle"
+              title="パスワードを表示"
+              data-action="onClick:togglePasswordVisibility"
+            >
+              <!-- @conditional: !isPasswordVisible - 表示アイコン -->
+              <svg class="password-toggle__icon--show" data-icon="lucide:Eye" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+              <!-- @conditional: isPasswordVisible - 非表示アイコン -->
+              <svg class="password-toggle__icon--hide" data-icon="lucide:EyeOff" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"/>
+                <path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"/>
+                <path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"/>
+                <path d="m2 2 20 20"/>
+              </svg>
+            </button>
+          </div>
+          <!-- @/component: PasswordInput -->
+        </div>
+        <!-- @/field: password -->
+
+        <!--
+        @link: パスワードリセット画面へ
+        @navigation: -> password-reset.html
+        -->
+        <a href="password-reset.html" class="login-form__forgot">パスワードを忘れた方</a>
+
+        <!--
+        @button: ログインボタン
+        @event: onClick/onSubmit - handleLogin()
+        @state: disabled={isLoading}
+        @api: POST /api/auth/login (Supabase Auth signInWithPassword)
+        @loading: isLoading時にスピナー表示 + "ログイン中..."
+        @success: router.push('/main') または router.push('/')
+        -->
+        <button type="submit" class="btn btn--primary btn--block btn--lg" data-action="onClick:handleLogin">
+          ログイン
+        </button>
+
+      </form>
+      <!-- @/component: LoginForm -->
+
+      <!-- @section: Divider - 区切り線（静的コンテンツ） -->
+      <div class="login-divider">
+        <div class="login-divider__line"></div>
+        <span class="login-divider__text">または</span>
+        <div class="login-divider__line"></div>
+      </div>
+      <!-- @/section: Divider -->
+
+      <!--
+      @component: GoogleLoginButton
+      @status: v1.1で実装予定（現在disabled）
+      @event: onClick - handleGoogleLogin()
+      @api: Supabase Auth signInWithOAuth({ provider: 'google' })
+      -->
+      <button
+        type="button"
+        class="btn btn--google btn--block"
+        disabled
+        title="v1.1で追加予定"
+        data-component="GoogleLoginButton"
+        data-action="onClick:handleGoogleLogin"
+      >
+        <svg data-icon="google" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+        </svg>
+        Googleでログイン
+      </button>
+      <!-- @/component: GoogleLoginButton -->
+
+      <!--
+      @section: Footer - 新規登録リンク
+      @navigation: -> register.html
+      -->
+      <div class="login-card__footer">
+        アカウントをお持ちでない方は
+        <a href="register.html" class="login-card__footer-link">新規登録はこちら</a>
+      </div>
+      <!-- @/section: Footer -->
+
+    </div>
+    <!-- @/component: LoginCard -->
+
+  </div>
+  <!-- @/component: LoginPage -->
+
+  <script src="js/main.js"></script>
+  <script>
+    // Password visibility toggle
+    document.addEventListener('DOMContentLoaded', function() {
+      const passwordWrapper = document.querySelector('.password-input-wrapper');
+      const passwordInput = document.getElementById('password');
+      const toggleBtn = document.querySelector('.password-toggle');
+
+      if (toggleBtn && passwordInput && passwordWrapper) {
+        toggleBtn.addEventListener('click', function() {
+          const isVisible = passwordWrapper.getAttribute('data-state') === 'visible';
+
+          if (isVisible) {
+            passwordInput.type = 'password';
+            passwordWrapper.removeAttribute('data-state');
+            toggleBtn.title = 'パスワードを表示';
+          } else {
+            passwordInput.type = 'text';
+            passwordWrapper.setAttribute('data-state', 'visible');
+            toggleBtn.title = 'パスワードを隠す';
+          }
+        });
+      }
+
+      // Form submission (demo)
+      const form = document.querySelector('.login-form');
+      if (form) {
+        form.addEventListener('submit', function(e) {
+          e.preventDefault();
+          // In real app: submit to Supabase Auth
+          // For demo: redirect to main
+          window.location.href = 'main.html';
+        });
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>新規登録 - ReSave</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* Auth Page Specific Styles */
+    .auth-page {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: var(--bg-secondary);
+    }
+
+    .auth-card {
+      width: 100%;
+      max-width: 400px;
+      background: var(--bg-primary);
+      border-radius: var(--border-radius-lg);
+      box-shadow: var(--shadow-lg);
+      padding: 32px;
+    }
+
+    .auth-card__header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .auth-card__logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .auth-card__logo-icon {
+      width: 40px;
+      height: 40px;
+      color: var(--color-primary);
+    }
+
+    .auth-card__logo-text {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .auth-card__title {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+
+    .auth-card__subtitle {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .auth-card__form {
+      margin-bottom: 24px;
+    }
+
+    .auth-card__divider {
+      display: flex;
+      align-items: center;
+      margin: 24px 0;
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+
+    .auth-card__divider::before,
+    .auth-card__divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border-color);
+    }
+
+    .auth-card__divider::before {
+      margin-right: 12px;
+    }
+
+    .auth-card__divider::after {
+      margin-left: 12px;
+    }
+
+    .auth-card__footer {
+      text-align: center;
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .auth-card__footer a {
+      color: var(--color-primary);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .auth-card__footer a:hover {
+      text-decoration: underline;
+    }
+
+    /* Password Input with Toggle */
+    .password-input-wrapper {
+      position: relative;
+    }
+
+    .password-input-wrapper .form-input {
+      padding-right: 44px;
+    }
+
+    .password-toggle {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 32px;
+      height: 32px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-secondary);
+      border-radius: var(--border-radius);
+      transition: all var(--transition-fast);
+    }
+
+    .password-toggle:hover {
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+    }
+
+    .password-toggle svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* Password Requirements */
+    .password-requirements {
+      margin-top: 8px;
+      padding: 12px;
+      background: var(--bg-secondary);
+      border-radius: var(--border-radius);
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .password-requirements__title {
+      font-weight: 500;
+      margin-bottom: 6px;
+      color: var(--text-primary);
+    }
+
+    .password-requirements__list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .password-requirements__item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 4px;
+    }
+
+    .password-requirements__item:last-child {
+      margin-bottom: 0;
+    }
+
+    .password-requirements__item svg {
+      width: 14px;
+      height: 14px;
+      flex-shrink: 0;
+    }
+
+    .password-requirements__item--valid {
+      color: var(--color-success);
+    }
+
+    .password-requirements__item--valid svg {
+      color: var(--color-success);
+    }
+
+    /* Google Button */
+    .btn--google {
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+      font-weight: 500;
+    }
+
+    .btn--google:hover {
+      background: var(--bg-secondary);
+    }
+
+    .btn--google svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* Alert */
+    .alert {
+      padding: 12px 16px;
+      border-radius: var(--border-radius);
+      font-size: 14px;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    .alert--error {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--color-danger);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .alert--success {
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--color-success);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .alert[data-state="visible"] {
+      display: block;
+    }
+
+    /* Form Input Error State */
+    .form-input--error {
+      border-color: var(--color-danger);
+    }
+
+    .form-input--error:focus {
+      border-color: var(--color-danger);
+      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+    }
+  </style>
+</head>
+<body>
+  <!--
+  ============================================================================
+  @screen: 新規登録画面 (RegisterPage)
+  @route: /register
+  @機能ID: F-001 ユーザー登録
+  @参照仕様: docs/requirements/functions/auth/F-001-user-registration.md
+  ============================================================================
+  @state: {
+    email: string,              // メールアドレス入力値
+    password: string,           // パスワード入力値
+    passwordConfirm: string,    // パスワード確認入力値
+    isPasswordVisible: boolean, // パスワード表示/非表示
+    isPasswordConfirmVisible: boolean, // パスワード確認表示/非表示
+    isSubmitting: boolean,      // 送信中フラグ
+    errors: {                   // バリデーションエラー
+      email?: string,
+      password?: string,
+      passwordConfirm?: string
+    },
+    errorMessage?: string       // API エラーメッセージ
+  }
+  ============================================================================
+  @api:
+    - POST /api/auth/register - ユーザー登録
+      Request: { email: string, password: string }
+      Response: { user: User } | { error: string }
+  ============================================================================
+  @validation (Zod):
+    - email: z.string().email().max(254)
+    - password: z.string().min(8).regex(/[a-zA-Z]/).regex(/[0-9]/)
+    - passwordConfirm: z.string() (password と一致確認)
+  ============================================================================
+  @navigation:
+    - 前の画面: /login (login.html)
+    - 次の画面: / (main.html) - 登録成功時
+    - リンク: ログインはこちら -> /login
+  ============================================================================
+  -->
+
+  <!-- @component: RegisterPage - ページ全体のコンテナ -->
+  <div class="auth-page" data-component="RegisterPage">
+    <div class="auth-card">
+
+      <!--
+      ========================================
+      @component: AuthHeader
+      @description: ロゴとタイトル表示部分
+      @props: なし (静的コンテンツ)
+      ========================================
+      -->
+      <div class="auth-card__header" data-component="AuthHeader">
+        <div class="auth-card__logo">
+          <!-- @icon: lucide/BookOpen -->
+          <svg class="auth-card__logo-icon" data-icon="lucide:BookOpen" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+          </svg>
+          <span class="auth-card__logo-text">ReSave</span>
+        </div>
+        <h1 class="auth-card__title">アカウントを作成</h1>
+        <p class="auth-card__subtitle">無料で始めましょう</p>
+      </div>
+      <!-- @/component: AuthHeader -->
+
+      <!--
+      ========================================
+      @component: AlertMessage
+      @description: エラーメッセージ表示エリア
+      @props: { message: string, type: 'error' | 'success' }
+      @conditional: errorMessage が存在する場合のみ表示
+      ========================================
+      -->
+      <!-- @render-if: errorMessage -->
+      <div
+        class="alert alert--error"
+        id="error-alert"
+        data-component="AlertMessage"
+        data-state="hidden"
+        data-show-if="errorMessage"
+      >
+        <!-- @bind: errorMessage -->
+        <span data-prop="errorMessage">アカウントを作成できませんでした</span>
+      </div>
+      <!-- @/component: AlertMessage -->
+
+      <!--
+      ========================================
+      @component: RegisterForm
+      @description: 新規登録フォーム
+      @event: onSubmit -> handleRegister()
+      @mutation: useRegister (Supabase Auth signUp)
+      ========================================
+      -->
+      <form
+        class="auth-card__form"
+        data-component="RegisterForm"
+        data-action="onSubmit:handleRegister"
+      >
+        <!--
+        ----------------------------------------
+        @field: email
+        @label: メールアドレス
+        @type: email
+        @validation: z.string().email().max(254)
+        @error-code: E-F001-01 (形式不正)
+        ----------------------------------------
+        -->
+        <div class="form-group">
+          <label class="form-label" for="email">メールアドレス</label>
+          <!-- @state: email -->
+          <!-- @event: onChange -> setEmail(e.target.value) -->
+          <input
+            type="email"
+            id="email"
+            name="email"
+            class="form-input"
+            placeholder="メールアドレスを入力"
+            maxlength="254"
+            required
+            data-prop="email"
+            data-action="onChange:setEmail"
+          >
+          <!-- @render-if: errors.email -->
+          <p class="form-error" data-show-if="errors.email" data-prop="errors.email">有効なメールアドレスを入力してください</p>
+        </div>
+
+        <!--
+        ----------------------------------------
+        @field: password
+        @label: パスワード
+        @type: password (toggleable)
+        @validation: z.string().min(8).regex(/[a-zA-Z]/).regex(/[0-9]/)
+        @error-code: E-F001-02 (要件不足)
+        ----------------------------------------
+        -->
+        <div class="form-group">
+          <label class="form-label" for="password">パスワード</label>
+          <div class="password-input-wrapper">
+            <!-- @state: password -->
+            <!-- @event: onChange -> setPassword(e.target.value) -->
+            <!-- @dynamic-type: isPasswordVisible ? 'text' : 'password' -->
+            <input
+              type="password"
+              id="password"
+              name="password"
+              class="form-input"
+              placeholder="8文字以上、英数字混合"
+              minlength="8"
+              required
+              data-prop="password"
+              data-action="onChange:setPassword"
+            >
+            <!--
+            @button: パスワード表示切替
+            @event: onClick -> togglePasswordVisibility()
+            @state-toggle: isPasswordVisible
+            -->
+            <button
+              type="button"
+              class="password-toggle"
+              title="パスワードを表示"
+              data-action="onClick:togglePasswordVisibility"
+              aria-label="パスワードの表示切替"
+            >
+              <!-- @render-if: !isPasswordVisible -->
+              <!-- @icon: lucide/Eye -->
+              <svg data-icon="lucide:Eye" data-show-if="!isPasswordVisible" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
+              <!-- @render-if: isPasswordVisible -->
+              <!-- @icon: lucide/EyeOff -->
+              <svg data-icon="lucide:EyeOff" data-show-if="isPasswordVisible" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;"><path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"/><path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"/><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"/><path d="m2 2 20 20"/></svg>
+            </button>
+          </div>
+          <!-- @render-if: errors.password -->
+          <p class="form-error" data-show-if="errors.password" data-prop="errors.password">パスワードは8文字以上、英数字を含める必要があります</p>
+
+          <!--
+          ========================================
+          @component: PasswordRequirements
+          @description: パスワード要件のリアルタイム表示
+          @props: { password: string }
+          @derived-state: {
+            isLengthValid: password.length >= 8,
+            isAlphanumericValid: /[a-zA-Z]/.test(password) && /[0-9]/.test(password)
+          }
+          ========================================
+          -->
+          <div class="password-requirements" data-component="PasswordRequirements">
+            <p class="password-requirements__title">パスワード要件</p>
+            <ul class="password-requirements__list">
+              <!--
+              @requirement: length
+              @condition: password.length >= 8
+              @class-toggle: password-requirements__item--valid (条件満たす時)
+              @icon-toggle: Circle -> Check (条件満たす時)
+              -->
+              <li class="password-requirements__item" data-requirement="length">
+                <!-- @icon: lucide/Circle (未達成) or lucide/Check (達成) -->
+                <svg data-icon="lucide:Circle" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/></svg>
+                <span>8文字以上</span>
+              </li>
+              <!--
+              @requirement: alphanumeric
+              @condition: /[a-zA-Z]/.test(password) && /[0-9]/.test(password)
+              @class-toggle: password-requirements__item--valid (条件満たす時)
+              @icon-toggle: Circle -> Check (条件満たす時)
+              -->
+              <li class="password-requirements__item" data-requirement="alphanumeric">
+                <!-- @icon: lucide/Circle (未達成) or lucide/Check (達成) -->
+                <svg data-icon="lucide:Circle" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/></svg>
+                <span>英字と数字を含む</span>
+              </li>
+            </ul>
+          </div>
+          <!-- @/component: PasswordRequirements -->
+        </div>
+
+        <!--
+        ----------------------------------------
+        @field: passwordConfirm
+        @label: パスワード（確認）
+        @type: password (toggleable)
+        @validation: password === passwordConfirm
+        @error-code: E-F001-03 (不一致)
+        ----------------------------------------
+        -->
+        <div class="form-group">
+          <label class="form-label" for="password-confirm">パスワード（確認）</label>
+          <div class="password-input-wrapper">
+            <!-- @state: passwordConfirm -->
+            <!-- @event: onChange -> setPasswordConfirm(e.target.value) -->
+            <!-- @dynamic-type: isPasswordConfirmVisible ? 'text' : 'password' -->
+            <input
+              type="password"
+              id="password-confirm"
+              name="passwordConfirm"
+              class="form-input"
+              placeholder="パスワードを再入力"
+              minlength="8"
+              required
+              data-prop="passwordConfirm"
+              data-action="onChange:setPasswordConfirm"
+            >
+            <!--
+            @button: パスワード確認表示切替
+            @event: onClick -> togglePasswordConfirmVisibility()
+            @state-toggle: isPasswordConfirmVisible
+            -->
+            <button
+              type="button"
+              class="password-toggle"
+              title="パスワードを表示"
+              data-action="onClick:togglePasswordConfirmVisibility"
+              aria-label="パスワード確認の表示切替"
+            >
+              <!-- @render-if: !isPasswordConfirmVisible -->
+              <svg data-icon="lucide:Eye" data-show-if="!isPasswordConfirmVisible" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
+              <!-- @render-if: isPasswordConfirmVisible -->
+              <svg data-icon="lucide:EyeOff" data-show-if="isPasswordConfirmVisible" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;"><path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"/><path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"/><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"/><path d="m2 2 20 20"/></svg>
+            </button>
+          </div>
+          <!-- @render-if: errors.passwordConfirm -->
+          <p class="form-error" data-show-if="errors.passwordConfirm" data-prop="errors.passwordConfirm">パスワードが一致しません</p>
+        </div>
+
+        <!--
+        ----------------------------------------
+        @button: 登録ボタン
+        @type: submit
+        @event: onClick -> handleSubmit()
+        @disabled-if: isSubmitting
+        @loading-state: isSubmitting 時にローディング表示
+        ----------------------------------------
+        -->
+        <!-- @event: form onSubmit -> handleRegister() -->
+        <button
+          type="submit"
+          class="btn btn--primary btn--block btn--lg"
+          data-action="onClick:handleSubmit"
+        >
+          <!-- @render-if: !isSubmitting -->
+          登録
+          <!-- @render-if: isSubmitting (ローディング時) -->
+          <!-- 登録中... + Spinner -->
+        </button>
+      </form>
+      <!-- @/component: RegisterForm -->
+
+      <!-- @divider: ソーシャルログイン区切り -->
+      <div class="auth-card__divider">または</div>
+
+      <!--
+      ========================================
+      @component: SocialLogin
+      @description: ソーシャルログインボタン群
+      @note: v1.1で実装予定 (現在disabled)
+      ========================================
+      -->
+      <div data-component="SocialLogin">
+        <!--
+        @button: Google登録
+        @event: onClick -> handleGoogleLogin()
+        @api: Supabase Auth signInWithOAuth({ provider: 'google' })
+        @disabled: true (v1.1で実装予定)
+        -->
+        <button
+          type="button"
+          class="btn btn--google btn--block"
+          data-action="onClick:handleGoogleLogin"
+          disabled
+          title="v1.1で追加予定"
+        >
+          <!-- @icon: Google Logo -->
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+          </svg>
+          Googleで登録
+        </button>
+      </div>
+      <!-- @/component: SocialLogin -->
+
+      <!--
+      ========================================
+      @section: AuthFooter
+      @description: ログインページへのナビゲーション
+      ========================================
+      -->
+      <div class="auth-card__footer">
+        すでにアカウントをお持ちですか？
+        <!-- @link: ログインページへ遷移 -->
+        <!-- @event: onClick -> router.push('/login') または <Link href="/login"> -->
+        <a href="login.html" data-action="onClick:navigateToLogin">ログインはこちら</a>
+      </div>
+
+    </div>
+  </div>
+  <!-- @/component: RegisterPage -->
+
+  <!--
+  ============================================================================
+  @implementation-notes: React実装時の参考
+  ============================================================================
+
+  1. Hooks構成:
+     - useState: email, password, passwordConfirm, isPasswordVisible,
+                 isPasswordConfirmVisible, errors
+     - useMutation: useRegister (Supabase Auth)
+
+  2. バリデーション:
+     - Zodスキーマを使用
+     - リアルタイムバリデーション (onChange時)
+     - 送信時バリデーション (onSubmit時)
+
+  3. API連携:
+     - Server Actions: registerAction (apps/web/src/actions/auth.ts)
+     - Supabase: supabase.auth.signUp({ email, password })
+
+  4. エラーハンドリング:
+     - E-F001-01: メールアドレス形式不正
+     - E-F001-02: パスワード要件不足
+     - E-F001-03: パスワード不一致
+     - E-F001-04: メールアドレス既存
+
+  5. 成功時処理:
+     - router.push('/') でメイン画面へ遷移
+     - または確認メール送信画面へ遷移
+
+  ============================================================================
+  -->
+
+  <script src="js/main.js"></script>
+  <script>
+    /**
+     * Register Page - Interactive Features (Mock用デモスクリプト)
+     */
+    document.addEventListener('DOMContentLoaded', () => {
+      initializeRegisterPage();
+    });
+
+    function initializeRegisterPage() {
+      initializePasswordToggles();
+      initializePasswordValidation();
+      initializeFormValidation();
+    }
+
+    /**
+     * Initialize password visibility toggles
+     */
+    function initializePasswordToggles() {
+      const toggles = document.querySelectorAll('.password-toggle');
+
+      toggles.forEach(toggle => {
+        toggle.addEventListener('click', () => {
+          const wrapper = toggle.closest('.password-input-wrapper');
+          const input = wrapper.querySelector('.form-input');
+          const eyeIcon = toggle.querySelector('[data-icon="lucide:Eye"]');
+          const eyeOffIcon = toggle.querySelector('[data-icon="lucide:EyeOff"]');
+
+          if (input.type === 'password') {
+            input.type = 'text';
+            toggle.title = 'パスワードを非表示';
+            if (eyeIcon) eyeIcon.style.display = 'none';
+            if (eyeOffIcon) eyeOffIcon.style.display = 'block';
+          } else {
+            input.type = 'password';
+            toggle.title = 'パスワードを表示';
+            if (eyeIcon) eyeIcon.style.display = 'block';
+            if (eyeOffIcon) eyeOffIcon.style.display = 'none';
+          }
+        });
+      });
+    }
+
+    /**
+     * Initialize password requirements validation
+     */
+    function initializePasswordValidation() {
+      const passwordInput = document.getElementById('password');
+      const requirements = document.querySelectorAll('.password-requirements__item');
+
+      if (!passwordInput) return;
+
+      passwordInput.addEventListener('input', () => {
+        const value = passwordInput.value;
+
+        requirements.forEach(req => {
+          const type = req.getAttribute('data-requirement');
+          let isValid = false;
+
+          if (type === 'length') {
+            isValid = value.length >= 8;
+          } else if (type === 'alphanumeric') {
+            isValid = /[a-zA-Z]/.test(value) && /[0-9]/.test(value);
+          }
+
+          const icon = req.querySelector('svg');
+
+          if (isValid) {
+            req.classList.add('password-requirements__item--valid');
+            icon.innerHTML = '<polyline points="20 6 9 17 4 12"/>';
+            icon.setAttribute('data-icon', 'lucide:Check');
+          } else {
+            req.classList.remove('password-requirements__item--valid');
+            icon.innerHTML = '<circle cx="12" cy="12" r="10"/>';
+            icon.setAttribute('data-icon', 'lucide:Circle');
+          }
+        });
+      });
+    }
+
+    /**
+     * Initialize form validation
+     */
+    function initializeFormValidation() {
+      const form = document.querySelector('.auth-card__form');
+      const emailInput = document.getElementById('email');
+      const passwordInput = document.getElementById('password');
+      const passwordConfirmInput = document.getElementById('password-confirm');
+      const errorAlert = document.getElementById('error-alert');
+
+      if (!form) return;
+
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        // Reset error states
+        clearErrors();
+
+        let hasError = false;
+        const errors = [];
+
+        // Validate email
+        const email = emailInput.value.trim();
+        if (!isValidEmail(email)) {
+          showFieldError(emailInput, '有効なメールアドレスを入力してください');
+          errors.push('E-F001-01');
+          hasError = true;
+        }
+
+        // Validate password
+        const password = passwordInput.value;
+        if (!isValidPassword(password)) {
+          showFieldError(passwordInput, 'パスワードは8文字以上、英数字を含める必要があります');
+          errors.push('E-F001-02');
+          hasError = true;
+        }
+
+        // Validate password confirmation
+        const passwordConfirm = passwordConfirmInput.value;
+        if (password !== passwordConfirm) {
+          showFieldError(passwordConfirmInput, 'パスワードが一致しません');
+          errors.push('E-F001-03');
+          hasError = true;
+        }
+
+        if (hasError) {
+          // Show general error alert
+          if (errorAlert) {
+            errorAlert.querySelector('span').textContent = 'アカウントを作成できませんでした';
+            errorAlert.setAttribute('data-state', 'visible');
+          }
+          return;
+        }
+
+        // Success - In real app, submit to server
+        alert('登録に成功しました！（デモ）\n\nEmail: ' + email);
+
+        // Redirect to main page (demo)
+        // window.location.href = 'main.html';
+      });
+    }
+
+    /**
+     * Validate email format (RFC 5322 simplified)
+     */
+    function isValidEmail(email) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return emailRegex.test(email) && email.length <= 254;
+    }
+
+    /**
+     * Validate password (8+ chars, alphanumeric)
+     */
+    function isValidPassword(password) {
+      return password.length >= 8 && /[a-zA-Z]/.test(password) && /[0-9]/.test(password);
+    }
+
+    /**
+     * Show field error
+     */
+    function showFieldError(input, message) {
+      input.classList.add('form-input--error');
+      const errorEl = input.closest('.form-group').querySelector('.form-error');
+      if (errorEl) {
+        errorEl.textContent = message;
+        errorEl.style.display = 'block';
+      }
+    }
+
+    /**
+     * Clear all errors
+     */
+    function clearErrors() {
+      document.querySelectorAll('.form-input--error').forEach(el => {
+        el.classList.remove('form-input--error');
+      });
+      document.querySelectorAll('.form-error').forEach(el => {
+        el.style.display = 'none';
+      });
+      const errorAlert = document.getElementById('error-alert');
+      if (errorAlert) {
+        errorAlert.setAttribute('data-state', 'hidden');
+      }
+    }
+  </script>
+</body>
+</html>

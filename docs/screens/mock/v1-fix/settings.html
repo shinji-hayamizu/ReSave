@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* Settings Page Specific Styles */
+    .settings-section {
+      margin-bottom: 16px;
+    }
+
+    .settings-section__title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .settings-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .settings-item:last-child {
+      border-bottom: none;
+    }
+
+    .settings-item__label {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .settings-item__name {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .settings-item__description {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .settings-item__value {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .settings-item__control {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Number Input */
+    .number-input {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .number-input__field {
+      width: 60px;
+      padding: 8px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--border-radius);
+      font-size: 14px;
+      text-align: center;
+    }
+
+    .number-input__field:focus {
+      outline: none;
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    .number-input__unit {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    /* Toggle Switch */
+    .toggle-switch {
+      position: relative;
+      width: 48px;
+      height: 24px;
+      background: var(--border-color);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background var(--transition-fast);
+    }
+
+    .toggle-switch::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 20px;
+      height: 20px;
+      background: white;
+      border-radius: 50%;
+      transition: transform var(--transition-fast);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .toggle-switch.active {
+      background: var(--color-primary);
+    }
+
+    .toggle-switch.active::after {
+      transform: translateX(24px);
+    }
+
+    /* Disabled State */
+    .settings-item--disabled {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+
+    .settings-item--disabled .settings-item__name::after {
+      content: '(近日公開)';
+      font-size: 11px;
+      font-weight: 400;
+      color: var(--text-muted);
+      margin-left: 8px;
+    }
+
+    /* Select */
+    .settings-select {
+      padding: 8px 32px 8px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--border-radius);
+      font-size: 14px;
+      background: var(--bg-primary);
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+    }
+
+    .settings-select:focus {
+      outline: none;
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    /* Link Button */
+    .settings-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 14px;
+      color: var(--color-primary);
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .settings-link:hover {
+      text-decoration: underline;
+    }
+
+    .settings-link svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* App Info */
+    .app-info {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .app-info__version {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .app-info__links {
+      display: flex;
+      gap: 16px;
+    }
+
+    /* Actions */
+    .settings-actions {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border-color);
+    }
+  </style>
+</head>
+<body class="content-body">
+  <!--
+    ============================================================
+    @screen: 設定画面 (SettingsPage)
+    @path: /settings
+    @description: ユーザー設定、アカウント管理、アプリ情報を表示・編集する画面
+
+    @api: GET /api/user/settings - 設定情報取得
+    @api: PATCH /api/user/settings - 設定更新
+    @api: POST /api/auth/logout - ログアウト
+    @api: POST /api/auth/change-password - パスワード変更
+
+    @auth: required - 認証必須
+
+    @navigation:
+      - from: index.html (サイドバーから)
+      - to: index.html (戻る), login.html (ログアウト時)
+
+    @state:
+      - settings: UserSettings - ユーザー設定データ
+      - isLoading: boolean - 読み込み中フラグ
+      - isSaving: boolean - 保存中フラグ
+    ============================================================
+  -->
+
+  <!--
+    @component: SettingsPage
+    @description: 設定画面のルートコンポーネント
+    @props: none (認証ユーザー情報はコンテキストから取得)
+    @hooks:
+      - useSettings() - 設定データの取得・更新
+      - useAuth() - 認証状態・ログアウト処理
+  -->
+  <div class="content-wrapper" data-component="SettingsPage">
+
+    <!-- ========================================
+         @section: 学習設定
+         @component: LearningSettings
+         @description: 学習に関する設定項目
+         @state:
+           - newCardLimit: number - 1日の新規カード上限 (default: 20, min: 1, max: 100)
+         @api: PATCH /api/user/settings - 設定更新時
+         ======================================== -->
+    <div class="summary-card settings-section" data-component="LearningSettings">
+      <h2 class="settings-section__title">学習設定</h2>
+
+      <!--
+        @component: NewCardLimitInput
+        @description: 1日の新規カード上限設定
+        @state: newCardLimit: number
+        @event: onChange - 値変更時にdebounce(500ms)で自動保存
+        @validation: min=1, max=100, integer only
+        @api: PATCH /api/user/settings { new_card_limit: number }
+      -->
+      <div class="settings-item" data-component="NewCardLimitInput">
+        <div class="settings-item__label">
+          <span class="settings-item__name">1日の新規カード上限</span>
+          <span class="settings-item__description">1日に学習する新規カードの最大枚数</span>
+        </div>
+        <div class="settings-item__control">
+          <div class="number-input">
+            <!-- @input: type=number, controlled component -->
+            <!-- @event: onChange -> handleNewCardLimitChange(value) -->
+            <!-- @state: value={settings.newCardLimit} -->
+            <input
+              type="number"
+              class="number-input__field"
+              value="20"
+              min="1"
+              max="100"
+            >
+            <span class="number-input__unit">枚</span>
+          </div>
+        </div>
+      </div>
+
+      <!--
+        @component: ReviewIntervalLink
+        @description: 復習間隔の詳細設定へのリンク
+        @event: onClick -> navigate('/settings/intervals') or open modal
+        @note: 復習間隔は固定値 [1, 3, 7, 14, 30, 180日] のためカスタマイズ不可の場合は非表示も検討
+      -->
+      <div class="settings-item" data-component="ReviewIntervalLink">
+        <div class="settings-item__label">
+          <span class="settings-item__name">復習間隔</span>
+          <span class="settings-item__description">忘却曲線に基づいた復習スケジュール</span>
+        </div>
+        <div class="settings-item__control">
+          <!-- @event: onClick -> handleOpenIntervalSettings() -->
+          <a href="#" class="settings-link">
+            詳細設定
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+    <!-- [/section: 学習設定] -->
+
+    <!-- ========================================
+         @section: 通知設定 (将来対応)
+         @component: NotificationSettings
+         @description: 通知に関する設定項目
+         @status: disabled - 将来実装予定
+         @state:
+           - reminderEnabled: boolean - リマインダー有効フラグ
+           - notificationTime: 'morning' | 'noon' | 'evening' | 'night'
+         ======================================== -->
+    <div class="summary-card settings-section" data-component="NotificationSettings">
+      <h2 class="settings-section__title">通知設定</h2>
+
+      <!--
+        @component: ReviewReminderToggle
+        @description: 復習リマインダーの有効/無効切り替え
+        @status: disabled - 将来実装予定
+        @state: reminderEnabled: boolean
+        @event: onClick -> toggleReminder()
+        @conditional: settings-item--disabled class when feature not available
+      -->
+      <div class="settings-item settings-item--disabled" data-component="ReviewReminderToggle">
+        <div class="settings-item__label">
+          <span class="settings-item__name">復習リマインダー</span>
+          <span class="settings-item__description">復習が必要なカードがある時に通知</span>
+        </div>
+        <div class="settings-item__control">
+          <!--
+            @component: ToggleSwitch
+            @state: active={reminderEnabled}
+            @event: onClick -> handleToggleReminder()
+            @class: add 'active' class when enabled
+          -->
+          <div class="toggle-switch"></div>
+        </div>
+      </div>
+
+      <!--
+        @component: NotificationTimeSelect
+        @description: 通知時間帯の選択
+        @status: disabled - 将来実装予定
+        @state: notificationTime: string
+        @event: onChange -> handleNotificationTimeChange(value)
+        @options: morning(8:00), noon(12:00), evening(18:00), night(21:00)
+        @conditional: disabled when reminderEnabled is false
+      -->
+      <div class="settings-item settings-item--disabled" data-component="NotificationTimeSelect">
+        <div class="settings-item__label">
+          <span class="settings-item__name">通知時間帯</span>
+          <span class="settings-item__description">リマインダーを送信する時間</span>
+        </div>
+        <div class="settings-item__control">
+          <!-- @event: onChange -> handleNotificationTimeChange(e.target.value) -->
+          <!-- @state: value={settings.notificationTime} -->
+          <select class="settings-select" disabled>
+            <option value="morning">朝 (8:00)</option>
+            <option value="noon">昼 (12:00)</option>
+            <option value="evening" selected>夕方 (18:00)</option>
+            <option value="night">夜 (21:00)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <!-- [/section: 通知設定] -->
+
+    <!-- ========================================
+         @section: アカウント
+         @component: AccountSettings
+         @description: アカウント関連の設定・操作
+         @props:
+           - email: string - ユーザーのメールアドレス (from auth context)
+         @api:
+           - POST /api/auth/logout - ログアウト
+           - POST /api/auth/change-password - パスワード変更
+         ======================================== -->
+    <div class="summary-card settings-section" data-component="AccountSettings">
+      <h2 class="settings-section__title">アカウント</h2>
+
+      <!--
+        @component: EmailDisplay
+        @description: ユーザーのメールアドレス表示 (読み取り専用)
+        @props: email: string - from useAuth() or user context
+        @note: メールアドレス変更機能は将来実装予定
+      -->
+      <div class="settings-item" data-component="EmailDisplay">
+        <div class="settings-item__label">
+          <span class="settings-item__name">メールアドレス</span>
+        </div>
+        <!-- @render: {user.email} -->
+        <div class="settings-item__value">
+          user@example.com
+        </div>
+      </div>
+
+      <!--
+        @component: PasswordChangeLink
+        @description: パスワード変更画面/モーダルへのリンク
+        @event: onClick -> navigate('/settings/password') or openPasswordModal()
+        @api: POST /api/auth/change-password
+      -->
+      <div class="settings-item" data-component="PasswordChangeLink">
+        <div class="settings-item__label">
+          <span class="settings-item__name">パスワード</span>
+        </div>
+        <div class="settings-item__control">
+          <!-- @event: onClick -> handleOpenPasswordChange() -->
+          <a href="#" class="settings-link">
+            パスワード変更
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <!--
+        @component: LogoutButton
+        @description: ログアウトボタン
+        @event: onClick -> handleLogout()
+        @api: POST /api/auth/logout
+        @behavior:
+          1. 確認ダイアログ表示 (optional)
+          2. API呼び出し
+          3. 認証状態クリア
+          4. login.html へリダイレクト
+        @state: isLoggingOut: boolean - ログアウト処理中フラグ
+      -->
+      <div class="settings-actions">
+        <!--
+          @event: onClick -> handleLogout()
+          @state: disabled={isLoggingOut}
+          @loading: show spinner when isLoggingOut
+        -->
+        <button type="button" class="btn btn--danger btn--block">
+          ログアウト
+        </button>
+      </div>
+    </div>
+    <!-- [/section: アカウント] -->
+
+    <!-- ========================================
+         @section: データ管理 (将来対応)
+         @component: DataManagement
+         @description: データのエクスポート・インポート機能
+         @status: disabled - 将来実装予定
+         @api:
+           - GET /api/cards/export - データエクスポート
+           - POST /api/cards/import - データインポート
+         ======================================== -->
+    <div class="summary-card settings-section" data-component="DataManagement">
+      <h2 class="settings-section__title">データ管理</h2>
+
+      <!--
+        @component: DataExportButton
+        @description: 全カードデータのエクスポート
+        @status: disabled - 将来実装予定
+        @event: onClick -> handleExport()
+        @api: GET /api/cards/export
+        @behavior: ダウンロードファイル生成 (JSON or CSV)
+        @state: isExporting: boolean
+      -->
+      <div class="settings-item settings-item--disabled" data-component="DataExportButton">
+        <div class="settings-item__label">
+          <span class="settings-item__name">データエクスポート</span>
+          <span class="settings-item__description">全てのカードデータをファイルに書き出し</span>
+        </div>
+        <div class="settings-item__control">
+          <!-- @event: onClick -> handleExport() -->
+          <!-- @state: disabled={isExporting || !featureEnabled} -->
+          <button type="button" class="btn btn--secondary btn--sm" disabled>
+            エクスポート
+          </button>
+        </div>
+      </div>
+
+      <!--
+        @component: DataImportButton
+        @description: カードデータのインポート
+        @status: disabled - 将来実装予定
+        @event: onClick -> handleImport() -> open file picker
+        @api: POST /api/cards/import (multipart/form-data)
+        @behavior: ファイル選択 -> バリデーション -> インポート実行
+        @state: isImporting: boolean
+      -->
+      <div class="settings-item settings-item--disabled" data-component="DataImportButton">
+        <div class="settings-item__label">
+          <span class="settings-item__name">データインポート</span>
+          <span class="settings-item__description">ファイルからカードデータを読み込み</span>
+        </div>
+        <div class="settings-item__control">
+          <!-- @event: onClick -> handleImport() -->
+          <!-- @state: disabled={isImporting || !featureEnabled} -->
+          <button type="button" class="btn btn--secondary btn--sm" disabled>
+            インポート
+          </button>
+        </div>
+      </div>
+    </div>
+    <!-- [/section: データ管理] -->
+
+    <!-- ========================================
+         @section: アプリ情報
+         @component: AppInfo
+         @description: アプリのバージョン情報とリンク
+         @props:
+           - version: string - アプリバージョン (from env or config)
+         @static: true - 動的データ取得不要
+         ======================================== -->
+    <div class="summary-card settings-section" data-component="AppInfo">
+      <h2 class="settings-section__title">アプリ情報</h2>
+
+      <div class="app-info">
+        <!--
+          @render: {APP_VERSION} from environment or package.json
+          @example: process.env.NEXT_PUBLIC_APP_VERSION or package.json version
+        -->
+        <div class="app-info__version">
+          バージョン: 1.0.0
+        </div>
+
+        <!--
+          @component: LegalLinks
+          @description: 利用規約・プライバシーポリシーへのリンク
+          @behavior: 外部リンクまたはモーダル表示
+        -->
+        <div class="app-info__links">
+          <!-- @event: onClick -> navigate('/terms') or window.open() -->
+          <a href="#" class="settings-link">
+            利用規約
+          </a>
+          <!-- @event: onClick -> navigate('/privacy') or window.open() -->
+          <a href="#" class="settings-link">
+            プライバシーポリシー
+          </a>
+        </div>
+      </div>
+    </div>
+    <!-- [/section: アプリ情報] -->
+
+  </div>
+  <!-- [/component: SettingsPage] -->
+
+  <script src="js/main.js"></script>
+</body>
+</html>

@@ -177,5 +177,29 @@
     }
   },
   "active": "62a71329f653509f",
-  "lastOpenFiles": []
+  "lastOpenFiles": [
+    "docs/screens/mock/v1-fix/js/main.js",
+    "docs/screens/mock/v1-fix/css/style.css",
+    "docs/screens/mock/v1-fix/tags.html",
+    "docs/screens/mock/v1-fix/stats.html",
+    "docs/screens/mock/v1-fix/splash.html",
+    "docs/screens/mock/v1-fix/settings.html",
+    "docs/screens/mock/v1-fix/register.html",
+    "docs/screens/mock/v1-fix/profile.html",
+    "docs/screens/mock/v1-fix/password-reset.html",
+    "docs/screens/mock/v1-fix/main.html",
+    "docs/screens/mock/v1-fix/login.html",
+    "apps/web/playwright-report/data/56e42966ee3c2ab43ea87c2c7993112975133fbb.md",
+    "apps/web/test-results/auth.setup.ts-authenticate-setup/error-context.md",
+    "apps/web/test-results/auth-認証フロー-ログイン画面-無効なメール形式でバリデーションエラー-chromium-no-auth/error-context.md",
+    "apps/web/test-results/auth-認証フロー-未認証時-ホーム画面アクセスでログイン画面へリダイレクト-chromium-no-auth/error-context.md",
+    "apps/web/playwright-report/data/8274f3f29fd1ff9b33133f5d3d38e6317928e1f0.md",
+    "apps/web/playwright-report/data/7200ddacb9b33c099eac5e50e29e36515d56ca6b.md",
+    "apps/web/playwright-report/data/6b6b835ab62e32a7e5a317939e89a12b72e8ec8e.md",
+    "apps/web/playwright-report/data/20e56245ec29ad1c303ff9b6887629ade63e9f41.md",
+    "apps/web/test-results/auth-認証フロー-ログイン画面から新規登録画面へ遷移-chromium-no-auth/error-context.md",
+    "apps/web/test-results/auth-認証フロー-新規登録画面-パスワード不一致でバリデーションエラー-chromium-no-auth/error-context.md",
+    "apps/web/test-results/auth-認証フロー-新規登録画面-フォーム要素が表示される-chromium-no-auth/error-context.md",
+    "apps/web/test-results/auth-認証フロー-ログイン画面-フォーム要素が表示される-chromium-no-auth/error-context.md"
+  ]
 }
