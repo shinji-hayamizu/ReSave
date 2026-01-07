@@ -74,8 +74,6 @@ export default function DashboardPage() {
         due.push(card);
       } else if (card.nextReviewAt === null) {
         completed.push(card);
-      } else if (card.reviewLevel === 0) {
-        due.push(card);
       } else {
         learning.push(card);
       }
@@ -126,6 +124,7 @@ export default function DashboardPage() {
                   ok: getNextInterval(card.reviewLevel),
                   again: '1日後',
                 }}
+                reviewLevel={card.reviewLevel}
                 tags={card.tags}
                 onEdit={() => handleEdit(card)}
               />
