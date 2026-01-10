@@ -7,6 +7,7 @@ import type { Rating } from '@/components/ui/rating-buttons';
 import { RatingButtons } from '@/components/ui/rating-buttons';
 import { StudyCard } from '@/components/ui/study-card';
 import { TagBadge } from '@/components/ui/tag-badge';
+import { useUpdateCard } from '@/hooks/useCards';
 import { useSubmitAssessment } from '@/hooks/useStudy';
 import type { Assessment } from '@/types/study-log';
 import type { Tag } from '@/types/tag';
@@ -45,6 +46,7 @@ export const HomeStudyCard = memo(function HomeStudyCard({
   className,
 }: HomeStudyCardProps) {
   const submitAssessment = useSubmitAssessment();
+  const updateCard = useUpdateCard();
 
   const handleRate = useCallback(
     async (rating: Rating) => {
@@ -59,6 +61,21 @@ export const HomeStudyCard = memo(function HomeStudyCard({
       }
     },
     [id, submitAssessment, onAssessmentComplete]
+  );
+
+  const handleSave = useCallback(
+    async (data: { front?: string; back?: string }) => {
+      try {
+        await updateCard.mutateAsync({
+          id,
+          input: data,
+        });
+        toast.success('カードを更新しました');
+      } catch {
+        toast.error('カードの更新に失敗しました');
+      }
+    },
+    [id, updateCard]
   );
 
   return (
@@ -86,6 +103,7 @@ export const HomeStudyCard = memo(function HomeStudyCard({
       }
       totalSteps={schedule?.length}
       onEdit={onEdit}
+      onSave={handleSave}
     />
   );
 });

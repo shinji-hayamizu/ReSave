@@ -10,7 +10,7 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { Skeleton } from '@/components/ui/skeleton';
 import { StudyCard } from '@/components/ui/study-card';
 import { TagBadge } from '@/components/ui/tag-badge';
-import { useResetCard } from '@/hooks/useCards';
+import { useResetCard, useUpdateCard } from '@/hooks/useCards';
 import { cn } from '@/lib/utils';
 import type { CardWithTags } from '@/types/card';
 
@@ -68,11 +68,13 @@ const CardItem = memo(function CardItem({
   card,
   onReset,
   onEdit,
+  onSave,
   isResetting,
 }: {
   card: CardWithTags;
   onReset: (id: string) => void;
   onEdit: (card: CardWithTags) => void;
+  onSave: (id: string, data: { front?: string; back?: string }) => void;
   isResetting: boolean;
 }) {
   const tags = useMemo(() => {
@@ -96,6 +98,13 @@ const CardItem = memo(function CardItem({
     onEdit(card);
   }, [card, onEdit]);
 
+  const handleSave = useCallback(
+    (data: { front?: string; back?: string }) => {
+      onSave(card.id, data);
+    },
+    [card.id, onSave]
+  );
+
   return (
     <StudyCard
       answer={card.back}
@@ -105,6 +114,7 @@ const CardItem = memo(function CardItem({
       tags={tags}
       totalSteps={card.schedule.length}
       onEdit={handleEdit}
+      onSave={handleSave}
     />
   );
 });
@@ -114,12 +124,14 @@ function VirtualizedCardList({
   className,
   onReset,
   onEdit,
+  onSave,
   isResetting,
 }: {
   cards: CardWithTags[];
   className?: string;
   onReset: (id: string) => void;
   onEdit: (card: CardWithTags) => void;
+  onSave: (id: string, data: { front?: string; back?: string }) => void;
   isResetting: boolean;
 }) {
   const parentRef = useRef<HTMLDivElement>(null);
@@ -153,7 +165,7 @@ function VirtualizedCardList({
                   transform: `translateY(${virtualItem.start}px)`,
                 }}
               >
-                <CardItem card={card} isResetting={isResetting} onEdit={onEdit} onReset={onReset} />
+                <CardItem card={card} isResetting={isResetting} onEdit={onEdit} onReset={onReset} onSave={onSave} />
               </div>
             );
           })}
@@ -170,6 +182,7 @@ export const CardList = memo(function CardList({
   className,
 }: CardListProps) {
   const resetCard = useResetCard();
+  const updateCard = useUpdateCard();
   const shouldVirtualize = (cards?.length ?? 0) > VIRTUALIZATION_THRESHOLD;
   const [editingCard, setEditingCard] = useState<CardWithTags | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -190,6 +203,18 @@ export const CardList = memo(function CardList({
     setEditingCard(card);
     setIsEditDialogOpen(true);
   }, []);
+
+  const handleSave = useCallback(
+    async (id: string, data: { front?: string; back?: string }) => {
+      try {
+        await updateCard.mutateAsync({ id, input: data });
+        toast.success('カードを更新しました');
+      } catch {
+        toast.error('カードの更新に失敗しました');
+      }
+    },
+    [updateCard]
+  );
 
   const handleEditDialogClose = useCallback((open: boolean) => {
     setIsEditDialogOpen(open);
@@ -222,6 +247,7 @@ export const CardList = memo(function CardList({
           isResetting={resetCard.isPending}
           onEdit={handleEdit}
           onReset={handleReset}
+          onSave={handleSave}
         />
         <EditCardDialog
           card={editingCard}
@@ -243,6 +269,7 @@ export const CardList = memo(function CardList({
               isResetting={resetCard.isPending}
               onEdit={handleEdit}
               onReset={handleReset}
+              onSave={handleSave}
             />
           ))}
         </div>
