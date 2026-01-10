@@ -66,3 +66,6 @@ e2e/.auth/
 
 # MCP (contains access tokens)
 .mcp.json
+
+# Claude
+.claude/settings.local.json
