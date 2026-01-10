@@ -13,12 +13,13 @@ import { cn } from '@/lib/utils';
 
 interface QuickInputFormProps {
   className?: string;
+  onCardCreated?: () => void;
 }
 
 const MAX_FRONT_LENGTH = 500;
 const MAX_BACK_LENGTH = 2000;
 
-export function QuickInputForm({ className }: QuickInputFormProps) {
+export function QuickInputForm({ className, onCardCreated }: QuickInputFormProps) {
   const [front, setFront] = useState('');
   const [back, setBack] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -39,6 +40,7 @@ export function QuickInputForm({ className }: QuickInputFormProps) {
       toast.success('カードを追加しました');
       setFront('');
       setBack('');
+      onCardCreated?.();
     } catch {
       toast.error('カードの追加に失敗しました');
     }
@@ -61,10 +63,9 @@ export function QuickInputForm({ className }: QuickInputFormProps) {
   return (
     <>
       <form className={className} onSubmit={handleSubmit}>
-        <div className="bg-card rounded-xl shadow-sm px-4 pt-2 pb-4">
-          <div className="grid grid-cols-[1fr_auto] gap-0">
+        <div className="grid grid-cols-[1fr_auto] gap-0">
             <Input
-              className="rounded-r-none border-r-0 mb-1"
+              className="rounded-r-none border-r-0 mb-0.5 h-8"
               placeholder="覚えたいこと"
               maxLength={MAX_FRONT_LENGTH}
               value={front}
@@ -96,7 +97,7 @@ export function QuickInputForm({ className }: QuickInputFormProps) {
               </Button>
             </div>
             <Input
-              className="rounded-r-none border-r-0"
+              className="rounded-r-none border-r-0 h-8"
               placeholder="答え（任意）"
               maxLength={MAX_BACK_LENGTH}
               value={back}
@@ -104,7 +105,6 @@ export function QuickInputForm({ className }: QuickInputFormProps) {
               disabled={createCard.isPending}
             />
           </div>
-        </div>
       </form>
       <CreateCardDialog
         open={dialogOpen}
@@ -113,6 +113,7 @@ export function QuickInputForm({ className }: QuickInputFormProps) {
           front: front.trim(),
           back: back.trim(),
         }}
+        onCardCreated={onCardCreated}
       />
     </>
   );

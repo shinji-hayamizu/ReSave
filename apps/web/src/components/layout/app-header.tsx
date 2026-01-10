@@ -30,7 +30,7 @@ export function AppHeader() {
 
   return (
     <header className="sticky top-0 z-40 border-b bg-background">
-      <div className="mx-auto flex h-14 max-w-2xl items-center justify-between px-4 md:px-6">
+      <div className="mx-auto flex h-12 max-w-3xl items-center justify-between px-4">
         <div className="flex items-center gap-2">
         <Button
           variant="ghost"

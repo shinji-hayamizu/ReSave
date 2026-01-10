@@ -70,6 +70,10 @@ export default function DashboardPage() {
     }
   }, []);
 
+  const handleCardCreated = useCallback(() => {
+    setActiveTab('due');
+  }, []);
+
   const categorizedCards = useMemo(() => {
     // due: status='new'のカード（未学習）
     const due = newCards ?? [];
@@ -90,8 +94,8 @@ export default function DashboardPage() {
   const activeCards = categorizedCards[activeTab];
 
   return (
-    <div className="py-4 md:py-6 space-y-6">
-        <QuickInputForm />
+    <div className="pt-1 pb-2 md:pt-2 md:pb-4 space-y-2">
+        <QuickInputForm onCardCreated={handleCardCreated} />
 
         <CardTabs counts={counts} value={activeTab} onChange={setActiveTab} />
 
@@ -112,7 +116,7 @@ export default function DashboardPage() {
         ) : activeTab === 'completed' ? (
           <CardList cards={activeCards} />
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-0.5">
             {activeCards.map((card) => (
               <HomeStudyCard
                 key={card.id}

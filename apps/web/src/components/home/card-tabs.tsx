@@ -44,8 +44,8 @@ export function CardTabs({ value, onChange, counts, className }: CardTabsProps) 
           type="button"
           className={cn(
             'flex-1 transition-all -mb-px',
-            'flex flex-col items-center gap-1 py-2 px-2 border-b-2 border-transparent',
-            'md:flex-row md:justify-center md:gap-2 md:py-2 md:px-4',
+            'flex flex-col items-center gap-0.5 py-1 px-2 border-b-2 border-transparent',
+            'md:flex-row md:justify-center md:gap-2 md:py-1.5 md:px-4',
             value === tab.value
               ? 'text-primary border-b-primary'
               : 'text-muted-foreground hover:text-foreground'
