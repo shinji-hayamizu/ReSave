@@ -9,8 +9,11 @@ export interface Database {
           user_id: string;
           front: string;
           back: string;
-          review_level: number;
+          schedule: number[];
+          current_step: number;
           next_review_at: string | null;
+          status: 'active' | 'completed';
+          completed_at: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -19,8 +22,11 @@ export interface Database {
           user_id: string;
           front: string;
           back: string;
-          review_level?: number;
+          schedule?: number[];
+          current_step?: number;
           next_review_at?: string | null;
+          status?: 'active' | 'completed';
+          completed_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -29,14 +35,52 @@ export interface Database {
           user_id?: string;
           front?: string;
           back?: string;
-          review_level?: number;
+          schedule?: number[];
+          current_step?: number;
           next_review_at?: string | null;
+          status?: 'active' | 'completed';
+          completed_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };
         Relationships: [
           {
             foreignKeyName: 'cards_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
+      review_schedules: {
+        Row: {
+          id: string;
+          user_id: string;
+          name: string;
+          intervals: number[];
+          is_default: boolean;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          name: string;
+          intervals: number[];
+          is_default?: boolean;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          name?: string;
+          intervals?: number[];
+          is_default?: boolean;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'review_schedules_user_id_fkey';
             columns: ['user_id'];
             isOneToOne: false;
             referencedRelation: 'users';

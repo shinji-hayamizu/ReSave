@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 
 import type { Card, CardWithTags, CreateCardInput, UpdateCardInput, CardFilters, CardListResponse } from '@/types/card';
+import { DEFAULT_INTERVALS } from '@/types/review-schedule';
 import { createCardSchema, updateCardSchema } from '@/validations/card';
 import { createClient } from '@/lib/supabase/server';
 
@@ -19,14 +20,20 @@ export async function createCard(input: CreateCardInput): Promise<Card> {
 
   const validated = createCardSchema.parse(input);
 
+  const schedule = validated.schedule || DEFAULT_INTERVALS;
+  const nextReviewAt = new Date();
+  nextReviewAt.setDate(nextReviewAt.getDate() + schedule[0]);
+
   const { data: card, error } = await supabase
     .from('cards')
     .insert({
       user_id: user.id,
       front: validated.front,
       back: validated.back,
-      review_level: 0,
-      next_review_at: null,
+      schedule,
+      current_step: 0,
+      next_review_at: nextReviewAt.toISOString(),
+      status: 'active',
     })
     .select()
     .single();
@@ -57,8 +64,11 @@ export async function createCard(input: CreateCardInput): Promise<Card> {
     userId: card.user_id,
     front: card.front,
     back: card.back,
-    reviewLevel: card.review_level,
+    schedule: card.schedule,
+    currentStep: card.current_step,
     nextReviewAt: card.next_review_at,
+    status: card.status,
+    completedAt: card.completed_at,
     createdAt: card.created_at,
     updatedAt: card.updated_at,
   };
@@ -126,8 +136,11 @@ export async function updateCard(id: string, input: UpdateCardInput): Promise<Ca
     userId: card.user_id,
     front: card.front,
     back: card.back,
-    reviewLevel: card.review_level,
+    schedule: card.schedule,
+    currentStep: card.current_step,
     nextReviewAt: card.next_review_at,
+    status: card.status,
+    completedAt: card.completed_at,
     createdAt: card.created_at,
     updatedAt: card.updated_at,
   };
@@ -197,8 +210,11 @@ export async function getCard(id: string): Promise<CardWithTags> {
     userId: card.user_id,
     front: card.front,
     back: card.back,
-    reviewLevel: card.review_level,
+    schedule: card.schedule,
+    currentStep: card.current_step,
     nextReviewAt: card.next_review_at,
+    status: card.status,
+    completedAt: card.completed_at,
     createdAt: card.created_at,
     updatedAt: card.updated_at,
     tags,
@@ -233,9 +249,9 @@ export async function getCards(filters?: CardFilters): Promise<CardListResponse>
 
   if (filters?.status === 'due') {
     const today = new Date().toISOString();
-    query = query.lte('next_review_at', today);
+    query = query.eq('status', 'active').lte('next_review_at', today);
   } else if (filters?.status === 'completed') {
-    query = query.is('next_review_at', null);
+    query = query.eq('status', 'completed');
   }
 
   if (filters?.tagId) {
@@ -270,8 +286,11 @@ export async function getCards(filters?: CardFilters): Promise<CardListResponse>
     userId: card.user_id,
     front: card.front,
     back: card.back,
-    reviewLevel: card.review_level,
+    schedule: card.schedule,
+    currentStep: card.current_step,
     nextReviewAt: card.next_review_at,
+    status: card.status,
+    completedAt: card.completed_at,
     createdAt: card.created_at,
     updatedAt: card.updated_at,
     tags: card.card_tags.map((ct: any) => ({
@@ -304,14 +323,29 @@ export async function resetCardToUnlearned(id: string): Promise<Card> {
     throw new Error('Unauthorized');
   }
 
-  const now = new Date().toISOString();
+  const { data: existingCard, error: fetchError } = await supabase
+    .from('cards')
+    .select('schedule')
+    .eq('id', id)
+    .eq('user_id', user.id)
+    .single();
+
+  if (fetchError || !existingCard) {
+    throw new Error('Card not found');
+  }
+
+  const now = new Date();
+  const nextReviewAt = new Date(now);
+  nextReviewAt.setDate(nextReviewAt.getDate() + existingCard.schedule[0]);
 
   const { data: card, error } = await supabase
     .from('cards')
     .update({
-      review_level: 0,
-      next_review_at: now,
-      updated_at: now,
+      current_step: 0,
+      next_review_at: nextReviewAt.toISOString(),
+      status: 'active',
+      completed_at: null,
+      updated_at: now.toISOString(),
     })
     .eq('id', id)
     .eq('user_id', user.id)
@@ -330,8 +364,11 @@ export async function resetCardToUnlearned(id: string): Promise<Card> {
     userId: card.user_id,
     front: card.front,
     back: card.back,
-    reviewLevel: card.review_level,
+    schedule: card.schedule,
+    currentStep: card.current_step,
     nextReviewAt: card.next_review_at,
+    status: card.status,
+    completedAt: card.completed_at,
     createdAt: card.created_at,
     updatedAt: card.updated_at,
   };
@@ -359,8 +396,9 @@ export async function getTodayCards(): Promise<CardWithTags[]> {
       )
     `)
     .eq('user_id', user.id)
-    .or(`next_review_at.lte.${today},next_review_at.is.null`)
-    .order('next_review_at', { ascending: true, nullsFirst: true });
+    .eq('status', 'active')
+    .lte('next_review_at', today)
+    .order('next_review_at', { ascending: true });
 
   if (error) {
     throw new Error(`Failed to fetch today's cards: ${error.message}`);
@@ -371,8 +409,11 @@ export async function getTodayCards(): Promise<CardWithTags[]> {
     userId: card.user_id,
     front: card.front,
     back: card.back,
-    reviewLevel: card.review_level,
+    schedule: card.schedule,
+    currentStep: card.current_step,
     nextReviewAt: card.next_review_at,
+    status: card.status,
+    completedAt: card.completed_at,
     createdAt: card.created_at,
     updatedAt: card.updated_at,
     tags: card.card_tags.map((ct: any) => ({

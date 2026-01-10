@@ -37,3 +37,12 @@ export type {
   SignupInput,
   ResetPasswordInput,
 } from './user';
+
+export type {
+  ReviewSchedule,
+  ReviewScheduleListResponse,
+  CreateReviewScheduleInput,
+  UpdateReviewScheduleInput,
+} from './review-schedule';
+
+export { DEFAULT_INTERVALS } from './review-schedule';

@@ -9,8 +9,11 @@ export type Card = {
   userId: string;
   front: string;
   back: string;
-  reviewLevel: number;
+  schedule: number[];
+  currentStep: number;
   nextReviewAt: string | null;
+  status: 'active' | 'completed';
+  completedAt: string | null;
   createdAt: string;
   updatedAt: string;
 };

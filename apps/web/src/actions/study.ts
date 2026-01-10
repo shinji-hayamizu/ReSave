@@ -7,8 +7,6 @@ import type { SubmitAssessmentInput, StudyStats } from '@/types/study-log';
 import type { Card } from '@/types/card';
 import { submitAssessmentSchema } from '@/validations/study-log';
 
-const REVIEW_INTERVALS = [1, 3, 7, 14, 30, 180];
-
 type ActionResult<T> =
   | { ok: true; data: T }
   | { ok: false; error: string };
@@ -47,34 +45,45 @@ export async function submitAssessment(
     return { ok: false, error: 'カードが見つかりません' };
   }
 
-  let newReviewLevel = card.review_level;
+  const schedule = card.schedule as number[];
+  let newCurrentStep = card.current_step;
   let nextReviewAt: string | null = null;
+  let newStatus: 'active' | 'completed' = card.status as 'active' | 'completed';
+  let completedAt: string | null = card.completed_at;
 
   if (assessment === 'ok') {
-    newReviewLevel = Math.min(card.review_level + 1, REVIEW_INTERVALS.length - 1);
-    const daysToAdd = REVIEW_INTERVALS[newReviewLevel];
-    const nextDate = new Date();
-    nextDate.setDate(nextDate.getDate() + daysToAdd);
-    nextReviewAt = nextDate.toISOString();
-  } else if (assessment === 'again') {
-    newReviewLevel = 0;
-    const daysToAdd = REVIEW_INTERVALS[0];
-    const nextDate = new Date();
-    nextDate.setDate(nextDate.getDate() + daysToAdd);
-    nextReviewAt = nextDate.toISOString();
-  } else if (assessment === 'remembered') {
-    nextReviewAt = null;
-    // reviewLevel=0のままだとdueに分類されるため、完了として認識させる
-    if (newReviewLevel === 0) {
-      newReviewLevel = 1;
+    newCurrentStep = card.current_step + 1;
+    if (newCurrentStep >= schedule.length) {
+      newStatus = 'completed';
+      completedAt = new Date().toISOString();
+      nextReviewAt = null;
+    } else {
+      const daysToAdd = schedule[newCurrentStep];
+      const nextDate = new Date();
+      nextDate.setDate(nextDate.getDate() + daysToAdd);
+      nextReviewAt = nextDate.toISOString();
     }
+  } else if (assessment === 'again') {
+    newCurrentStep = 0;
+    const daysToAdd = schedule[0];
+    const nextDate = new Date();
+    nextDate.setDate(nextDate.getDate() + daysToAdd);
+    nextReviewAt = nextDate.toISOString();
+    newStatus = 'active';
+    completedAt = null;
+  } else if (assessment === 'remembered') {
+    newStatus = 'completed';
+    completedAt = new Date().toISOString();
+    nextReviewAt = null;
   }
 
   const { error: updateError } = await supabase
     .from('cards')
     .update({
-      review_level: newReviewLevel,
+      current_step: newCurrentStep,
       next_review_at: nextReviewAt,
+      status: newStatus,
+      completed_at: completedAt,
       updated_at: new Date().toISOString(),
     })
     .eq('id', cardId)
@@ -111,8 +120,11 @@ export async function submitAssessment(
     userId: updatedCard.user_id,
     front: updatedCard.front,
     back: updatedCard.back,
-    reviewLevel: updatedCard.review_level,
+    schedule: updatedCard.schedule,
+    currentStep: updatedCard.current_step,
     nextReviewAt: updatedCard.next_review_at,
+    status: updatedCard.status,
+    completedAt: updatedCard.completed_at,
     createdAt: updatedCard.created_at,
     updatedAt: updatedCard.updated_at,
   };
@@ -132,7 +144,8 @@ export async function getStudySession(): Promise<
       id: string;
       front: string;
       back: string;
-      reviewLevel: number;
+      currentStep: number;
+      schedule: number[];
     }>;
     stats: StudyStats;
   }>
@@ -153,8 +166,9 @@ export async function getStudySession(): Promise<
 
   const { data: dueCards, error: dueError } = await supabase
     .from('cards')
-    .select('id, front, back, review_level')
+    .select('id, front, back, current_step, schedule')
     .eq('user_id', user.id)
+    .eq('status', 'active')
     .lte('next_review_at', new Date().toISOString())
     .order('next_review_at', { ascending: true });
 
@@ -187,7 +201,8 @@ export async function getStudySession(): Promise<
     id: card.id,
     front: card.front,
     back: card.back,
-    reviewLevel: card.review_level,
+    currentStep: card.current_step,
+    schedule: card.schedule as number[],
   }));
 
   const stats: StudyStats = {

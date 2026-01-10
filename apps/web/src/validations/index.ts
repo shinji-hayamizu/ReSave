@@ -51,3 +51,15 @@ export type {
   SignupInput,
   ResetPasswordInput,
 } from './user';
+
+export {
+  reviewScheduleSchema,
+  createReviewScheduleSchema,
+  updateReviewScheduleSchema,
+} from './review-schedule';
+
+export type {
+  ReviewSchedule,
+  CreateReviewScheduleInput,
+  UpdateReviewScheduleInput,
+} from './review-schedule';
