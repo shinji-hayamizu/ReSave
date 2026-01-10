@@ -1,7 +1,7 @@
 'use client'
 
 import { memo, useCallback, useEffect, useRef, useState } from 'react'
-import { Check, Eye, EyeOff, Pencil, X } from 'lucide-react'
+import { Check, Eye, EyeOff, Pencil, SquarePen, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 
@@ -33,8 +33,10 @@ export const StudyCard = memo(function StudyCard({
   const [isOpen, setIsOpen] = useState(defaultOpen)
   const [editingField, setEditingField] = useState<'front' | 'back' | null>(null)
   const [editValue, setEditValue] = useState('')
+  const [isWritingAnswer, setIsWritingAnswer] = useState(false)
   const answerRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const writeAnswerRef = useRef<HTMLTextAreaElement>(null)
 
   const handleToggle = () => {
     const willOpen = !isOpen
@@ -62,6 +64,28 @@ export const StudyCard = memo(function StudyCard({
     setEditValue('')
   }, [])
 
+  const startWriteAnswer = useCallback(() => {
+    setIsWritingAnswer(true)
+    setEditValue('')
+  }, [])
+
+  const cancelWriteAnswer = useCallback(() => {
+    setIsWritingAnswer(false)
+    setEditValue('')
+  }, [])
+
+  const saveWriteAnswer = useCallback(() => {
+    if (!onSave) return
+    const trimmed = editValue.trim()
+    if (!trimmed) {
+      cancelWriteAnswer()
+      return
+    }
+    onSave({ back: trimmed })
+    setIsWritingAnswer(false)
+    setEditValue('')
+  }, [editValue, onSave, cancelWriteAnswer])
+
   const saveEdit = useCallback(() => {
     if (!editingField || !onSave) return
     const trimmed = editValue.trim()
@@ -86,14 +110,25 @@ export const StudyCard = memo(function StudyCard({
   }, [editingField])
 
   useEffect(() => {
+    if (isWritingAnswer && writeAnswerRef.current) {
+      writeAnswerRef.current.focus()
+    }
+  }, [isWritingAnswer])
+
+  useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (editingField && e.key === 'Escape') {
-        cancelEdit()
+      if (e.key === 'Escape') {
+        if (editingField) {
+          cancelEdit()
+        }
+        if (isWritingAnswer) {
+          cancelWriteAnswer()
+        }
       }
     }
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [editingField, cancelEdit])
+  }, [editingField, cancelEdit, isWritingAnswer, cancelWriteAnswer])
 
   const showReviewInfo = currentStep !== undefined && totalSteps !== undefined && totalSteps > 0
   const canInlineEdit = Boolean(onSave)
@@ -121,15 +156,15 @@ export const StudyCard = memo(function StudyCard({
 
       <div className="px-5 py-4">
         {editingField === 'front' ? (
-          <div>
+          <div className="flex gap-3 items-center">
             <textarea
               ref={textareaRef}
               value={editValue}
               onChange={(e) => setEditValue(e.target.value)}
-              className="w-full min-h-[60px] p-3 text-base text-foreground leading-relaxed border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-y"
+              className="flex-1 min-h-[60px] p-3 text-base text-foreground leading-relaxed border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-y"
               rows={2}
             />
-            <div className="flex justify-center gap-2 mt-3">
+            <div className="flex flex-col gap-2">
               <button
                 type="button"
                 onClick={saveEdit}
@@ -173,7 +208,7 @@ export const StudyCard = memo(function StudyCard({
         )}
       </div>
 
-      {answer && (
+      {answer ? (
         <>
           <div className="flex justify-center py-2 bg-card">
             <button
@@ -200,15 +235,15 @@ export const StudyCard = memo(function StudyCard({
             <div className="overflow-hidden">
               <div ref={answerRef} className="px-5 py-4 bg-card">
                 {editingField === 'back' ? (
-                  <div>
+                  <div className="flex gap-3 items-center">
                     <textarea
                       ref={textareaRef}
                       value={editValue}
                       onChange={(e) => setEditValue(e.target.value)}
-                      className="w-full min-h-[100px] p-3 text-base text-foreground leading-relaxed bg-amber-50 border border-amber-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-y"
+                      className="flex-1 min-h-[100px] p-3 text-base text-foreground leading-relaxed bg-amber-50 border border-amber-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-y"
                       rows={4}
                     />
-                    <div className="flex justify-center gap-2 mt-3">
+                    <div className="flex flex-col gap-2">
                       <button
                         type="button"
                         onClick={saveEdit}
@@ -242,6 +277,48 @@ export const StudyCard = memo(function StudyCard({
             </div>
           </div>
         </>
+      ) : canInlineEdit && (
+        <div className="px-5 py-3 bg-card">
+          {isWritingAnswer ? (
+            <div className="flex gap-3 items-center">
+              <textarea
+                ref={writeAnswerRef}
+                value={editValue}
+                onChange={(e) => setEditValue(e.target.value)}
+                className="flex-1 min-h-[100px] p-3 text-base text-foreground leading-relaxed bg-amber-50 border border-amber-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-y"
+                placeholder="答えを入力..."
+                rows={4}
+              />
+              <div className="flex flex-col gap-2">
+                <button
+                  type="button"
+                  onClick={saveWriteAnswer}
+                  className="h-10 w-10 rounded-lg bg-emerald-100 text-emerald-600 inline-flex items-center justify-center hover:bg-emerald-200 transition-colors"
+                >
+                  <Check className="h-5 w-5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={cancelWriteAnswer}
+                  className="h-10 w-10 rounded-lg bg-rose-100 text-rose-500 inline-flex items-center justify-center hover:bg-rose-200 transition-colors"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button
+              type="button"
+              className="w-full border-2 border-dashed border-gray-300 rounded-lg p-3 bg-gray-50 hover:border-primary hover:bg-primary/5 transition-colors cursor-text text-left"
+              onClick={startWriteAnswer}
+            >
+              <span className="text-sm text-muted-foreground flex items-center gap-2">
+                <SquarePen className="h-4 w-4" />
+                答えを入力...
+              </span>
+            </button>
+          )}
+        </div>
       )}
     </div>
   )
