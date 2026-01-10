@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import { toast } from 'sonner';
 
 import {
@@ -41,13 +40,13 @@ export function EditCardDialog({ card, open, onOpenChange }: EditCardDialogProps
     }
   };
 
-  if (!card) return null;
-
-  const defaultValues: Partial<CardInputFormValues> = {
-    front: card.front,
-    back: card.back || '',
-    tagIds: card.tags.map((tag) => tag.id),
-  };
+  const defaultValues: Partial<CardInputFormValues> | undefined = card
+    ? {
+        front: card.front,
+        back: card.back || '',
+        tagIds: card.tags.map((tag) => tag.id),
+      }
+    : undefined;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -55,12 +54,14 @@ export function EditCardDialog({ card, open, onOpenChange }: EditCardDialogProps
         <DialogHeader>
           <DialogTitle>カードを編集</DialogTitle>
         </DialogHeader>
-        <CardInputForm
-          mode="edit"
-          defaultValues={defaultValues}
-          onSubmit={handleSubmit}
-          isSubmitting={updateCard.isPending}
-        />
+        {card && (
+          <CardInputForm
+            mode="edit"
+            defaultValues={defaultValues}
+            onSubmit={handleSubmit}
+            isSubmitting={updateCard.isPending}
+          />
+        )}
       </DialogContent>
     </Dialog>
   );

@@ -21,8 +21,6 @@ export async function createCard(input: CreateCardInput): Promise<Card> {
   const validated = createCardSchema.parse(input);
 
   const schedule = validated.schedule || DEFAULT_INTERVALS;
-  const nextReviewAt = new Date();
-  nextReviewAt.setDate(nextReviewAt.getDate() + schedule[0]);
 
   const { data: card, error } = await supabase
     .from('cards')
@@ -32,8 +30,8 @@ export async function createCard(input: CreateCardInput): Promise<Card> {
       back: validated.back,
       schedule,
       current_step: 0,
-      next_review_at: nextReviewAt.toISOString(),
-      status: 'active',
+      next_review_at: null,
+      status: 'new',
     })
     .select()
     .single();
@@ -247,7 +245,9 @@ export async function getCards(filters?: CardFilters): Promise<CardListResponse>
     .order('created_at', { ascending: false })
     .range(offset, offset + limit - 1);
 
-  if (filters?.status === 'due') {
+  if (filters?.status === 'new') {
+    query = query.eq('status', 'new');
+  } else if (filters?.status === 'due') {
     const today = new Date().toISOString();
     query = query.eq('status', 'active').lte('next_review_at', today);
   } else if (filters?.status === 'completed') {
@@ -372,6 +372,156 @@ export async function resetCardToUnlearned(id: string): Promise<Card> {
     createdAt: card.created_at,
     updatedAt: card.updated_at,
   };
+}
+
+/**
+ * 完了タブに表示するカードを取得
+ * 1. status = 'completed' のカード（復習完了済み）
+ * 2. 今日復習したカード（study_logsで今日評価を受けたカード）
+ */
+export async function getTodayCompletedCards(): Promise<CardWithTags[]> {
+  const supabase = await createClient();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    throw new Error('Unauthorized');
+  }
+
+  // 今日の開始時刻（00:00:00）
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+
+  // 並列で取得: 1. status='completed'のカード 2. 今日評価を受けたカードID
+  const [completedCardsResult, studyLogsResult] = await Promise.all([
+    supabase
+      .from('cards')
+      .select(`
+        *,
+        card_tags (
+          tag:tags (*)
+        )
+      `)
+      .eq('user_id', user.id)
+      .eq('status', 'completed')
+      .order('completed_at', { ascending: false }),
+    supabase
+      .from('study_logs')
+      .select('card_id')
+      .eq('user_id', user.id)
+      .gte('studied_at', todayStart.toISOString()),
+  ]);
+
+  if (completedCardsResult.error) {
+    throw new Error(`Failed to fetch completed cards: ${completedCardsResult.error.message}`);
+  }
+
+  if (studyLogsResult.error) {
+    throw new Error(`Failed to fetch study logs: ${studyLogsResult.error.message}`);
+  }
+
+  const completedCards = completedCardsResult.data || [];
+  const studyLogs = studyLogsResult.data || [];
+
+  // 今日復習したカードIDを取得（重複除去）
+  const todayStudiedCardIds = [...new Set(studyLogs.map(log => log.card_id))];
+
+  // completedCardsのIDセット（重複チェック用）
+  const completedCardIds = new Set(completedCards.map(card => card.id));
+
+  // 今日復習したがstatus='completed'ではないカードを取得
+  const additionalCardIds = todayStudiedCardIds.filter(id => !completedCardIds.has(id));
+
+  let additionalCards: any[] = [];
+  if (additionalCardIds.length > 0) {
+    const { data, error } = await supabase
+      .from('cards')
+      .select(`
+        *,
+        card_tags (
+          tag:tags (*)
+        )
+      `)
+      .eq('user_id', user.id)
+      .in('id', additionalCardIds);
+
+    if (error) {
+      throw new Error(`Failed to fetch additional cards: ${error.message}`);
+    }
+    additionalCards = data || [];
+  }
+
+  // 両方のカードを結合
+  const allCards = [...completedCards, ...additionalCards];
+
+  return allCards.map((card: any) => ({
+    id: card.id,
+    userId: card.user_id,
+    front: card.front,
+    back: card.back,
+    schedule: card.schedule,
+    currentStep: card.current_step,
+    nextReviewAt: card.next_review_at,
+    status: card.status,
+    completedAt: card.completed_at,
+    createdAt: card.created_at,
+    updatedAt: card.updated_at,
+    tags: card.card_tags.map((ct: any) => ({
+      id: ct.tag.id,
+      userId: ct.tag.user_id,
+      name: ct.tag.name,
+      color: ct.tag.color,
+      createdAt: ct.tag.created_at,
+    })),
+  }));
+}
+
+/**
+ * 未学習（status='new'）のカードを取得
+ */
+export async function getNewCards(): Promise<CardWithTags[]> {
+  const supabase = await createClient();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    throw new Error('Unauthorized');
+  }
+
+  const { data: cards, error } = await supabase
+    .from('cards')
+    .select(`
+      *,
+      card_tags (
+        tag:tags (*)
+      )
+    `)
+    .eq('user_id', user.id)
+    .eq('status', 'new')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    throw new Error(`Failed to fetch new cards: ${error.message}`);
+  }
+
+  return cards.map((card: any) => ({
+    id: card.id,
+    userId: card.user_id,
+    front: card.front,
+    back: card.back,
+    schedule: card.schedule,
+    currentStep: card.current_step,
+    nextReviewAt: card.next_review_at,
+    status: card.status,
+    completedAt: card.completed_at,
+    createdAt: card.created_at,
+    updatedAt: card.updated_at,
+    tags: card.card_tags.map((ct: any) => ({
+      id: ct.tag.id,
+      userId: ct.tag.user_id,
+      name: ct.tag.name,
+      color: ct.tag.color,
+      createdAt: ct.tag.created_at,
+    })),
+  }));
 }
 
 /**

@@ -14,7 +14,8 @@ export type StudySessionData = {
     id: string;
     front: string;
     back: string;
-    reviewLevel: number;
+    currentStep: number;
+    schedule: number[];
   }>;
   stats: StudyStats;
 };
@@ -85,6 +86,7 @@ export function useSubmitAssessment() {
       qc.invalidateQueries({ queryKey: studyKeys.all });
       qc.invalidateQueries({ queryKey: cardKeys.lists() });
       qc.invalidateQueries({ queryKey: cardKeys.today() });
+      qc.invalidateQueries({ queryKey: cardKeys.todayCompleted() });
     },
   });
 }

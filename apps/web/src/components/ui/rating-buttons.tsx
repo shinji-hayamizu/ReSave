@@ -8,6 +8,7 @@ interface RatingButtonsProps {
   onRate: (rating: Rating) => void
   intervals?: { ok?: string; again?: string }
   disabled?: boolean
+  showAgain?: boolean
   className?: string
 }
 
@@ -31,11 +32,14 @@ export function RatingButtons({
   onRate,
   intervals,
   disabled,
+  showAgain = true,
   className,
 }: RatingButtonsProps) {
+  const ratings = showAgain ? (['ok', 'learned', 'again'] as const) : (['ok', 'learned'] as const)
+
   return (
     <div className={cn('flex gap-1.5', className)}>
-      {(['ok', 'learned', 'again'] as const).map((rating) => (
+      {ratings.map((rating) => (
         <button
           key={rating}
           type="button"

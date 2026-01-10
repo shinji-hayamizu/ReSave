@@ -14,8 +14,11 @@ function mapRowToCard(row: CardRow): CardWithTags {
     userId: row.user_id,
     front: row.front,
     back: row.back,
-    reviewLevel: row.review_level,
+    schedule: row.schedule,
+    currentStep: row.current_step,
     nextReviewAt: row.next_review_at,
+    status: row.status,
+    completedAt: row.completed_at,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     tags: [],
@@ -89,6 +92,7 @@ export async function GET(request: NextRequest) {
       .from('cards')
       .select('*')
       .eq('user_id', user.id)
+      .eq('status', 'active')
       .not('next_review_at', 'is', null)
       .lte('next_review_at', now)
       .order('next_review_at', { ascending: true });

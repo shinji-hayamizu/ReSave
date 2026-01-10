@@ -46,13 +46,20 @@ export async function submitAssessment(
   }
 
   const schedule = card.schedule as number[];
+  const isNewCard = card.status === 'new';
   let newCurrentStep = card.current_step;
   let nextReviewAt: string | null = null;
-  let newStatus: 'active' | 'completed' = card.status as 'active' | 'completed';
+  let newStatus: 'new' | 'active' | 'completed' = card.status as 'new' | 'active' | 'completed';
   let completedAt: string | null = card.completed_at;
 
   if (assessment === 'ok') {
-    newCurrentStep = card.current_step + 1;
+    if (isNewCard) {
+      newCurrentStep = 0;
+      newStatus = 'active';
+    } else {
+      newCurrentStep = card.current_step + 1;
+    }
+
     if (newCurrentStep >= schedule.length) {
       newStatus = 'completed';
       completedAt = new Date().toISOString();

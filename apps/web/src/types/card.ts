@@ -12,7 +12,7 @@ export type Card = {
   schedule: number[];
   currentStep: number;
   nextReviewAt: string | null;
-  status: 'active' | 'completed';
+  status: 'new' | 'active' | 'completed';
   completedAt: string | null;
   createdAt: string;
   updatedAt: string;
@@ -51,7 +51,7 @@ export type UpdateCardInput = {
 /**
  * Card status filter options
  */
-export type CardStatus = 'all' | 'due' | 'completed';
+export type CardStatus = 'all' | 'new' | 'due' | 'completed';
 
 /**
  * Query filters for fetching cards

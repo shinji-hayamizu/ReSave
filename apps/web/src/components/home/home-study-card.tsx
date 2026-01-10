@@ -16,8 +16,10 @@ interface HomeStudyCardProps {
   front: string;
   back: string;
   tags?: Tag[];
-  reviewLevel?: number;
+  currentStep?: number;
+  schedule?: number[];
   intervals?: { ok?: string; again?: string };
+  showAgain?: boolean;
   onAssessmentComplete?: () => void;
   onEdit?: () => void;
   className?: string;
@@ -34,8 +36,10 @@ export const HomeStudyCard = memo(function HomeStudyCard({
   front,
   back,
   tags = [],
-  reviewLevel,
+  currentStep,
+  schedule,
   intervals,
+  showAgain = true,
   onAssessmentComplete,
   onEdit,
   className,
@@ -61,15 +65,16 @@ export const HomeStudyCard = memo(function HomeStudyCard({
     <StudyCard
       answer={back}
       className={className}
+      currentStep={currentStep}
       question={front}
       ratingButtons={
         <RatingButtons
           disabled={submitAssessment.isPending}
           intervals={intervals}
+          showAgain={showAgain}
           onRate={handleRate}
         />
       }
-      reviewLevel={reviewLevel}
       tags={
         tags.length > 0 ? (
           <>
@@ -79,6 +84,7 @@ export const HomeStudyCard = memo(function HomeStudyCard({
           </>
         ) : undefined
       }
+      totalSteps={schedule?.length}
       onEdit={onEdit}
     />
   );

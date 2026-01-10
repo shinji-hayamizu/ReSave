@@ -6,8 +6,6 @@ import { submitAssessmentSchema } from '@/validations/study-log';
 
 export const dynamic = 'force-dynamic';
 
-const REVIEW_INTERVALS = [1, 3, 7, 14, 30, 180];
-
 /**
  * 学習結果送信 (Mobile用)
  */
@@ -59,33 +57,52 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    let newReviewLevel = card.review_level;
+    const schedule = card.schedule as number[];
+    const isNewCard = card.status === 'new';
+    let newCurrentStep = card.current_step;
     let nextReviewAt: string | null = null;
+    let newStatus: 'new' | 'active' | 'completed' = card.status;
+    let completedAt: string | null = card.completed_at;
 
     if (assessment === 'ok') {
-      newReviewLevel = card.review_level + 1;
-      const intervalDays = REVIEW_INTERVALS[newReviewLevel] || REVIEW_INTERVALS[REVIEW_INTERVALS.length - 1];
-      const nextDate = new Date();
-      nextDate.setDate(nextDate.getDate() + intervalDays);
-      nextReviewAt = nextDate.toISOString();
-    } else if (assessment === 'again') {
-      newReviewLevel = 0;
-      const nextDate = new Date();
-      nextDate.setDate(nextDate.getDate() + REVIEW_INTERVALS[0]);
-      nextReviewAt = nextDate.toISOString();
-    } else if (assessment === 'remembered') {
-      nextReviewAt = null;
-      // reviewLevel=0のままだとdueに分類されるため、完了として認識させる
-      if (newReviewLevel === 0) {
-        newReviewLevel = 1;
+      if (isNewCard) {
+        newCurrentStep = 0;
+        newStatus = 'active';
+      } else {
+        newCurrentStep = card.current_step + 1;
       }
+
+      if (newCurrentStep >= schedule.length) {
+        newStatus = 'completed';
+        completedAt = new Date().toISOString();
+        nextReviewAt = null;
+      } else {
+        const daysToAdd = schedule[newCurrentStep];
+        const nextDate = new Date();
+        nextDate.setDate(nextDate.getDate() + daysToAdd);
+        nextReviewAt = nextDate.toISOString();
+      }
+    } else if (assessment === 'again') {
+      newCurrentStep = 0;
+      const daysToAdd = schedule[0];
+      const nextDate = new Date();
+      nextDate.setDate(nextDate.getDate() + daysToAdd);
+      nextReviewAt = nextDate.toISOString();
+      newStatus = 'active';
+      completedAt = null;
+    } else if (assessment === 'remembered') {
+      newStatus = 'completed';
+      completedAt = new Date().toISOString();
+      nextReviewAt = null;
     }
 
     const { data: updatedCard, error: updateError } = await supabase
       .from('cards')
       .update({
-        review_level: newReviewLevel,
+        current_step: newCurrentStep,
         next_review_at: nextReviewAt,
+        status: newStatus,
+        completed_at: completedAt,
         updated_at: new Date().toISOString(),
       })
       .eq('id', cardId)
@@ -117,8 +134,11 @@ export async function POST(request: NextRequest) {
         userId: updatedCard.user_id,
         front: updatedCard.front,
         back: updatedCard.back,
-        reviewLevel: updatedCard.review_level,
+        schedule: updatedCard.schedule,
+        currentStep: updatedCard.current_step,
         nextReviewAt: updatedCard.next_review_at,
+        status: updatedCard.status,
+        completedAt: updatedCard.completed_at,
         createdAt: updatedCard.created_at,
         updatedAt: updatedCard.updated_at,
       },

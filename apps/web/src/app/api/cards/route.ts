@@ -16,8 +16,11 @@ function mapRowToCard(row: CardRow): CardWithTags {
     userId: row.user_id,
     front: row.front,
     back: row.back,
-    reviewLevel: row.review_level,
+    schedule: row.schedule,
+    currentStep: row.current_step,
     nextReviewAt: row.next_review_at,
+    status: row.status,
+    completedAt: row.completed_at,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     tags: [],
@@ -116,11 +119,13 @@ export async function GET(request: NextRequest) {
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
 
-    if (status === 'due') {
+    if (status === 'new') {
+      query = query.eq('status', 'new');
+    } else if (status === 'due') {
       const now = new Date().toISOString();
-      query = query.or(`next_review_at.is.null,next_review_at.lte.${now}`);
+      query = query.eq('status', 'active').lte('next_review_at', now);
     } else if (status === 'completed') {
-      query = query.is('next_review_at', null).gt('review_level', 0);
+      query = query.eq('status', 'completed');
     }
 
     const { data: cardsData, error: cardsError, count } = await query;
@@ -283,8 +288,10 @@ export async function POST(request: NextRequest) {
         user_id: user.id,
         front,
         back,
-        review_level: 0,
-        next_review_at: new Date().toISOString(),
+        schedule: [1, 3, 7, 14, 30, 90],
+        current_step: 0,
+        next_review_at: null,
+        status: 'new',
       })
       .select()
       .single();

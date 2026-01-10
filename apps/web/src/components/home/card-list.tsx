@@ -99,10 +99,11 @@ const CardItem = memo(function CardItem({
   return (
     <StudyCard
       answer={card.back}
+      currentStep={card.currentStep}
       question={card.front}
       ratingButtons={<ResetButton disabled={isResetting} onReset={handleReset} />}
-      reviewLevel={card.reviewLevel}
       tags={tags}
+      totalSteps={card.schedule.length}
       onEdit={handleEdit}
     />
   );

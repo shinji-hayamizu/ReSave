@@ -9,10 +9,13 @@ import {
   deleteCard,
   getCard,
   getCards,
+  getNewCards,
   getTodayCards,
+  getTodayCompletedCards,
   resetCardToUnlearned,
   updateCard,
 } from '@/actions/cards';
+import { DEFAULT_INTERVALS } from '@/types/review-schedule';
 import type {
   CardFilters,
   CardListResponse,
@@ -25,7 +28,9 @@ export const cardKeys = {
   all: ['cards'] as const,
   lists: () => [...cardKeys.all, 'list'] as const,
   list: (filters: CardFilters) => [...cardKeys.lists(), filters] as const,
+  new: () => [...cardKeys.all, 'new'] as const,
   today: () => [...cardKeys.all, 'today'] as const,
+  todayCompleted: () => [...cardKeys.all, 'today-completed'] as const,
   detail: (id: string) => [...cardKeys.all, 'detail', id] as const,
 };
 
@@ -44,6 +49,13 @@ export function useCard(id: string) {
   });
 }
 
+export function useNewCards() {
+  return useQuery<CardWithTags[]>({
+    queryKey: cardKeys.new(),
+    queryFn: () => getNewCards(),
+  });
+}
+
 export function useTodayCards() {
   return useQuery<CardWithTags[]>({
     queryKey: cardKeys.today(),
@@ -51,8 +63,16 @@ export function useTodayCards() {
   });
 }
 
+export function useTodayCompletedCards() {
+  return useQuery<CardWithTags[]>({
+    queryKey: cardKeys.todayCompleted(),
+    queryFn: () => getTodayCompletedCards(),
+  });
+}
+
 type CreateCardContext = {
   previousLists: [QueryKey, CardListResponse | undefined][];
+  previousNew: CardWithTags[] | undefined;
   previousToday: CardWithTags[] | undefined;
 };
 
@@ -62,19 +82,24 @@ export function useCreateCard() {
     mutationFn: (input: CreateCardInput) => createCard(input),
     onMutate: async (input): Promise<CreateCardContext> => {
       await qc.cancelQueries({ queryKey: cardKeys.lists() });
+      await qc.cancelQueries({ queryKey: cardKeys.new() });
       await qc.cancelQueries({ queryKey: cardKeys.today() });
 
       const previousLists = qc.getQueriesData<CardListResponse>({
         queryKey: cardKeys.lists(),
       });
+      const previousNew = qc.getQueryData<CardWithTags[]>(cardKeys.new());
       const previousToday = qc.getQueryData<CardWithTags[]>(cardKeys.today());
 
       const optimisticCard: CardWithTags = {
         id: `temp-${Date.now()}`,
         front: input.front,
         back: input.back ?? '',
-        reviewLevel: 0,
-        nextReviewAt: new Date().toISOString(),
+        schedule: DEFAULT_INTERVALS,
+        currentStep: 0,
+        nextReviewAt: null,
+        status: 'new',
+        completedAt: null,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         userId: '',
@@ -93,13 +118,20 @@ export function useCreateCard() {
             : old
       );
 
-      return { previousLists, previousToday };
+      if (previousNew) {
+        qc.setQueryData<CardWithTags[]>(cardKeys.new(), [optimisticCard, ...previousNew]);
+      }
+
+      return { previousLists, previousNew, previousToday };
     },
     onError: (_, __, context) => {
       if (context?.previousLists) {
         context.previousLists.forEach(([queryKey, data]) => {
           qc.setQueryData(queryKey, data);
         });
+      }
+      if (context?.previousNew) {
+        qc.setQueryData(cardKeys.new(), context.previousNew);
       }
       if (context?.previousToday) {
         qc.setQueryData(cardKeys.today(), context.previousToday);
@@ -108,6 +140,7 @@ export function useCreateCard() {
     },
     onSettled: () => {
       qc.invalidateQueries({ queryKey: cardKeys.lists() });
+      qc.invalidateQueries({ queryKey: cardKeys.new() });
       qc.invalidateQueries({ queryKey: cardKeys.today() });
     },
   });

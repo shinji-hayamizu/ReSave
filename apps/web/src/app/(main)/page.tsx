@@ -13,14 +13,20 @@ import {
 } from '@/components/home';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useTodayCards } from '@/hooks/useCards';
+import { useNewCards, useTodayCards, useTodayCompletedCards } from '@/hooks/useCards';
 import type { CardWithTags } from '@/types/card';
 
-const REVIEW_INTERVALS = [1, 3, 7, 14, 30, 180];
-
-function getNextInterval(reviewLevel: number): string {
-  const nextLevel = Math.min(reviewLevel + 1, REVIEW_INTERVALS.length - 1);
-  const days = REVIEW_INTERVALS[nextLevel];
+/**
+ * カードのscheduleとcurrentStepから次回の復習間隔を計算
+ * 未学習カード(isNew=true): schedule[0]が適用される
+ * 学習中カード(isNew=false): schedule[currentStep+1]が適用される
+ */
+function getNextInterval(schedule: number[], currentStep: number, isNew: boolean): string {
+  const nextStep = isNew ? 0 : currentStep + 1;
+  if (nextStep >= schedule.length) {
+    return '完了';
+  }
+  const days = schedule[nextStep];
   return `${days}日後`;
 }
 
@@ -46,7 +52,11 @@ export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState<CardTabValue>('due');
   const [editingCard, setEditingCard] = useState<CardWithTags | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const { data: todayCards, isLoading } = useTodayCards();
+  const { data: newCards, isLoading: isLoadingNew } = useNewCards();
+  const { data: todayCards, isLoading: isLoadingToday } = useTodayCards();
+  const { data: completedCards, isLoading: isLoadingCompleted } = useTodayCompletedCards();
+
+  const isLoading = isLoadingNew || isLoadingToday || isLoadingCompleted;
 
   const handleEdit = useCallback((card: CardWithTags) => {
     setEditingCard(card);
@@ -61,26 +71,15 @@ export default function DashboardPage() {
   }, []);
 
   const categorizedCards = useMemo(() => {
-    if (!todayCards) {
-      return { due: [], learning: [], completed: [] };
-    }
-
-    const due: typeof todayCards = [];
-    const learning: typeof todayCards = [];
-    const completed: typeof todayCards = [];
-
-    for (const card of todayCards) {
-      if (card.nextReviewAt === null && card.reviewLevel === 0) {
-        due.push(card);
-      } else if (card.nextReviewAt === null) {
-        completed.push(card);
-      } else {
-        learning.push(card);
-      }
-    }
+    // due: status='new'のカード（未学習）
+    const due = newCards ?? [];
+    // learning: status='active'で今日復習予定のカード（復習中）
+    const learning = todayCards ?? [];
+    // completed: status='completed'または今日学習したカード
+    const completed = completedCards ?? [];
 
     return { due, learning, completed };
-  }, [todayCards]);
+  }, [newCards, todayCards, completedCards]);
 
   const counts = {
     due: categorizedCards.due.length,
@@ -104,8 +103,8 @@ export default function DashboardPage() {
               activeTab === 'due'
                 ? '新しいカードを追加して学習を始めましょう'
                 : activeTab === 'learning'
-                  ? '復習中のカードはありません'
-                  : '完了したカードはありません'
+                  ? '復習予定のカードはありません'
+                  : '今日復習したカードはありません'
             }
             icon={<FileQuestion />}
             title="カードなし"
@@ -118,13 +117,15 @@ export default function DashboardPage() {
               <HomeStudyCard
                 key={card.id}
                 back={card.back}
+                currentStep={card.currentStep}
                 front={card.front}
                 id={card.id}
                 intervals={{
-                  ok: getNextInterval(card.reviewLevel),
-                  again: '1日後',
+                  ok: getNextInterval(card.schedule, card.currentStep, card.status === 'new'),
+                  again: `${card.schedule[0]}日後`,
                 }}
-                reviewLevel={card.reviewLevel}
+                schedule={card.schedule}
+                showAgain={card.currentStep > 0}
                 tags={card.tags}
                 onEdit={() => handleEdit(card)}
               />
