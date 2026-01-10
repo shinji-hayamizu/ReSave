@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>答えを見るボタン - デザインサンプル</title>
+  <style>
+    :root {
+      --color-primary: #2563eb;
+      --color-primary-hover: #1d4ed8;
+      --color-success: #10b981;
+      --color-warning: #f59e0b;
+      --bg-primary: #ffffff;
+      --bg-secondary: #f8fafc;
+      --text-primary: #0f172a;
+      --text-secondary: #64748b;
+      --border-color: #e2e8f0;
+      --border-radius: 8px;
+      --border-radius-lg: 12px;
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      --transition-fast: 150ms ease;
+    }
+
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      padding: 24px;
+    }
+
+    h1 {
+      font-size: 24px;
+      margin-bottom: 8px;
+      color: var(--text-primary);
+    }
+
+    .description {
+      color: var(--text-secondary);
+      margin-bottom: 32px;
+    }
+
+    .section {
+      margin-bottom: 48px;
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--color-primary);
+    }
+
+    .button-grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .button-item {
+      background: var(--bg-primary);
+      border-radius: var(--border-radius-lg);
+      padding: 20px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .button-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+      font-weight: 500;
+    }
+
+    .button-demo {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .state-label {
+      font-size: 11px;
+      color: var(--text-secondary);
+      padding: 2px 8px;
+      background: var(--bg-secondary);
+      border-radius: 4px;
+    }
+
+    /* ========================================
+       Pattern A: Full Width Text Link (Current)
+       ======================================== */
+    .toggle-btn-a {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: 100%;
+      padding: 12px;
+      border: none;
+      background: var(--bg-primary);
+      color: var(--color-primary);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background var(--transition-fast);
+    }
+
+    .toggle-btn-a:hover {
+      background: var(--bg-secondary);
+    }
+
+    .toggle-btn-a svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* ========================================
+       Pattern B: Pill Button (Outlined)
+       ======================================== */
+    .toggle-btn-b {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 24px;
+      border: 2px solid var(--color-primary);
+      border-radius: 9999px;
+      background: transparent;
+      color: var(--color-primary);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .toggle-btn-b:hover {
+      background: var(--color-primary);
+      color: white;
+    }
+
+    .toggle-btn-b.active {
+      background: var(--color-primary);
+      color: white;
+    }
+
+    .toggle-btn-b svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* ========================================
+       Pattern C: Filled Button
+       ======================================== */
+    .toggle-btn-c {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 28px;
+      border: none;
+      border-radius: var(--border-radius);
+      background: var(--color-primary);
+      color: white;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .toggle-btn-c:hover {
+      background: var(--color-primary-hover);
+      box-shadow: var(--shadow-md);
+    }
+
+    .toggle-btn-c.active {
+      background: var(--text-secondary);
+    }
+
+    .toggle-btn-c svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* ========================================
+       Pattern D: Icon Only (Circle)
+       ======================================== */
+    .toggle-btn-d {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      height: 48px;
+      border: 2px solid var(--color-primary);
+      border-radius: 50%;
+      background: transparent;
+      color: var(--color-primary);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .toggle-btn-d:hover {
+      background: var(--color-primary);
+      color: white;
+      transform: scale(1.05);
+    }
+
+    .toggle-btn-d.active {
+      background: var(--color-primary);
+      color: white;
+    }
+
+    .toggle-btn-d svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    /* ========================================
+       Pattern E: Gradient Button
+       ======================================== */
+    .toggle-btn-e {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 28px;
+      border: none;
+      border-radius: var(--border-radius);
+      background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+      color: white;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+    }
+
+    .toggle-btn-e:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(37, 99, 235, 0.45);
+    }
+
+    .toggle-btn-e.active {
+      background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+      box-shadow: 0 4px 14px rgba(100, 116, 139, 0.35);
+    }
+
+    .toggle-btn-e svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* ========================================
+       Pattern F: Soft/Subtle Button
+       ======================================== */
+    .toggle-btn-f {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: var(--border-radius);
+      background: rgba(37, 99, 235, 0.1);
+      color: var(--color-primary);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .toggle-btn-f:hover {
+      background: rgba(37, 99, 235, 0.2);
+    }
+
+    .toggle-btn-f.active {
+      background: rgba(100, 116, 139, 0.15);
+      color: var(--text-secondary);
+    }
+
+    .toggle-btn-f svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* ========================================
+       Pattern G: Full Width with Border
+       ======================================== */
+    .toggle-btn-g {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 14px;
+      border: 2px dashed var(--color-primary);
+      border-radius: var(--border-radius);
+      background: transparent;
+      color: var(--color-primary);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .toggle-btn-g:hover {
+      background: rgba(37, 99, 235, 0.05);
+      border-style: solid;
+    }
+
+    .toggle-btn-g.active {
+      background: var(--color-primary);
+      color: white;
+      border-style: solid;
+    }
+
+    .toggle-btn-g svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    /* ========================================
+       Pattern H: Card Style Button
+       ======================================== */
+    .toggle-btn-h {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      padding: 16px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--border-radius-lg);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .toggle-btn-h:hover {
+      border-color: var(--color-primary);
+      box-shadow: var(--shadow-md);
+    }
+
+    .toggle-btn-h.active {
+      background: var(--color-primary);
+      color: white;
+      border-color: var(--color-primary);
+    }
+
+    .toggle-btn-h svg {
+      width: 20px;
+      height: 20px;
+      color: var(--color-primary);
+    }
+
+    .toggle-btn-h.active svg {
+      color: white;
+    }
+
+    /* ========================================
+       Pattern I: Minimal Link Style
+       ======================================== */
+    .toggle-btn-i {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 4px;
+      border: none;
+      background: transparent;
+      color: var(--color-primary);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: underline;
+      text-underline-offset: 4px;
+      transition: all var(--transition-fast);
+    }
+
+    .toggle-btn-i:hover {
+      color: var(--color-primary-hover);
+    }
+
+    .toggle-btn-i svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* ========================================
+       Pattern J: Floating Action Button Style
+       ======================================== */
+    .toggle-btn-j {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 14px 24px;
+      border: none;
+      border-radius: 9999px;
+      background: var(--color-primary);
+      color: white;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+    }
+
+    .toggle-btn-j:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(37, 99, 235, 0.5);
+    }
+
+    .toggle-btn-j.active {
+      background: var(--text-secondary);
+      box-shadow: 0 4px 12px rgba(100, 116, 139, 0.4);
+    }
+
+    .toggle-btn-j svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* ========================================
+       Recommendation Badge
+       ======================================== */
+    .recommended {
+      position: relative;
+    }
+
+    .recommended::after {
+      content: 'Recommended';
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background: var(--color-success);
+      color: white;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    /* Mobile simulation */
+    .mobile-frame {
+      max-width: 375px;
+      margin: 0 auto;
+      background: var(--bg-secondary);
+      border-radius: 24px;
+      padding: 16px;
+      border: 8px solid #1f2937;
+    }
+
+    .card-demo {
+      background: var(--bg-primary);
+      border-radius: var(--border-radius-lg);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+
+    .card-question {
+      padding: 20px;
+      font-size: 16px;
+    }
+
+    .card-answer {
+      padding: 20px;
+      background: var(--bg-primary);
+      border-top: 1px solid var(--border-color);
+    }
+
+    .card-answer-text {
+      display: inline-block;
+      padding: 12px 16px;
+      background: #fefce8;
+      border: 1px solid #fde047;
+      border-radius: var(--border-radius);
+    }
+  </style>
+</head>
+<body>
+  <h1>答えを見るボタン - デザインサンプル</h1>
+  <p class="description">StudyCardの「答えを見る/隠す」ボタンのデザインバリエーション一覧</p>
+
+  <!-- Pattern A -->
+  <section class="section">
+    <h2 class="section-title">A: テキストリンク風（現在の実装）</h2>
+    <div class="button-grid">
+      <div class="button-item">
+        <div class="button-label">閉じた状態 / 開いた状態</div>
+        <div class="button-demo">
+          <button class="toggle-btn-a">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
+            <span>答えを見る</span>
+          </button>
+          <button class="toggle-btn-a">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"/><path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"/><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"/><path d="m2 2 20 20"/></svg>
+            <span>答えを隠す</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pattern B -->
+  <section class="section">
+    <h2 class="section-title">B: ピルボタン（アウトライン）</h2>
+    <div class="button-grid">
+      <div class="button-item recommended">
+        <div class="button-label">閉じた状態 / 開いた状態</div>
+        <div class="button-demo">
+          <button class="toggle-btn-b">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
+            <span>答えを見る</span>
+          </button>
+          <button class="toggle-btn-b active">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"/><path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"/><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"/><path d="m2 2 20 20"/></svg>
+            <span>答えを隠す</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pattern C -->
+  <section class="section">
+    <h2 class="section-title">C: 塗りつぶしボタン</h2>
+    <div class="button-grid">
+      <div class="button-item">
+        <div class="button-label">閉じた状態 / 開いた状態</div>
+        <div class="button-demo">
+          <button class="toggle-btn-c">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
+            <span>答えを見る</span>
+          </button>
+          <button class="toggle-btn-c active">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"/><path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"/><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"/><path d="m2 2 20 20"/></svg>
+            <span>答えを隠す</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pattern D -->
+  <section class="section">
+    <h2 class="section-title">D: アイコンのみ（円形）</h2>
+    <div class="button-grid">
+      <div class="button-item">
+        <div class="button-label">閉じた状態 / 開いた状態</div>
+        <div class="button-demo">
+          <button class="toggle-btn-d" title="答えを見る">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+          <button class="toggle-btn-d active" title="答えを隠す">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"/><path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"/><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"/><path d="m2 2 20 20"/></svg>
+          </button>
+          <span class="state-label">テキストなし</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pattern E -->
+  <section class="section">
+    <h2 class="section-title">E: グラデーションボタン</h2>
+    <div class="button-grid">
+      <div class="button-item">
+        <div class="button-label">閉じた状態 / 開いた状態</div>
+        <div class="button-demo">
+          <button class="toggle-btn-e">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
+            <span>答えを見る</span>
+          </button>
+          <button class="toggle-btn-e active">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"/><path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"/><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"/><path d="m2 2 20 20"/></svg>
+            <span>答えを隠す</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pattern F -->
+  <section class="section">
+    <h2 class="section-title">F: ソフト/サブトルボタン</h2>
+    <div class="button-grid">
+      <div class="button-item">
+        <div class="button-label">閉じた状態 / 開いた状態</div>
+        <div class="button-demo">
+          <button class="toggle-btn-f">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
+            <span>答えを見る</span>
+          </button>
+          <button class="toggle-btn-f active">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"/><path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"/><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"/><path d="m2 2 20 20"/></svg>
+            <span>答えを隠す</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pattern G -->
+  <section class="section">
+    <h2 class="section-title">G: 全幅 + 破線ボーダー</h2>
+    <div class="button-grid">
+      <div class="button-item">
+        <div class="button-label">閉じた状態</div>
+        <button class="toggle-btn-g">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
+          <span>答えを見る</span>
+        </button>
+      </div>
+      <div class="button-item">
+        <div class="button-label">開いた状態</div>
+        <button class="toggle-btn-g active">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"/><path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"/><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"/><path d="m2 2 20 20"/></svg>
+          <span>答えを隠す</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pattern H -->
+  <section class="section">
+    <h2 class="section-title">H: カードスタイル</h2>
+    <div class="button-grid">
+      <div class="button-item">
+        <div class="button-label">閉じた状態</div>
+        <button class="toggle-btn-h">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
+          <span>答えを見る</span>
+        </button>
+      </div>
+      <div class="button-item">
+        <div class="button-label">開いた状態</div>
+        <button class="toggle-btn-h active">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"/><path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"/><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"/><path d="m2 2 20 20"/></svg>
+          <span>答えを隠す</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pattern I -->
+  <section class="section">
+    <h2 class="section-title">I: ミニマルリンク</h2>
+    <div class="button-grid">
+      <div class="button-item">
+        <div class="button-label">閉じた状態 / 開いた状態</div>
+        <div class="button-demo">
+          <button class="toggle-btn-i">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
+            <span>答えを見る</span>
+          </button>
+          <button class="toggle-btn-i">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"/><path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"/><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"/><path d="m2 2 20 20"/></svg>
+            <span>答えを隠す</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pattern J -->
+  <section class="section">
+    <h2 class="section-title">J: FABスタイル（丸みピル）</h2>
+    <div class="button-grid">
+      <div class="button-item">
+        <div class="button-label">閉じた状態 / 開いた状態</div>
+        <div class="button-demo">
+          <button class="toggle-btn-j">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
+            <span>答えを見る</span>
+          </button>
+          <button class="toggle-btn-j active">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"/><path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"/><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"/><path d="m2 2 20 20"/></svg>
+            <span>答えを隠す</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- In Context Demo -->
+  <section class="section">
+    <h2 class="section-title">カード内での表示イメージ</h2>
+    <div class="mobile-frame">
+      <div class="card-demo">
+        <div class="card-question">日本の首都は？</div>
+        <div style="display: flex; justify-content: center; padding: 8px 16px;">
+          <button class="toggle-btn-b">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
+            <span>答えを見る</span>
+          </button>
+        </div>
+      </div>
+      <div style="height: 16px;"></div>
+      <div class="card-demo">
+        <div class="card-question">「セレンディピティ」の意味は？</div>
+        <div style="display: flex; justify-content: center; padding: 8px 16px;">
+          <button class="toggle-btn-b active">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"/><path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"/><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"/><path d="m2 2 20 20"/></svg>
+            <span>答えを隠す</span>
+          </button>
+        </div>
+        <div class="card-answer">
+          <div class="card-answer-text">偶然の幸運な発見。予期せぬ良い結果に出会うこと。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</body>
+</html>

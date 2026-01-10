@@ -92,10 +92,10 @@ export const StudyCard = memo(function StudyCard({
             <button
               type="button"
               className={cn(
-                'inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full text-sm font-semibold transition-all',
+                'inline-flex items-center justify-center gap-2 px-6 h-9 rounded-full text-sm font-semibold border-2 transition-all',
                 isOpen
-                  ? 'bg-muted-foreground text-white shadow-[0_4px_12px_rgba(100,116,139,0.4)]'
-                  : 'bg-primary text-primary-foreground shadow-[0_4px_12px_rgba(37,99,235,0.4)] hover:-translate-y-0.5 hover:shadow-[0_6px_16px_rgba(37,99,235,0.5)]'
+                  ? 'bg-primary text-primary-foreground border-primary hover:bg-primary/90'
+                  : 'bg-transparent text-primary border-primary hover:bg-primary hover:text-primary-foreground'
               )}
               onClick={handleToggle}
             >

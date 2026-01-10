@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pattern 2 Variations - Card Tabs</title>
+  <style>
+    :root {
+      --background: #ffffff;
+      --foreground: #0f172a;
+      --muted: #f1f5f9;
+      --muted-foreground: #64748b;
+      --primary: #2563eb;
+      --border: #e2e8f0;
+      --card: #ffffff;
+
+      --status-new: #f59e0b;
+      --status-new-bg: #fef3c7;
+      --status-learning: #3b82f6;
+      --status-learning-bg: #dbeafe;
+      --status-completed: #10b981;
+      --status-completed-bg: #d1fae5;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background-color: #f8fafc;
+      color: var(--foreground);
+      line-height: 1.5;
+      padding: 2rem;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .subtitle {
+      color: var(--muted-foreground);
+      margin-bottom: 2rem;
+    }
+
+    h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--foreground);
+    }
+
+    .section {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .section__description {
+      color: var(--muted-foreground);
+      font-size: 0.8125rem;
+      margin-bottom: 1rem;
+    }
+
+    .demo-container {
+      background: var(--card);
+      border-radius: 8px;
+    }
+
+    /* Pattern 2: Underline Tabs with Badges */
+    .tabs-2 {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .tabs-2__item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      color: var(--muted-foreground);
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: all 0.2s ease;
+    }
+
+    .tabs-2__item:hover {
+      color: var(--foreground);
+    }
+
+    .tabs-2__item.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+
+    .tabs-2__badge {
+      font-size: 0.75rem;
+      padding: 0.125rem 0.375rem;
+      border-radius: 6px;
+      font-weight: 600;
+      min-width: 1.5rem;
+      text-align: center;
+    }
+
+    .tabs-2__badge--new {
+      background: var(--status-new-bg);
+      color: var(--status-new);
+    }
+
+    .tabs-2__badge--learning {
+      background: var(--status-learning-bg);
+      color: var(--status-learning);
+    }
+
+    .tabs-2__badge--completed {
+      background: var(--status-completed-bg);
+      color: var(--status-completed);
+    }
+
+    /* Mobile simulation */
+    .mobile-frame {
+      max-width: 375px;
+      border: 2px solid var(--border);
+      border-radius: 24px;
+      overflow: hidden;
+      background: var(--card);
+    }
+
+    .mobile-frame__notch {
+      height: 24px;
+      background: var(--foreground);
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      padding-bottom: 4px;
+    }
+
+    .mobile-frame__notch-inner {
+      width: 80px;
+      height: 6px;
+      background: var(--card);
+      border-radius: 3px;
+    }
+
+    .mobile-frame__content {
+      padding: 1rem;
+    }
+
+    /* Comparison grid */
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .note {
+      background: #fef3c7;
+      border-left: 4px solid #f59e0b;
+      padding: 0.75rem 1rem;
+      margin-top: 1rem;
+      font-size: 0.8125rem;
+      border-radius: 0 8px 8px 0;
+    }
+
+    .good {
+      background: #d1fae5;
+      border-left-color: #10b981;
+    }
+  </style>
+</head>
+<body>
+  <h1>Pattern 2: 数字のバリエーション確認</h1>
+  <p class="subtitle">4桁の数字がどう見えるかを確認</p>
+
+  <!-- Normal numbers -->
+  <div class="section">
+    <h2>通常の数字（1〜2桁）</h2>
+    <p class="section__description">一般的なユースケース</p>
+    <div class="demo-container">
+      <div class="tabs-2">
+        <button class="tabs-2__item active">
+          未学習
+          <span class="tabs-2__badge tabs-2__badge--new">12</span>
+        </button>
+        <button class="tabs-2__item">
+          復習中
+          <span class="tabs-2__badge tabs-2__badge--learning">8</span>
+        </button>
+        <button class="tabs-2__item">
+          完了
+          <span class="tabs-2__badge tabs-2__badge--completed">24</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4 digit numbers -->
+  <div class="section">
+    <h2>4桁の数字</h2>
+    <p class="section__description">大量のカードがある場合</p>
+    <div class="demo-container">
+      <div class="tabs-2">
+        <button class="tabs-2__item active">
+          未学習
+          <span class="tabs-2__badge tabs-2__badge--new">1234</span>
+        </button>
+        <button class="tabs-2__item">
+          復習中
+          <span class="tabs-2__badge tabs-2__badge--learning">567</span>
+        </button>
+        <button class="tabs-2__item">
+          完了
+          <span class="tabs-2__badge tabs-2__badge--completed">8901</span>
+        </button>
+      </div>
+    </div>
+    <div class="note">
+      バッジが大きくなるが、レイアウトは崩れない。ただし全体的に幅が広がる。
+    </div>
+  </div>
+
+  <!-- Mobile view with 4 digits -->
+  <div class="section">
+    <h2>モバイル表示（375px幅）での4桁</h2>
+    <p class="section__description">スマートフォンでの見え方</p>
+    <div class="comparison-grid">
+      <div>
+        <p style="font-size: 0.75rem; color: var(--muted-foreground); margin-bottom: 0.5rem;">通常</p>
+        <div class="mobile-frame">
+          <div class="mobile-frame__notch">
+            <div class="mobile-frame__notch-inner"></div>
+          </div>
+          <div class="mobile-frame__content">
+            <div class="tabs-2">
+              <button class="tabs-2__item active">
+                未学習
+                <span class="tabs-2__badge tabs-2__badge--new">12</span>
+              </button>
+              <button class="tabs-2__item">
+                復習中
+                <span class="tabs-2__badge tabs-2__badge--learning">8</span>
+              </button>
+              <button class="tabs-2__item">
+                完了
+                <span class="tabs-2__badge tabs-2__badge--completed">24</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <p style="font-size: 0.75rem; color: var(--muted-foreground); margin-bottom: 0.5rem;">4桁</p>
+        <div class="mobile-frame">
+          <div class="mobile-frame__notch">
+            <div class="mobile-frame__notch-inner"></div>
+          </div>
+          <div class="mobile-frame__content">
+            <div class="tabs-2">
+              <button class="tabs-2__item active">
+                未学習
+                <span class="tabs-2__badge tabs-2__badge--new">1234</span>
+              </button>
+              <button class="tabs-2__item">
+                復習中
+                <span class="tabs-2__badge tabs-2__badge--learning">567</span>
+              </button>
+              <button class="tabs-2__item">
+                完了
+                <span class="tabs-2__badge tabs-2__badge--completed">8901</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="note">
+      モバイルでは横スクロールが発生する可能性あり。
+    </div>
+  </div>
+
+  <!-- Compact alternative -->
+  <div class="section">
+    <h2>改善案: コンパクトバッジ</h2>
+    <p class="section__description">padding を小さくして4桁でも収まりやすく</p>
+    <style>
+      .tabs-2-compact .tabs-2__item {
+        padding: 0.75rem 0.75rem;
+        font-size: 0.8125rem;
+      }
+      .tabs-2-compact .tabs-2__badge {
+        font-size: 0.6875rem;
+        padding: 0.0625rem 0.3rem;
+      }
+    </style>
+    <div class="mobile-frame">
+      <div class="mobile-frame__notch">
+        <div class="mobile-frame__notch-inner"></div>
+      </div>
+      <div class="mobile-frame__content">
+        <div class="tabs-2 tabs-2-compact">
+          <button class="tabs-2__item active">
+            未学習
+            <span class="tabs-2__badge tabs-2__badge--new">1234</span>
+          </button>
+          <button class="tabs-2__item">
+            復習中
+            <span class="tabs-2__badge tabs-2__badge--learning">567</span>
+          </button>
+          <button class="tabs-2__item">
+            完了
+            <span class="tabs-2__badge tabs-2__badge--completed">8901</span>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="note good">
+      フォントサイズとpaddingを調整することで、4桁でも収まる。
+    </div>
+  </div>
+
+  <!-- Alternative: 999+ notation -->
+  <div class="section">
+    <h2>改善案: 999+ 表記</h2>
+    <p class="section__description">大きな数字は「999+」で省略</p>
+    <div class="mobile-frame">
+      <div class="mobile-frame__notch">
+        <div class="mobile-frame__notch-inner"></div>
+      </div>
+      <div class="mobile-frame__content">
+        <div class="tabs-2">
+          <button class="tabs-2__item active">
+            未学習
+            <span class="tabs-2__badge tabs-2__badge--new">999+</span>
+          </button>
+          <button class="tabs-2__item">
+            復習中
+            <span class="tabs-2__badge tabs-2__badge--learning">567</span>
+          </button>
+          <button class="tabs-2__item">
+            完了
+            <span class="tabs-2__badge tabs-2__badge--completed">999+</span>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="note good">
+      多くのアプリで採用されているパターン。常に一定の幅を保てる。
+    </div>
+  </div>
+
+  <!-- Alternative: K notation -->
+  <div class="section">
+    <h2>改善案: 1.2k 表記</h2>
+    <p class="section__description">1000以上は「1.2k」のように省略</p>
+    <div class="mobile-frame">
+      <div class="mobile-frame__notch">
+        <div class="mobile-frame__notch-inner"></div>
+      </div>
+      <div class="mobile-frame__content">
+        <div class="tabs-2">
+          <button class="tabs-2__item active">
+            未学習
+            <span class="tabs-2__badge tabs-2__badge--new">1.2k</span>
+          </button>
+          <button class="tabs-2__item">
+            復習中
+            <span class="tabs-2__badge tabs-2__badge--learning">567</span>
+          </button>
+          <button class="tabs-2__item">
+            完了
+            <span class="tabs-2__badge tabs-2__badge--completed">8.9k</span>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="note good">
+      具体的な数が分かりつつ、コンパクトに収まる。
+    </div>
+  </div>
+
+  <script>
+    document.querySelectorAll('.tabs-2').forEach(tabGroup => {
+      const items = tabGroup.querySelectorAll('.tabs-2__item');
+      items.forEach(item => {
+        item.addEventListener('click', () => {
+          items.forEach(i => i.classList.remove('active'));
+          item.classList.add('active');
+        });
+      });
+    });
+  </script>
+</body>
+</html>
