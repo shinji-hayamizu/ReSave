@@ -1,12 +1,13 @@
 'use client';
 
-import { memo, useCallback } from 'react';
+import { memo, useCallback, useState } from 'react';
 import { toast } from 'sonner';
 
 import type { Rating } from '@/components/ui/rating-buttons';
 import { RatingButtons } from '@/components/ui/rating-buttons';
 import { StudyCard } from '@/components/ui/study-card';
 import { TagBadge } from '@/components/ui/tag-badge';
+import { cn } from '@/lib/utils';
 import { useUpdateCard } from '@/hooks/useCards';
 import { useSubmitAssessment } from '@/hooks/useStudy';
 import type { Assessment } from '@/types/study-log';
@@ -32,6 +33,8 @@ const ratingToAssessment: Record<Rating, Assessment> = {
   again: 'again',
 };
 
+const REMOVE_ANIMATION_DURATION_MS = 300;
+
 export const HomeStudyCard = memo(function HomeStudyCard({
   id,
   front,
@@ -45,20 +48,26 @@ export const HomeStudyCard = memo(function HomeStudyCard({
   onEdit,
   className,
 }: HomeStudyCardProps) {
+  const [isRemoving, setIsRemoving] = useState(false);
   const submitAssessment = useSubmitAssessment();
   const updateCard = useUpdateCard();
 
   const handleRate = useCallback(
     async (rating: Rating) => {
-      try {
-        await submitAssessment.mutateAsync({
-          cardId: id,
-          assessment: ratingToAssessment[rating],
-        });
-        onAssessmentComplete?.();
-      } catch {
-        toast.error('評価の記録に失敗しました');
-      }
+      setIsRemoving(true);
+
+      setTimeout(async () => {
+        try {
+          await submitAssessment.mutateAsync({
+            cardId: id,
+            assessment: ratingToAssessment[rating],
+          });
+          onAssessmentComplete?.();
+        } catch {
+          setIsRemoving(false);
+          toast.error('評価の記録に失敗しました');
+        }
+      }, REMOVE_ANIMATION_DURATION_MS);
     },
     [id, submitAssessment, onAssessmentComplete]
   );
@@ -79,31 +88,43 @@ export const HomeStudyCard = memo(function HomeStudyCard({
   );
 
   return (
-    <StudyCard
-      answer={back}
-      className={className}
-      currentStep={currentStep}
-      question={front}
-      ratingButtons={
-        <RatingButtons
-          disabled={submitAssessment.isPending}
-          intervals={intervals}
-          showAgain={showAgain}
-          onRate={handleRate}
+    <div
+      className={cn(
+        'grid transition-all ease-out',
+        isRemoving
+          ? 'grid-rows-[0fr] opacity-0'
+          : 'grid-rows-[1fr] opacity-100'
+      )}
+      style={{ transitionDuration: `${REMOVE_ANIMATION_DURATION_MS}ms` }}
+    >
+      <div className="overflow-hidden">
+        <StudyCard
+          answer={back}
+          className={className}
+          currentStep={currentStep}
+          question={front}
+          ratingButtons={
+            <RatingButtons
+              disabled={submitAssessment.isPending || isRemoving}
+              intervals={intervals}
+              showAgain={showAgain}
+              onRate={handleRate}
+            />
+          }
+          tags={
+            tags.length > 0 ? (
+              <>
+                {tags.map((tag) => (
+                  <TagBadge key={tag.id}>{tag.name}</TagBadge>
+                ))}
+              </>
+            ) : undefined
+          }
+          totalSteps={schedule?.length}
+          onEdit={onEdit}
+          onSave={handleSave}
         />
-      }
-      tags={
-        tags.length > 0 ? (
-          <>
-            {tags.map((tag) => (
-              <TagBadge key={tag.id}>{tag.name}</TagBadge>
-            ))}
-          </>
-        ) : undefined
-      }
-      totalSteps={schedule?.length}
-      onEdit={onEdit}
-      onSave={handleSave}
-    />
+      </div>
+    </div>
   );
 });
