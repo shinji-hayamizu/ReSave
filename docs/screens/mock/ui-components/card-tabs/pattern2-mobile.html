@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pattern 2 Mobile - Card Tabs</title>
+  <style>
+    :root {
+      --background: #ffffff;
+      --foreground: #0f172a;
+      --muted: #f1f5f9;
+      --muted-foreground: #64748b;
+      --primary: #2563eb;
+      --border: #e2e8f0;
+      --card: #ffffff;
+
+      --status-new: #f59e0b;
+      --status-new-bg: #fef3c7;
+      --status-learning: #3b82f6;
+      --status-learning-bg: #dbeafe;
+      --status-completed: #10b981;
+      --status-completed-bg: #d1fae5;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background-color: #f8fafc;
+      color: var(--foreground);
+      line-height: 1.5;
+      padding: 2rem;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .subtitle {
+      color: var(--muted-foreground);
+      margin-bottom: 2rem;
+    }
+
+    h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--foreground);
+    }
+
+    .section {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .section__description {
+      color: var(--muted-foreground);
+      font-size: 0.8125rem;
+      margin-bottom: 1rem;
+    }
+
+    /* Mobile frame */
+    .mobile-frame {
+      max-width: 375px;
+      border: 2px solid var(--border);
+      border-radius: 24px;
+      overflow: hidden;
+      background: var(--card);
+    }
+
+    .mobile-frame__notch {
+      height: 24px;
+      background: var(--foreground);
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      padding-bottom: 4px;
+    }
+
+    .mobile-frame__notch-inner {
+      width: 80px;
+      height: 6px;
+      background: var(--card);
+      border-radius: 3px;
+    }
+
+    .mobile-frame__content {
+      padding: 1rem;
+    }
+
+    /* Pattern 2: Underline Tabs - 2 Line Layout */
+    .tabs-2 {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .tabs-2__item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.875rem 1rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      color: var(--muted-foreground);
+      border-left: 3px solid transparent;
+      transition: all 0.2s ease;
+    }
+
+    .tabs-2__item:not(:last-child) {
+      border-bottom: 1px solid var(--border);
+    }
+
+    .tabs-2__item:hover {
+      background: var(--muted);
+      color: var(--foreground);
+    }
+
+    .tabs-2__item.active {
+      color: var(--primary);
+      border-left-color: var(--primary);
+      background: rgba(37, 99, 235, 0.04);
+    }
+
+    .tabs-2__label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .tabs-2__dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .tabs-2__dot--new { background: var(--status-new); }
+    .tabs-2__dot--learning { background: var(--status-learning); }
+    .tabs-2__dot--completed { background: var(--status-completed); }
+
+    .tabs-2__badge {
+      font-size: 0.75rem;
+      padding: 0.125rem 0.5rem;
+      border-radius: 6px;
+      font-weight: 600;
+      min-width: 1.5rem;
+      text-align: center;
+    }
+
+    .tabs-2__badge--new {
+      background: var(--status-new-bg);
+      color: var(--status-new);
+    }
+
+    .tabs-2__badge--learning {
+      background: var(--status-learning-bg);
+      color: var(--status-learning);
+    }
+
+    .tabs-2__badge--completed {
+      background: var(--status-completed-bg);
+      color: var(--status-completed);
+    }
+
+    /* Alternative: Horizontal 2-row */
+    .tabs-3 {
+      display: flex;
+      flex-wrap: wrap;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .tabs-3__item {
+      display: flex;
+      align-items: center;
+      gap: 0.375rem;
+      padding: 0.625rem 0.75rem;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      color: var(--muted-foreground);
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: all 0.2s ease;
+    }
+
+    .tabs-3__item:hover {
+      color: var(--foreground);
+    }
+
+    .tabs-3__item.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+
+    .tabs-3__badge {
+      font-size: 0.6875rem;
+      padding: 0.0625rem 0.375rem;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+
+    .tabs-3__badge--new {
+      background: var(--status-new-bg);
+      color: var(--status-new);
+    }
+
+    .tabs-3__badge--learning {
+      background: var(--status-learning-bg);
+      color: var(--status-learning);
+    }
+
+    .tabs-3__badge--completed {
+      background: var(--status-completed-bg);
+      color: var(--status-completed);
+    }
+
+    /* Card style */
+    .tabs-4 {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .tabs-4__item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 1rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--card);
+      color: var(--muted-foreground);
+      transition: all 0.2s ease;
+    }
+
+    .tabs-4__item:hover {
+      border-color: var(--muted-foreground);
+      color: var(--foreground);
+    }
+
+    .tabs-4__item.active {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: rgba(37, 99, 235, 0.04);
+    }
+
+    .tabs-4__label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .tabs-4__dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .tabs-4__dot--new { background: var(--status-new); }
+    .tabs-4__dot--learning { background: var(--status-learning); }
+    .tabs-4__dot--completed { background: var(--status-completed); }
+
+    .tabs-4__count {
+      font-size: 1rem;
+      font-weight: 700;
+    }
+
+    .tabs-4__item.active .tabs-4__count {
+      color: var(--primary);
+    }
+
+    .tabs-4__item:not(.active) .tabs-4__count {
+      color: var(--foreground);
+    }
+
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .note {
+      background: #d1fae5;
+      border-left: 4px solid #10b981;
+      padding: 0.75rem 1rem;
+      margin-top: 1rem;
+      font-size: 0.8125rem;
+      border-radius: 0 8px 8px 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>Pattern 2: モバイル向け縦並びレイアウト</h1>
+  <p class="subtitle">2行（縦並び）で表示するバリエーション</p>
+
+  <div class="comparison-grid">
+    <!-- Option A: List style -->
+    <div class="section">
+      <h2>A: リストスタイル</h2>
+      <p class="section__description">左ボーダーでアクティブを表現</p>
+      <div class="mobile-frame">
+        <div class="mobile-frame__notch">
+          <div class="mobile-frame__notch-inner"></div>
+        </div>
+        <div class="mobile-frame__content">
+          <div class="tabs-2">
+            <button class="tabs-2__item active">
+              <span class="tabs-2__label">
+                <span class="tabs-2__dot tabs-2__dot--new"></span>
+                未学習
+              </span>
+              <span class="tabs-2__badge tabs-2__badge--new">1234</span>
+            </button>
+            <button class="tabs-2__item">
+              <span class="tabs-2__label">
+                <span class="tabs-2__dot tabs-2__dot--learning"></span>
+                復習中
+              </span>
+              <span class="tabs-2__badge tabs-2__badge--learning">567</span>
+            </button>
+            <button class="tabs-2__item">
+              <span class="tabs-2__label">
+                <span class="tabs-2__dot tabs-2__dot--completed"></span>
+                完了
+              </span>
+              <span class="tabs-2__badge tabs-2__badge--completed">8901</span>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="note">4桁でも余裕で収まる。タップ領域も広い。</div>
+    </div>
+
+    <!-- Option B: Card style -->
+    <div class="section">
+      <h2>B: カードスタイル</h2>
+      <p class="section__description">各項目をカードで分離</p>
+      <div class="mobile-frame">
+        <div class="mobile-frame__notch">
+          <div class="mobile-frame__notch-inner"></div>
+        </div>
+        <div class="mobile-frame__content">
+          <div class="tabs-4">
+            <button class="tabs-4__item active">
+              <span class="tabs-4__label">
+                <span class="tabs-4__dot tabs-4__dot--new"></span>
+                未学習
+              </span>
+              <span class="tabs-4__count">1234</span>
+            </button>
+            <button class="tabs-4__item">
+              <span class="tabs-4__label">
+                <span class="tabs-4__dot tabs-4__dot--learning"></span>
+                復習中
+              </span>
+              <span class="tabs-4__count">567</span>
+            </button>
+            <button class="tabs-4__item">
+              <span class="tabs-4__label">
+                <span class="tabs-4__dot tabs-4__dot--completed"></span>
+                完了
+              </span>
+              <span class="tabs-4__count">8901</span>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="note">数字が目立つ。カード間のスペースで区切りが明確。</div>
+    </div>
+  </div>
+
+  <!-- Normal numbers comparison -->
+  <div class="section">
+    <h2>通常の数字での見え方</h2>
+    <p class="section__description">1〜2桁の場合</p>
+    <div class="comparison-grid">
+      <div class="mobile-frame">
+        <div class="mobile-frame__notch">
+          <div class="mobile-frame__notch-inner"></div>
+        </div>
+        <div class="mobile-frame__content">
+          <div class="tabs-2">
+            <button class="tabs-2__item active">
+              <span class="tabs-2__label">
+                <span class="tabs-2__dot tabs-2__dot--new"></span>
+                未学習
+              </span>
+              <span class="tabs-2__badge tabs-2__badge--new">12</span>
+            </button>
+            <button class="tabs-2__item">
+              <span class="tabs-2__label">
+                <span class="tabs-2__dot tabs-2__dot--learning"></span>
+                復習中
+              </span>
+              <span class="tabs-2__badge tabs-2__badge--learning">8</span>
+            </button>
+            <button class="tabs-2__item">
+              <span class="tabs-2__label">
+                <span class="tabs-2__dot tabs-2__dot--completed"></span>
+                完了
+              </span>
+              <span class="tabs-2__badge tabs-2__badge--completed">24</span>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="mobile-frame">
+        <div class="mobile-frame__notch">
+          <div class="mobile-frame__notch-inner"></div>
+        </div>
+        <div class="mobile-frame__content">
+          <div class="tabs-4">
+            <button class="tabs-4__item active">
+              <span class="tabs-4__label">
+                <span class="tabs-4__dot tabs-4__dot--new"></span>
+                未学習
+              </span>
+              <span class="tabs-4__count">12</span>
+            </button>
+            <button class="tabs-4__item">
+              <span class="tabs-4__label">
+                <span class="tabs-4__dot tabs-4__dot--learning"></span>
+                復習中
+              </span>
+              <span class="tabs-4__count">8</span>
+            </button>
+            <button class="tabs-4__item">
+              <span class="tabs-4__label">
+                <span class="tabs-4__dot tabs-4__dot--completed"></span>
+                完了
+              </span>
+              <span class="tabs-4__count">24</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.querySelectorAll('[class^="tabs-"]').forEach(tabGroup => {
+      const items = tabGroup.querySelectorAll('[class*="__item"]');
+      items.forEach(item => {
+        item.addEventListener('click', () => {
+          items.forEach(i => i.classList.remove('active'));
+          item.classList.add('active');
+        });
+      });
+    });
+  </script>
+</body>
+</html>

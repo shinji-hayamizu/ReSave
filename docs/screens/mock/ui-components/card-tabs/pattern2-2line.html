@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pattern 2 - 2 Line Tabs</title>
+  <style>
+    :root {
+      --background: #ffffff;
+      --foreground: #0f172a;
+      --muted: #f1f5f9;
+      --muted-foreground: #64748b;
+      --primary: #2563eb;
+      --border: #e2e8f0;
+      --card: #ffffff;
+
+      --status-new: #f59e0b;
+      --status-new-bg: #fef3c7;
+      --status-learning: #3b82f6;
+      --status-learning-bg: #dbeafe;
+      --status-completed: #10b981;
+      --status-completed-bg: #d1fae5;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background-color: #f8fafc;
+      color: var(--foreground);
+      line-height: 1.5;
+      padding: 2rem;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .subtitle {
+      color: var(--muted-foreground);
+      margin-bottom: 2rem;
+    }
+
+    h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--foreground);
+    }
+
+    .section {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .section__description {
+      color: var(--muted-foreground);
+      font-size: 0.8125rem;
+      margin-bottom: 1rem;
+    }
+
+    /* Mobile frame */
+    .mobile-frame {
+      max-width: 375px;
+      border: 2px solid var(--border);
+      border-radius: 24px;
+      overflow: hidden;
+      background: var(--card);
+    }
+
+    .mobile-frame__notch {
+      height: 24px;
+      background: var(--foreground);
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      padding-bottom: 4px;
+    }
+
+    .mobile-frame__notch-inner {
+      width: 80px;
+      height: 6px;
+      background: var(--card);
+      border-radius: 3px;
+    }
+
+    .mobile-frame__content {
+      padding: 1rem;
+    }
+
+    /* Pattern 2: 2-line tabs */
+    .tabs-2line {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .tabs-2line__item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.75rem 0.5rem;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      color: var(--muted-foreground);
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: all 0.2s ease;
+    }
+
+    .tabs-2line__item:hover {
+      color: var(--foreground);
+    }
+
+    .tabs-2line__item.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+
+    .tabs-2line__label {
+      font-size: 0.75rem;
+    }
+
+    .tabs-2line__count {
+      font-size: 1rem;
+      font-weight: 700;
+      padding: 0.125rem 0.5rem;
+      border-radius: 6px;
+    }
+
+    .tabs-2line__item--new .tabs-2line__count {
+      background: var(--status-new-bg);
+      color: var(--status-new);
+    }
+
+    .tabs-2line__item--learning .tabs-2line__count {
+      background: var(--status-learning-bg);
+      color: var(--status-learning);
+    }
+
+    .tabs-2line__item--completed .tabs-2line__count {
+      background: var(--status-completed-bg);
+      color: var(--status-completed);
+    }
+
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .note {
+      background: #d1fae5;
+      border-left: 4px solid #10b981;
+      padding: 0.75rem 1rem;
+      margin-top: 1rem;
+      font-size: 0.8125rem;
+      border-radius: 0 8px 8px 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>Pattern 2: タブ内2行レイアウト</h1>
+  <p class="subtitle">ラベルと数字を縦に並べる</p>
+
+  <div class="comparison-grid">
+    <!-- Normal numbers -->
+    <div class="section">
+      <h2>通常の数字（1〜2桁）</h2>
+      <div class="mobile-frame">
+        <div class="mobile-frame__notch">
+          <div class="mobile-frame__notch-inner"></div>
+        </div>
+        <div class="mobile-frame__content">
+          <div class="tabs-2line">
+            <button class="tabs-2line__item tabs-2line__item--new active">
+              <span class="tabs-2line__label">未学習</span>
+              <span class="tabs-2line__count">12</span>
+            </button>
+            <button class="tabs-2line__item tabs-2line__item--learning">
+              <span class="tabs-2line__label">復習中</span>
+              <span class="tabs-2line__count">8</span>
+            </button>
+            <button class="tabs-2line__item tabs-2line__item--completed">
+              <span class="tabs-2line__label">完了</span>
+              <span class="tabs-2line__count">24</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4 digit with 1.2k notation -->
+    <div class="section">
+      <h2>4桁（1.2k表記）</h2>
+      <div class="mobile-frame">
+        <div class="mobile-frame__notch">
+          <div class="mobile-frame__notch-inner"></div>
+        </div>
+        <div class="mobile-frame__content">
+          <div class="tabs-2line">
+            <button class="tabs-2line__item tabs-2line__item--new active">
+              <span class="tabs-2line__label">未学習</span>
+              <span class="tabs-2line__count">1.2k</span>
+            </button>
+            <button class="tabs-2line__item tabs-2line__item--learning">
+              <span class="tabs-2line__label">復習中</span>
+              <span class="tabs-2line__count">567</span>
+            </button>
+            <button class="tabs-2line__item tabs-2line__item--completed">
+              <span class="tabs-2line__label">完了</span>
+              <span class="tabs-2line__count">8.9k</span>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="note">1000以上は「1.2k」表記でコンパクトに。</div>
+    </div>
+  </div>
+
+  <!-- Full width comparison -->
+  <div class="section">
+    <h2>デスクトップ幅での表示</h2>
+    <div style="max-width: 600px;">
+      <div class="tabs-2line">
+        <button class="tabs-2line__item tabs-2line__item--new active">
+          <span class="tabs-2line__label">未学習</span>
+          <span class="tabs-2line__count">1.2k</span>
+        </button>
+        <button class="tabs-2line__item tabs-2line__item--learning">
+          <span class="tabs-2line__label">復習中</span>
+          <span class="tabs-2line__count">567</span>
+        </button>
+        <button class="tabs-2line__item tabs-2line__item--completed">
+          <span class="tabs-2line__label">完了</span>
+          <span class="tabs-2line__count">8.9k</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.querySelectorAll('.tabs-2line').forEach(tabGroup => {
+      const items = tabGroup.querySelectorAll('.tabs-2line__item');
+      items.forEach(item => {
+        item.addEventListener('click', () => {
+          items.forEach(i => i.classList.remove('active'));
+          item.classList.add('active');
+        });
+      });
+    });
+  </script>
+</body>
+</html>
