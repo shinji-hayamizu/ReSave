@@ -23,6 +23,7 @@ interface CreateCardDialogProps {
   };
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  onCardCreated?: () => void;
 }
 
 export function CreateCardDialog({
@@ -30,6 +31,7 @@ export function CreateCardDialog({
   defaultValues,
   open: controlledOpen,
   onOpenChange: controlledOnOpenChange,
+  onCardCreated,
 }: CreateCardDialogProps) {
   const [internalOpen, setInternalOpen] = useState(false);
   const createCard = useCreateCard();
@@ -47,6 +49,7 @@ export function CreateCardDialog({
       });
       toast.success('カードを作成しました');
       setOpen(false);
+      onCardCreated?.();
     } catch {
       toast.error('カードの作成に失敗しました');
     }

@@ -3,12 +3,22 @@
 import { memo, useCallback, useState } from 'react';
 import { toast } from 'sonner';
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import type { Rating } from '@/components/ui/rating-buttons';
 import { RatingButtons } from '@/components/ui/rating-buttons';
 import { StudyCard } from '@/components/ui/study-card';
 import { TagBadge } from '@/components/ui/tag-badge';
 import { cn } from '@/lib/utils';
-import { useUpdateCard } from '@/hooks/useCards';
+import { useDeleteCard, useUpdateCard } from '@/hooks/useCards';
 import { useSubmitAssessment } from '@/hooks/useStudy';
 import type { Assessment } from '@/types/study-log';
 import type { Tag } from '@/types/tag';
@@ -49,8 +59,10 @@ export const HomeStudyCard = memo(function HomeStudyCard({
   className,
 }: HomeStudyCardProps) {
   const [isRemoving, setIsRemoving] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const submitAssessment = useSubmitAssessment();
   const updateCard = useUpdateCard();
+  const deleteCard = useDeleteCard();
 
   const handleRate = useCallback(
     async (rating: Rating) => {
@@ -87,6 +99,24 @@ export const HomeStudyCard = memo(function HomeStudyCard({
     [id, updateCard]
   );
 
+  const handleDeleteClick = useCallback(() => {
+    setShowDeleteDialog(true);
+  }, []);
+
+  const handleDeleteConfirm = useCallback(async () => {
+    setIsRemoving(true);
+
+    setTimeout(async () => {
+      try {
+        await deleteCard.mutateAsync(id);
+        toast.success('カードを削除しました');
+      } catch {
+        setIsRemoving(false);
+        toast.error('カードの削除に失敗しました');
+      }
+    }, REMOVE_ANIMATION_DURATION_MS);
+  }, [id, deleteCard]);
+
   return (
     <div
       className={cn(
@@ -121,9 +151,29 @@ export const HomeStudyCard = memo(function HomeStudyCard({
             ) : undefined
           }
           totalSteps={schedule?.length}
+          onDelete={handleDeleteClick}
           onEdit={onEdit}
           onSave={handleSave}
         />
+        <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>カードを削除しますか？</AlertDialogTitle>
+              <AlertDialogDescription>
+                この操作は取り消せません。カードに関連する学習履歴も削除されます。
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>キャンセル</AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                onClick={handleDeleteConfirm}
+              >
+                削除
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   );

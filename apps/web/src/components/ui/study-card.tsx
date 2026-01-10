@@ -1,7 +1,8 @@
 'use client'
 
 import { memo, useCallback, useEffect, useRef, useState } from 'react'
-import { Check, Eye, EyeOff, Pencil, SquarePen, X } from 'lucide-react'
+import { Check, Eye, EyeOff, Pencil, SquarePen, Trash2, X } from 'lucide-react'
+import TextareaAutosize from 'react-textarea-autosize'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 
@@ -13,6 +14,7 @@ interface StudyCardProps {
   currentStep?: number
   totalSteps?: number
   onEdit?: () => void
+  onDelete?: () => void
   onSave?: (data: { front?: string; back?: string }) => void
   defaultOpen?: boolean
   className?: string
@@ -26,6 +28,7 @@ export const StudyCard = memo(function StudyCard({
   currentStep,
   totalSteps,
   onEdit,
+  onDelete,
   onSave,
   defaultOpen = false,
   className,
@@ -35,8 +38,8 @@ export const StudyCard = memo(function StudyCard({
   const [editValue, setEditValue] = useState('')
   const [isWritingAnswer, setIsWritingAnswer] = useState(false)
   const answerRef = useRef<HTMLDivElement>(null)
-  const textareaRef = useRef<HTMLTextAreaElement>(null)
-  const writeAnswerRef = useRef<HTMLTextAreaElement>(null)
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null)
+  const writeAnswerRef = useRef<HTMLTextAreaElement | null>(null)
 
   const handleToggle = () => {
     const willOpen = !isOpen
@@ -156,13 +159,13 @@ export const StudyCard = memo(function StudyCard({
 
       <div className="px-5 py-4">
         {editingField === 'front' ? (
-          <div className="flex gap-3 items-center">
-            <textarea
+          <div className="flex gap-3 items-start">
+            <TextareaAutosize
               ref={textareaRef}
               value={editValue}
               onChange={(e) => setEditValue(e.target.value)}
-              className="flex-1 min-h-[60px] p-3 text-base text-foreground leading-relaxed border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-y"
-              rows={2}
+              minRows={2}
+              className="flex-1 p-3 text-base text-foreground leading-relaxed border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
             />
             <div className="flex flex-col gap-2">
               <button
@@ -192,17 +195,33 @@ export const StudyCard = memo(function StudyCard({
             >
               {question}
             </p>
-            {onEdit && (
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 flex-shrink-0 text-muted-foreground hover:text-foreground"
-                onClick={onEdit}
-              >
-                <Pencil className="h-4 w-4" />
-                <span className="sr-only">編集</span>
-              </Button>
+            {(onEdit || onDelete) && (
+              <div className="flex gap-1 flex-shrink-0">
+                {onEdit && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                    onClick={onEdit}
+                  >
+                    <Pencil className="h-4 w-4" />
+                    <span className="sr-only">編集</span>
+                  </Button>
+                )}
+                {onDelete && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                    onClick={onDelete}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    <span className="sr-only">削除</span>
+                  </Button>
+                )}
+              </div>
             )}
           </div>
         )}
@@ -235,13 +254,13 @@ export const StudyCard = memo(function StudyCard({
             <div className="overflow-hidden">
               <div ref={answerRef} className="px-5 py-4 bg-card">
                 {editingField === 'back' ? (
-                  <div className="flex gap-3 items-center">
-                    <textarea
+                  <div className="flex gap-3 items-start">
+                    <TextareaAutosize
                       ref={textareaRef}
                       value={editValue}
                       onChange={(e) => setEditValue(e.target.value)}
-                      className="flex-1 min-h-[100px] p-3 text-base text-foreground leading-relaxed bg-amber-50 border border-amber-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-y"
-                      rows={4}
+                      minRows={3}
+                      className="flex-1 p-3 text-base text-foreground leading-relaxed bg-amber-50 border border-amber-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
                     />
                     <div className="flex flex-col gap-2">
                       <button
@@ -268,7 +287,7 @@ export const StudyCard = memo(function StudyCard({
                     )}
                     onClick={canInlineEdit ? () => startEdit('back') : undefined}
                   >
-                    <p className="text-base text-foreground leading-relaxed">
+                    <p className="text-base text-foreground leading-relaxed whitespace-pre-wrap">
                       {answer}
                     </p>
                   </div>
@@ -280,14 +299,14 @@ export const StudyCard = memo(function StudyCard({
       ) : canInlineEdit && (
         <div className="px-5 py-3 bg-card">
           {isWritingAnswer ? (
-            <div className="flex gap-3 items-center">
-              <textarea
+            <div className="flex gap-3 items-start">
+              <TextareaAutosize
                 ref={writeAnswerRef}
                 value={editValue}
                 onChange={(e) => setEditValue(e.target.value)}
-                className="flex-1 min-h-[100px] p-3 text-base text-foreground leading-relaxed bg-amber-50 border border-amber-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-y"
+                minRows={3}
+                className="flex-1 p-3 text-base text-foreground leading-relaxed bg-amber-50 border border-amber-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
                 placeholder="答えを入力..."
-                rows={4}
               />
               <div className="flex flex-col gap-2">
                 <button

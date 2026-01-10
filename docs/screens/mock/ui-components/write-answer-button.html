@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>答えを書く - ボタンデザインサンプル</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-static@latest/font/lucide.min.css">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#3b82f6',
+            'primary-foreground': '#ffffff',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .card-container {
+      max-width: 480px;
+      margin: 0 auto;
+    }
+  </style>
+</head>
+<body class="bg-gray-100 min-h-screen py-8 px-4">
+  <div class="max-w-4xl mx-auto space-y-12">
+    <h1 class="text-2xl font-bold text-gray-900 text-center mb-8">「答えを書く」ボタン デザインサンプル</h1>
+
+    <!-- ========================================== -->
+    <!-- Sample 1: Pill Style (現状の「答えを見る」と同じスタイル) -->
+    <!-- ========================================== -->
+    <section class="space-y-4">
+      <h2 class="text-lg font-semibold text-gray-700 border-b pb-2">1. Pill Style（現行デザインと統一）</h2>
+      <p class="text-sm text-gray-500">現在の「答えを見る」ボタンと同じ丸みのあるピル型デザイン。アウトラインで控えめに。</p>
+
+      <div class="card-container bg-white rounded-xl shadow-sm overflow-hidden">
+        <div class="px-5 py-4">
+          <p class="text-base text-gray-900 leading-relaxed">ReactのuseStateフックの役割は？</p>
+        </div>
+        <div class="flex justify-center py-2">
+          <button type="button" class="inline-flex items-center justify-center gap-2 px-6 h-9 rounded-full text-sm font-semibold border-2 bg-transparent text-blue-500 border-blue-500 hover:bg-blue-500 hover:text-white transition-all">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z"/></svg>
+            <span>答えを書く</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- Sample 2: Filled Primary Style -->
+    <!-- ========================================== -->
+    <section class="space-y-4">
+      <h2 class="text-lg font-semibold text-gray-700 border-b pb-2">2. Filled Primary（強調スタイル）</h2>
+      <p class="text-sm text-gray-500">答えがないことを強調し、入力を促すデザイン。</p>
+
+      <div class="card-container bg-white rounded-xl shadow-sm overflow-hidden">
+        <div class="px-5 py-4">
+          <p class="text-base text-gray-900 leading-relaxed">CSSのflexboxとgridの使い分けは？</p>
+        </div>
+        <div class="flex justify-center py-2">
+          <button type="button" class="inline-flex items-center justify-center gap-2 px-6 h-9 rounded-full text-sm font-semibold bg-blue-500 text-white hover:bg-blue-600 transition-all shadow-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z"/></svg>
+            <span>答えを書く</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- Sample 3: Amber/Yellow Warning Style -->
+    <!-- ========================================== -->
+    <section class="space-y-4">
+      <h2 class="text-lg font-semibold text-gray-700 border-b pb-2">3. Amber Style（未入力を警告）</h2>
+      <p class="text-sm text-gray-500">答えが未設定であることを黄色系で視覚的に伝える。</p>
+
+      <div class="card-container bg-white rounded-xl shadow-sm overflow-hidden">
+        <div class="px-5 py-4">
+          <p class="text-base text-gray-900 leading-relaxed">TypeScriptのジェネリクスとは？</p>
+        </div>
+        <div class="flex justify-center py-2">
+          <button type="button" class="inline-flex items-center justify-center gap-2 px-6 h-9 rounded-full text-sm font-semibold border-2 bg-amber-50 text-amber-700 border-amber-400 hover:bg-amber-100 hover:border-amber-500 transition-all">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z"/></svg>
+            <span>答えを書く</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- Sample 4: Dashed Border Style -->
+    <!-- ========================================== -->
+    <section class="space-y-4">
+      <h2 class="text-lg font-semibold text-gray-700 border-b pb-2">4. Dashed Style（プレースホルダー感）</h2>
+      <p class="text-sm text-gray-500">「まだ何もない」感を破線で表現。</p>
+
+      <div class="card-container bg-white rounded-xl shadow-sm overflow-hidden">
+        <div class="px-5 py-4">
+          <p class="text-base text-gray-900 leading-relaxed">Next.jsのApp Routerの特徴は？</p>
+        </div>
+        <div class="flex justify-center py-2">
+          <button type="button" class="inline-flex items-center justify-center gap-2 px-6 h-9 rounded-full text-sm font-medium border-2 border-dashed bg-transparent text-gray-500 border-gray-400 hover:text-blue-600 hover:border-blue-500 hover:bg-blue-50 transition-all">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z"/></svg>
+            <span>答えを書く</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- Sample 5: Plus Icon Style -->
+    <!-- ========================================== -->
+    <section class="space-y-4">
+      <h2 class="text-lg font-semibold text-gray-700 border-b pb-2">5. Plus Icon（追加アクション感）</h2>
+      <p class="text-sm text-gray-500">プラスアイコンで「追加する」意図を明確に。</p>
+
+      <div class="card-container bg-white rounded-xl shadow-sm overflow-hidden">
+        <div class="px-5 py-4">
+          <p class="text-base text-gray-900 leading-relaxed">REST APIとGraphQLの違いは？</p>
+        </div>
+        <div class="flex justify-center py-2">
+          <button type="button" class="inline-flex items-center justify-center gap-2 px-6 h-9 rounded-full text-sm font-semibold border-2 bg-transparent text-emerald-600 border-emerald-500 hover:bg-emerald-500 hover:text-white transition-all">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+            <span>答えを追加</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- Sample 6: Inline Input Area (Expanded by Default) -->
+    <!-- ========================================== -->
+    <section class="space-y-4">
+      <h2 class="text-lg font-semibold text-gray-700 border-b pb-2">6. Inline Input（最初から入力欄表示）</h2>
+      <p class="text-sm text-gray-500">ボタンではなく、最初から入力エリアを表示。すぐに書き始められる。</p>
+
+      <div class="card-container bg-white rounded-xl shadow-sm overflow-hidden">
+        <div class="px-5 py-4">
+          <p class="text-base text-gray-900 leading-relaxed">GitのrebaseとmergeはどのVRう使い分ける？</p>
+        </div>
+        <div class="px-5 py-3">
+          <div class="border-2 border-dashed border-gray-300 rounded-lg p-3 bg-gray-50 hover:border-blue-400 hover:bg-blue-50/30 transition-colors cursor-text">
+            <p class="text-sm text-gray-400 flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z"/></svg>
+              答えを入力...
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- Sample 7: Mini Fab Style -->
+    <!-- ========================================== -->
+    <section class="space-y-4">
+      <h2 class="text-lg font-semibold text-gray-700 border-b pb-2">7. Mini FAB（コンパクト）</h2>
+      <p class="text-sm text-gray-500">テキストなしのアイコンボタン。スペースを取らない。</p>
+
+      <div class="card-container bg-white rounded-xl shadow-sm overflow-hidden">
+        <div class="px-5 py-4">
+          <p class="text-base text-gray-900 leading-relaxed">Dockerコンテナとイメージの違いは？</p>
+        </div>
+        <div class="flex justify-center py-2">
+          <button type="button" class="inline-flex items-center justify-center w-10 h-10 rounded-full text-sm font-semibold bg-blue-500 text-white hover:bg-blue-600 transition-all shadow-md hover:shadow-lg" title="答えを書く">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z"/></svg>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- Sample 8: Text Link Style -->
+    <!-- ========================================== -->
+    <section class="space-y-4">
+      <h2 class="text-lg font-semibold text-gray-700 border-b pb-2">8. Text Link（シンプルリンク）</h2>
+      <p class="text-sm text-gray-500">ボタンではなくリンクスタイル。控えめだが分かりやすい。</p>
+
+      <div class="card-container bg-white rounded-xl shadow-sm overflow-hidden">
+        <div class="px-5 py-4">
+          <p class="text-base text-gray-900 leading-relaxed">Webpackとviteの違いは？</p>
+        </div>
+        <div class="flex justify-center py-3">
+          <button type="button" class="inline-flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-800 hover:underline transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z"/></svg>
+            答えを書く
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- Sample 9: Card-like Prompt -->
+    <!-- ========================================== -->
+    <section class="space-y-4">
+      <h2 class="text-lg font-semibold text-gray-700 border-b pb-2">9. Card Prompt（カード型促し）</h2>
+      <p class="text-sm text-gray-500">答えエリア全体をクリック可能なカードに。</p>
+
+      <div class="card-container bg-white rounded-xl shadow-sm overflow-hidden">
+        <div class="px-5 py-4">
+          <p class="text-base text-gray-900 leading-relaxed">HTTPSの仕組みを簡潔に説明すると？</p>
+        </div>
+        <div class="px-5 py-3">
+          <button type="button" class="w-full p-4 rounded-lg border-2 border-dashed border-amber-300 bg-amber-50/50 text-amber-700 hover:bg-amber-100 hover:border-amber-400 transition-all text-left">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z"/></svg>
+              </div>
+              <div>
+                <p class="font-medium">答えを書く</p>
+                <p class="text-xs text-amber-600/80">クリックして答えを追加</p>
+              </div>
+            </div>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- Sample 10: Ghost with Arrow -->
+    <!-- ========================================== -->
+    <section class="space-y-4">
+      <h2 class="text-lg font-semibold text-gray-700 border-b pb-2">10. Ghost with Arrow（矢印で誘導）</h2>
+      <p class="text-sm text-gray-500">矢印で「次のステップへ」という流れを表現。</p>
+
+      <div class="card-container bg-white rounded-xl shadow-sm overflow-hidden">
+        <div class="px-5 py-4">
+          <p class="text-base text-gray-900 leading-relaxed">SQLのJOINの種類を列挙すると？</p>
+        </div>
+        <div class="flex justify-center py-2">
+          <button type="button" class="inline-flex items-center justify-center gap-2 px-6 h-9 rounded-full text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all group">
+            <span>答えを書く</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="transition-transform group-hover:translate-x-1"><path d="m9 18 6-6-6-6"/></svg>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- Comparison: Side by Side -->
+    <!-- ========================================== -->
+    <section class="space-y-4 mt-16">
+      <h2 class="text-xl font-bold text-gray-900 border-b-2 pb-2">比較: 答えがある場合 vs ない場合</h2>
+
+      <div class="grid md:grid-cols-2 gap-6">
+        <!-- With Answer -->
+        <div class="space-y-2">
+          <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wide">答えあり（現行）</h3>
+          <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+            <div class="px-5 py-4">
+              <p class="text-base text-gray-900 leading-relaxed">ReactのuseStateの役割は？</p>
+            </div>
+            <div class="flex justify-center py-2">
+              <button type="button" class="inline-flex items-center justify-center gap-2 px-6 h-9 rounded-full text-sm font-semibold border-2 bg-transparent text-blue-500 border-blue-500 hover:bg-blue-500 hover:text-white transition-all">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
+                <span>答えを見る</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Without Answer -->
+        <div class="space-y-2">
+          <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wide">答えなし（推奨案）</h3>
+          <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+            <div class="px-5 py-4">
+              <p class="text-base text-gray-900 leading-relaxed">useEffectの依存配列とは？</p>
+            </div>
+            <div class="flex justify-center py-2">
+              <button type="button" class="inline-flex items-center justify-center gap-2 px-6 h-9 rounded-full text-sm font-semibold border-2 bg-transparent text-blue-500 border-blue-500 hover:bg-blue-500 hover:text-white transition-all">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z"/></svg>
+                <span>答えを書く</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <p class="text-sm text-gray-500 bg-blue-50 p-4 rounded-lg border border-blue-200">
+        <strong>推奨:</strong> Sample 1（Pill Style）がベスト。現行の「答えを見る」と統一されたデザインで、ユーザーが迷わない。アイコンと文言だけが変わるシンプルな差分。
+      </p>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- Interactive Demo: Click to Write -->
+    <!-- ========================================== -->
+    <section class="space-y-4 mt-16">
+      <h2 class="text-xl font-bold text-gray-900 border-b-2 pb-2">インタラクティブデモ</h2>
+      <p class="text-sm text-gray-500">ボタンをクリックすると入力欄が開きます。</p>
+
+      <div class="card-container bg-white rounded-xl shadow-sm overflow-hidden" id="demo-card">
+        <div class="px-5 py-4">
+          <p class="text-base text-gray-900 leading-relaxed">Node.jsのイベントループとは？</p>
+        </div>
+
+        <!-- Button State -->
+        <div id="demo-button-area" class="flex justify-center py-2">
+          <button type="button" onclick="showWriteArea()" class="inline-flex items-center justify-center gap-2 px-6 h-9 rounded-full text-sm font-semibold border-2 bg-transparent text-blue-500 border-blue-500 hover:bg-blue-500 hover:text-white transition-all">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z"/></svg>
+            <span>答えを書く</span>
+          </button>
+        </div>
+
+        <!-- Write Area (Hidden by default) -->
+        <div id="demo-write-area" class="hidden px-5 py-4">
+          <textarea class="w-full min-h-[100px] p-3 text-base text-gray-900 leading-relaxed bg-amber-50 border border-amber-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-y" placeholder="答えを入力..." rows="4"></textarea>
+          <div class="flex justify-center gap-2 mt-3">
+            <button type="button" onclick="saveAnswer()" class="h-10 w-10 rounded-lg bg-emerald-100 text-emerald-600 inline-flex items-center justify-center hover:bg-emerald-200 transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </button>
+            <button type="button" onclick="cancelWrite()" class="h-10 w-10 rounded-lg bg-rose-100 text-rose-500 inline-flex items-center justify-center hover:bg-rose-200 transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Saved Answer (Hidden by default) -->
+        <div id="demo-saved-area" class="hidden">
+          <div class="flex justify-center py-2">
+            <button type="button" onclick="toggleAnswer()" class="inline-flex items-center justify-center gap-2 px-6 h-9 rounded-full text-sm font-semibold border-2 bg-blue-500 text-white border-blue-500 hover:bg-blue-600 transition-all">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
+              <span>答えを見る</span>
+            </button>
+          </div>
+          <div id="demo-answer-content" class="px-5 py-4">
+            <div class="inline-block px-4 py-3 bg-amber-50 border border-amber-200 rounded-lg">
+              <p id="demo-answer-text" class="text-base text-gray-900 leading-relaxed"></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    function showWriteArea() {
+      document.getElementById('demo-button-area').classList.add('hidden');
+      document.getElementById('demo-write-area').classList.remove('hidden');
+      document.querySelector('#demo-write-area textarea').focus();
+    }
+
+    function cancelWrite() {
+      document.getElementById('demo-write-area').classList.add('hidden');
+      document.getElementById('demo-button-area').classList.remove('hidden');
+      document.querySelector('#demo-write-area textarea').value = '';
+    }
+
+    function saveAnswer() {
+      const text = document.querySelector('#demo-write-area textarea').value.trim();
+      if (!text) {
+        cancelWrite();
+        return;
+      }
+      document.getElementById('demo-answer-text').textContent = text;
+      document.getElementById('demo-write-area').classList.add('hidden');
+      document.getElementById('demo-saved-area').classList.remove('hidden');
+      document.getElementById('demo-answer-content').classList.remove('hidden');
+    }
+
+    let answerVisible = true;
+    function toggleAnswer() {
+      answerVisible = !answerVisible;
+      const content = document.getElementById('demo-answer-content');
+      const btn = document.querySelector('#demo-saved-area button span');
+      if (answerVisible) {
+        content.classList.remove('hidden');
+        btn.textContent = '答えを隠す';
+      } else {
+        content.classList.add('hidden');
+        btn.textContent = '答えを見る';
+      }
+    }
+  </script>
+</body>
+</html>

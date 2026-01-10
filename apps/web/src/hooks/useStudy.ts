@@ -51,11 +51,13 @@ export function useSubmitAssessment() {
     onMutate: async (input) => {
       await qc.cancelQueries({ queryKey: studyKeys.all });
       await qc.cancelQueries({ queryKey: cardKeys.today() });
+      await qc.cancelQueries({ queryKey: cardKeys.new() });
 
       const previousSession = qc.getQueryData<StudySessionData>(
         studyKeys.session()
       );
       const previousToday = qc.getQueryData<CardWithTags[]>(cardKeys.today());
+      const previousNew = qc.getQueryData<CardWithTags[]>(cardKeys.new());
 
       if (previousSession) {
         qc.setQueryData<StudySessionData>(studyKeys.session(), {
@@ -71,7 +73,14 @@ export function useSubmitAssessment() {
         );
       }
 
-      return { previousSession, previousToday };
+      if (previousNew) {
+        qc.setQueryData<CardWithTags[]>(
+          cardKeys.new(),
+          previousNew.filter((card) => card.id !== input.cardId)
+        );
+      }
+
+      return { previousSession, previousToday, previousNew };
     },
     onError: (_, __, context) => {
       if (context?.previousSession) {
@@ -80,6 +89,9 @@ export function useSubmitAssessment() {
       if (context?.previousToday) {
         qc.setQueryData(cardKeys.today(), context.previousToday);
       }
+      if (context?.previousNew) {
+        qc.setQueryData(cardKeys.new(), context.previousNew);
+      }
       toast.error('評価の記録に失敗しました');
     },
     onSettled: () => {
@@ -87,6 +99,7 @@ export function useSubmitAssessment() {
       qc.invalidateQueries({ queryKey: cardKeys.lists() });
       qc.invalidateQueries({ queryKey: cardKeys.today() });
       qc.invalidateQueries({ queryKey: cardKeys.todayCompleted() });
+      qc.invalidateQueries({ queryKey: cardKeys.new() });
     },
   });
 }

@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>インライン編集 - ボタン配置サンプル</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen py-8 px-4">
+  <div class="max-w-2xl mx-auto space-y-12">
+    <h1 class="text-2xl font-bold text-gray-900 text-center mb-8">インライン編集 ボタン配置サンプル</h1>
+
+    <!-- ========================================== -->
+    <!-- 現状: ボタンが下に横並び -->
+    <!-- ========================================== -->
+    <section class="space-y-4">
+      <h2 class="text-lg font-semibold text-gray-700 border-b pb-2">現状: ボタンが下に横並び</h2>
+      <div class="bg-white rounded-xl shadow-sm p-5">
+        <textarea class="w-full min-h-[100px] p-3 text-base text-gray-900 leading-relaxed bg-amber-50 border-2 border-blue-400 rounded-lg focus:outline-none resize-y" rows="4">test</textarea>
+        <div class="flex justify-center gap-2 mt-3">
+          <button type="button" class="h-10 w-10 rounded-lg bg-emerald-100 text-emerald-600 inline-flex items-center justify-center hover:bg-emerald-200 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </button>
+          <button type="button" class="h-10 w-10 rounded-lg bg-rose-100 text-rose-500 inline-flex items-center justify-center hover:bg-rose-200 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- 案1: 右側に縦並び（基本） -->
+    <!-- ========================================== -->
+    <section class="space-y-4">
+      <h2 class="text-lg font-semibold text-gray-700 border-b pb-2">案1: 右側に縦並び（基本）</h2>
+      <div class="bg-white rounded-xl shadow-sm p-5">
+        <div class="flex gap-3">
+          <textarea class="flex-1 min-h-[100px] p-3 text-base text-gray-900 leading-relaxed bg-amber-50 border-2 border-blue-400 rounded-lg focus:outline-none resize-y" rows="4">test</textarea>
+          <div class="flex flex-col gap-2">
+            <button type="button" class="h-10 w-10 rounded-lg bg-emerald-100 text-emerald-600 inline-flex items-center justify-center hover:bg-emerald-200 transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </button>
+            <button type="button" class="h-10 w-10 rounded-lg bg-rose-100 text-rose-500 inline-flex items-center justify-center hover:bg-rose-200 transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- 案2: 右側に縦並び（中央揃え） -->
+    <!-- ========================================== -->
+    <section class="space-y-4">
+      <h2 class="text-lg font-semibold text-gray-700 border-b pb-2">案2: 右側に縦並び（中央揃え）</h2>
+      <div class="bg-white rounded-xl shadow-sm p-5">
+        <div class="flex gap-3 items-center">
+          <textarea class="flex-1 min-h-[100px] p-3 text-base text-gray-900 leading-relaxed bg-amber-50 border-2 border-blue-400 rounded-lg focus:outline-none resize-y" rows="4">test</textarea>
+          <div class="flex flex-col gap-2">
+            <button type="button" class="h-10 w-10 rounded-lg bg-emerald-100 text-emerald-600 inline-flex items-center justify-center hover:bg-emerald-200 transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </button>
+            <button type="button" class="h-10 w-10 rounded-lg bg-rose-100 text-rose-500 inline-flex items-center justify-center hover:bg-rose-200 transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- 案3: 右側に縦並び（小さいボタン） -->
+    <!-- ========================================== -->
+    <section class="space-y-4">
+      <h2 class="text-lg font-semibold text-gray-700 border-b pb-2">案3: 右側に縦並び（小さいボタン）</h2>
+      <div class="bg-white rounded-xl shadow-sm p-5">
+        <div class="flex gap-2 items-center">
+          <textarea class="flex-1 min-h-[100px] p-3 text-base text-gray-900 leading-relaxed bg-amber-50 border-2 border-blue-400 rounded-lg focus:outline-none resize-y" rows="4">test</textarea>
+          <div class="flex flex-col gap-1.5">
+            <button type="button" class="h-8 w-8 rounded-md bg-emerald-100 text-emerald-600 inline-flex items-center justify-center hover:bg-emerald-200 transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </button>
+            <button type="button" class="h-8 w-8 rounded-md bg-rose-100 text-rose-500 inline-flex items-center justify-center hover:bg-rose-200 transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- 案4: 右側に縦並び（ボーダーなしアイコン） -->
+    <!-- ========================================== -->
+    <section class="space-y-4">
+      <h2 class="text-lg font-semibold text-gray-700 border-b pb-2">案4: 右側に縦並び（ミニマル）</h2>
+      <div class="bg-white rounded-xl shadow-sm p-5">
+        <div class="flex gap-2 items-start">
+          <textarea class="flex-1 min-h-[100px] p-3 text-base text-gray-900 leading-relaxed bg-amber-50 border-2 border-blue-400 rounded-lg focus:outline-none resize-y" rows="4">test</textarea>
+          <div class="flex flex-col gap-1 pt-2">
+            <button type="button" class="h-8 w-8 rounded-full text-emerald-600 inline-flex items-center justify-center hover:bg-emerald-100 transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </button>
+            <button type="button" class="h-8 w-8 rounded-full text-rose-500 inline-flex items-center justify-center hover:bg-rose-100 transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- カード全体のコンテキストで見る -->
+    <!-- ========================================== -->
+    <section class="space-y-4 mt-16">
+      <h2 class="text-xl font-bold text-gray-900 border-b-2 pb-2">カード全体での見え方</h2>
+
+      <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+        <!-- Rating buttons + Tags -->
+        <div class="flex items-center justify-between gap-3 px-4 py-3">
+          <div class="flex gap-1">
+            <button class="px-3 py-1.5 rounded-full text-xs font-medium bg-rose-100 text-rose-700">もう一度</button>
+            <button class="px-3 py-1.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700">OK</button>
+            <button class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">覚えた</button>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <span class="px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700">React</span>
+            <span class="px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">1/5</span>
+          </div>
+        </div>
+
+        <!-- Question -->
+        <div class="px-5 py-4">
+          <p class="text-base text-gray-900 leading-relaxed">ReactのuseStateフックの役割は？</p>
+        </div>
+
+        <!-- Answer Edit Area -->
+        <div class="px-5 py-3">
+          <div class="flex gap-3 items-center">
+            <textarea class="flex-1 min-h-[100px] p-3 text-base text-gray-900 leading-relaxed bg-amber-50 border border-amber-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-y" rows="4">コンポーネント内で状態を管理するためのフック。状態が変更されるとコンポーネントが再レンダリングされる。</textarea>
+            <div class="flex flex-col gap-2">
+              <button type="button" class="h-10 w-10 rounded-lg bg-emerald-100 text-emerald-600 inline-flex items-center justify-center hover:bg-emerald-200 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              </button>
+              <button type="button" class="h-10 w-10 rounded-lg bg-rose-100 text-rose-500 inline-flex items-center justify-center hover:bg-rose-200 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- 「答えを書く」の場合 -->
+    <!-- ========================================== -->
+    <section class="space-y-4">
+      <h2 class="text-xl font-bold text-gray-900 border-b-2 pb-2">「答えを書く」モード</h2>
+
+      <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+        <!-- Rating buttons + Tags -->
+        <div class="flex items-center justify-between gap-3 px-4 py-3">
+          <div class="flex gap-1">
+            <button class="px-3 py-1.5 rounded-full text-xs font-medium bg-rose-100 text-rose-700">もう一度</button>
+            <button class="px-3 py-1.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700">OK</button>
+            <button class="px-3 py-1.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">覚えた</button>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <span class="px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700">React</span>
+            <span class="px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">2/5</span>
+          </div>
+        </div>
+
+        <!-- Question -->
+        <div class="px-5 py-4">
+          <p class="text-base text-gray-900 leading-relaxed">useEffectの依存配列とは？</p>
+        </div>
+
+        <!-- Write Answer Area -->
+        <div class="px-5 py-3">
+          <div class="flex gap-3 items-center">
+            <textarea class="flex-1 min-h-[100px] p-3 text-base text-gray-900 leading-relaxed bg-amber-50 border border-amber-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-y" placeholder="答えを入力..." rows="4"></textarea>
+            <div class="flex flex-col gap-2">
+              <button type="button" class="h-10 w-10 rounded-lg bg-emerald-100 text-emerald-600 inline-flex items-center justify-center hover:bg-emerald-200 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              </button>
+              <button type="button" class="h-10 w-10 rounded-lg bg-rose-100 text-rose-500 inline-flex items-center justify-center hover:bg-rose-200 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</body>
+</html>

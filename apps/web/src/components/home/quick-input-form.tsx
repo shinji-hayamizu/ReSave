@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
-import { Edit, Plus } from 'lucide-react';
+import { Edit, Plus, X } from 'lucide-react';
+import type { TextareaAutosizeProps } from 'react-textarea-autosize';
 import TextareaAutosize from 'react-textarea-autosize';
 import { toast } from 'sonner';
 
@@ -24,6 +25,23 @@ export function QuickInputForm({ className, onCardCreated }: QuickInputFormProps
   const [back, setBack] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
   const createCard = useCreateCard();
+  const backTextareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const handleFrontKeyDown: TextareaAutosizeProps['onKeyDown'] = (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+      e.preventDefault();
+      backTextareaRef.current?.focus();
+    }
+  };
+
+  const handleBackKeyDown: TextareaAutosizeProps['onKeyDown'] = (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+      e.preventDefault();
+      if (!isSubmitDisabled) {
+        e.currentTarget.form?.requestSubmit();
+      }
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,6 +92,16 @@ export function QuickInputForm({ className, onCardCreated }: QuickInputFormProps
               onChange={(e) => setFront(e.target.value)}
               disabled={createCard.isPending}
             />
+            {front && (
+              <button
+                type="button"
+                className="w-10 h-auto border border-l-0 border-input bg-secondary/50 text-muted-foreground hover:text-foreground hover:bg-secondary flex items-center justify-center"
+                onClick={() => setFront('')}
+                title="クリア"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
             <Button
               type="submit"
               size="icon"
@@ -97,6 +125,16 @@ export function QuickInputForm({ className, onCardCreated }: QuickInputFormProps
               onChange={(e) => setBack(e.target.value)}
               disabled={createCard.isPending}
             />
+            {back && (
+              <button
+                type="button"
+                className="w-10 h-auto border border-l-0 border-input bg-secondary/50 text-muted-foreground hover:text-foreground hover:bg-secondary flex items-center justify-center"
+                onClick={() => setBack('')}
+                title="クリア"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
             <Button
               type="button"
               variant="secondary"

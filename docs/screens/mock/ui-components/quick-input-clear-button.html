@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quick Input - Clear Button Patterns v2</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    body { background: #f5f5f5; }
+    .pattern-section { background: white; border-radius: 12px; padding: 16px; margin-bottom: 24px; }
+    .recommend { border: 2px solid #3b82f6; }
+  </style>
+</head>
+<body class="p-4 max-w-md mx-auto">
+  <h1 class="text-lg font-bold mb-4">クリアボタン配置パターン v2</h1>
+
+  <!-- Pattern E: 入力欄内部にX（推奨） -->
+  <div class="pattern-section recommend">
+    <div class="flex items-center gap-2 mb-3">
+      <h2 class="text-sm font-medium text-blue-600">E: 入力欄内部にX（推奨）</h2>
+      <span class="text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full">Best</span>
+    </div>
+    <div class="flex flex-col gap-0.5">
+      <div class="flex items-stretch">
+        <div class="flex-1 relative">
+          <textarea
+            class="w-full rounded-md rounded-r-none border border-r-0 border-gray-200 bg-transparent px-3 py-1.5 pr-8 text-base placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 resize-none min-h-[32px]"
+            placeholder="覚えたいこと"
+            rows="1"
+          >サンプルテキスト入力中</textarea>
+          <button class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600" title="クリア">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+        <button
+          class="rounded-l-none w-10 h-auto bg-blue-500 text-white flex items-center justify-center"
+          title="保存"
+        >
+          <i data-lucide="plus" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div class="flex items-stretch">
+        <div class="flex-1 relative">
+          <textarea
+            class="w-full rounded-md rounded-r-none border border-r-0 border-gray-200 bg-transparent px-3 py-1.5 pr-8 text-base placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 resize-none min-h-[32px]"
+            placeholder="答え（任意）"
+            rows="1"
+          >答えのテキスト</textarea>
+          <button class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600" title="クリア">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+        <button
+          class="rounded-l-none w-10 h-auto bg-gray-100 border border-l-0 border-gray-200 text-gray-600 flex items-center justify-center hover:bg-gray-200"
+          title="詳細入力"
+        >
+          <i data-lucide="square-pen" class="w-5 h-5"></i>
+        </button>
+      </div>
+    </div>
+    <p class="text-xs text-gray-400 mt-2">各入力欄の右端に小さなX。検索バーでおなじみのパターン</p>
+  </div>
+
+  <!-- Pattern E-2: 空の時 -->
+  <div class="pattern-section">
+    <h2 class="text-sm font-medium text-gray-500 mb-3">E-2: 空の時（Xは非表示）</h2>
+    <div class="flex flex-col gap-0.5">
+      <div class="flex items-stretch">
+        <div class="flex-1 relative">
+          <textarea
+            class="w-full rounded-md rounded-r-none border border-r-0 border-gray-200 bg-transparent px-3 py-1.5 text-base placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 resize-none min-h-[32px]"
+            placeholder="覚えたいこと"
+            rows="1"
+          ></textarea>
+          <!-- X非表示 -->
+        </div>
+        <button
+          class="rounded-l-none w-10 h-auto bg-blue-500 text-white flex items-center justify-center opacity-50"
+          title="保存"
+        >
+          <i data-lucide="plus" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div class="flex items-stretch">
+        <div class="flex-1 relative">
+          <textarea
+            class="w-full rounded-md rounded-r-none border border-r-0 border-gray-200 bg-transparent px-3 py-1.5 text-base placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 resize-none min-h-[32px]"
+            placeholder="答え（任意）"
+            rows="1"
+          ></textarea>
+        </div>
+        <button
+          class="rounded-l-none w-10 h-auto bg-gray-100 border border-l-0 border-gray-200 text-gray-600 flex items-center justify-center hover:bg-gray-200"
+          title="詳細入力"
+        >
+          <i data-lucide="square-pen" class="w-5 h-5"></i>
+        </button>
+      </div>
+    </div>
+    <p class="text-xs text-gray-400 mt-2">入力がない時はスッキリ</p>
+  </div>
+
+  <!-- Pattern F: 全体クリアボタン1つだけ -->
+  <div class="pattern-section">
+    <h2 class="text-sm font-medium text-gray-500 mb-3">F: 全体クリア1ボタン（右下に配置）</h2>
+    <div class="flex flex-col gap-0.5">
+      <div class="flex items-stretch">
+        <textarea
+          class="flex-1 rounded-md rounded-r-none border border-r-0 border-gray-200 bg-transparent px-3 py-1.5 text-base placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 resize-none min-h-[32px]"
+          placeholder="覚えたいこと"
+          rows="1"
+        >サンプルテキスト入力中</textarea>
+        <button
+          class="rounded-l-none w-10 h-auto bg-blue-500 text-white flex items-center justify-center"
+          title="保存"
+        >
+          <i data-lucide="plus" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div class="flex items-stretch">
+        <textarea
+          class="flex-1 rounded-md rounded-r-none border border-r-0 border-gray-200 bg-transparent px-3 py-1.5 text-base placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 resize-none min-h-[32px]"
+          placeholder="答え（任意）"
+          rows="1"
+        >答えのテキスト</textarea>
+        <button
+          class="w-10 h-auto bg-gray-100 border border-l-0 border-gray-200 text-gray-400 flex items-center justify-center hover:bg-gray-200 hover:text-gray-600"
+          title="全てクリア"
+        >
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+        <button
+          class="rounded-l-none w-10 h-auto bg-gray-100 border border-l-0 border-gray-200 text-gray-600 flex items-center justify-center hover:bg-gray-200"
+          title="詳細入力"
+        >
+          <i data-lucide="square-pen" class="w-5 h-5"></i>
+        </button>
+      </div>
+    </div>
+    <p class="text-xs text-gray-400 mt-2">両方の入力欄を一括クリア</p>
+  </div>
+
+  <!-- Pattern G: トグル式 -->
+  <div class="pattern-section">
+    <h2 class="text-sm font-medium text-gray-500 mb-3">G: 編集ボタンがクリアに変化</h2>
+    <p class="text-xs text-gray-500 mb-2">入力がある時だけ編集ボタンがXに変わる</p>
+    <div class="flex flex-col gap-0.5">
+      <div class="flex items-stretch">
+        <textarea
+          class="flex-1 rounded-md rounded-r-none border border-r-0 border-gray-200 bg-transparent px-3 py-1.5 text-base placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 resize-none min-h-[32px]"
+          placeholder="覚えたいこと"
+          rows="1"
+        >サンプルテキスト入力中</textarea>
+        <button
+          class="rounded-l-none w-10 h-auto bg-blue-500 text-white flex items-center justify-center"
+          title="保存"
+        >
+          <i data-lucide="plus" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div class="flex items-stretch">
+        <textarea
+          class="flex-1 rounded-md rounded-r-none border border-r-0 border-gray-200 bg-transparent px-3 py-1.5 text-base placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 resize-none min-h-[32px]"
+          placeholder="答え（任意）"
+          rows="1"
+        >答えのテキスト</textarea>
+        <button
+          class="rounded-l-none w-10 h-auto bg-red-50 border border-l-0 border-red-200 text-red-400 flex items-center justify-center hover:bg-red-100 hover:text-red-500"
+          title="クリア"
+        >
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+    </div>
+    <p class="text-xs text-gray-400 mt-2">入力がない時は編集アイコン、入力があるとXに切り替わる</p>
+  </div>
+
+  <!-- Pattern H: CircleX with eraser icon -->
+  <div class="pattern-section">
+    <h2 class="text-sm font-medium text-gray-500 mb-3">H: 丸いXアイコン（入力欄内部）</h2>
+    <div class="flex flex-col gap-0.5">
+      <div class="flex items-stretch">
+        <div class="flex-1 relative">
+          <textarea
+            class="w-full rounded-md rounded-r-none border border-r-0 border-gray-200 bg-transparent px-3 py-1.5 pr-8 text-base placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 resize-none min-h-[32px]"
+            placeholder="覚えたいこと"
+            rows="1"
+          >サンプルテキスト入力中</textarea>
+          <button class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-300 hover:text-gray-500" title="クリア">
+            <i data-lucide="circle-x" class="w-5 h-5"></i>
+          </button>
+        </div>
+        <button
+          class="rounded-l-none w-10 h-auto bg-blue-500 text-white flex items-center justify-center"
+          title="保存"
+        >
+          <i data-lucide="plus" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div class="flex items-stretch">
+        <div class="flex-1 relative">
+          <textarea
+            class="w-full rounded-md rounded-r-none border border-r-0 border-gray-200 bg-transparent px-3 py-1.5 pr-8 text-base placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 resize-none min-h-[32px]"
+            placeholder="答え（任意）"
+            rows="1"
+          >答えのテキスト</textarea>
+          <button class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-300 hover:text-gray-500" title="クリア">
+            <i data-lucide="circle-x" class="w-5 h-5"></i>
+          </button>
+        </div>
+        <button
+          class="rounded-l-none w-10 h-auto bg-gray-100 border border-l-0 border-gray-200 text-gray-600 flex items-center justify-center hover:bg-gray-200"
+          title="詳細入力"
+        >
+          <i data-lucide="square-pen" class="w-5 h-5"></i>
+        </button>
+      </div>
+    </div>
+    <p class="text-xs text-gray-400 mt-2">iOS風の丸いクリアボタン</p>
+  </div>
+
+  <!-- Pattern I: 消しゴムアイコン -->
+  <div class="pattern-section">
+    <h2 class="text-sm font-medium text-gray-500 mb-3">I: 消しゴムアイコン（全体クリア）</h2>
+    <div class="flex flex-col gap-0.5">
+      <div class="flex items-stretch">
+        <textarea
+          class="flex-1 rounded-md rounded-r-none border border-r-0 border-gray-200 bg-transparent px-3 py-1.5 text-base placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 resize-none min-h-[32px]"
+          placeholder="覚えたいこと"
+          rows="1"
+        >サンプルテキスト入力中</textarea>
+        <button
+          class="rounded-l-none w-10 h-auto bg-blue-500 text-white flex items-center justify-center"
+          title="保存"
+        >
+          <i data-lucide="plus" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div class="flex items-stretch">
+        <textarea
+          class="flex-1 rounded-md rounded-r-none border border-r-0 border-gray-200 bg-transparent px-3 py-1.5 text-base placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 resize-none min-h-[32px]"
+          placeholder="答え（任意）"
+          rows="1"
+        >答えのテキスト</textarea>
+        <button
+          class="w-10 h-auto bg-gray-100 border border-l-0 border-gray-200 text-gray-400 flex items-center justify-center hover:bg-gray-200 hover:text-gray-600"
+          title="全てクリア"
+        >
+          <i data-lucide="eraser" class="w-5 h-5"></i>
+        </button>
+        <button
+          class="rounded-l-none w-10 h-auto bg-gray-100 border border-l-0 border-gray-200 text-gray-600 flex items-center justify-center hover:bg-gray-200"
+          title="詳細入力"
+        >
+          <i data-lucide="square-pen" class="w-5 h-5"></i>
+        </button>
+      </div>
+    </div>
+    <p class="text-xs text-gray-400 mt-2">消しゴムアイコンで直感的</p>
+  </div>
+
+  <!-- Pattern J: ゴミ箱アイコン -->
+  <div class="pattern-section">
+    <h2 class="text-sm font-medium text-gray-500 mb-3">J: ゴミ箱アイコン</h2>
+    <div class="flex flex-col gap-0.5">
+      <div class="flex items-stretch">
+        <textarea
+          class="flex-1 rounded-md rounded-r-none border border-r-0 border-gray-200 bg-transparent px-3 py-1.5 text-base placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 resize-none min-h-[32px]"
+          placeholder="覚えたいこと"
+          rows="1"
+        >サンプルテキスト入力中</textarea>
+        <button
+          class="rounded-l-none w-10 h-auto bg-blue-500 text-white flex items-center justify-center"
+          title="保存"
+        >
+          <i data-lucide="plus" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div class="flex items-stretch">
+        <textarea
+          class="flex-1 rounded-md rounded-r-none border border-r-0 border-gray-200 bg-transparent px-3 py-1.5 text-base placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 resize-none min-h-[32px]"
+          placeholder="答え（任意）"
+          rows="1"
+        >答えのテキスト</textarea>
+        <button
+          class="w-10 h-auto bg-gray-100 border border-l-0 border-gray-200 text-gray-400 flex items-center justify-center hover:bg-gray-200 hover:text-gray-600"
+          title="全てクリア"
+        >
+          <i data-lucide="trash-2" class="w-4 h-4"></i>
+        </button>
+        <button
+          class="rounded-l-none w-10 h-auto bg-gray-100 border border-l-0 border-gray-200 text-gray-600 flex items-center justify-center hover:bg-gray-200"
+          title="詳細入力"
+        >
+          <i data-lucide="square-pen" class="w-5 h-5"></i>
+        </button>
+      </div>
+    </div>
+    <p class="text-xs text-gray-400 mt-2">削除のイメージが強すぎるかも</p>
+  </div>
+
+  <hr class="my-6">
+
+  <h2 class="text-md font-bold mb-4">おすすめ順位</h2>
+  <ol class="text-sm space-y-2 text-gray-600">
+    <li><strong>1. E（入力欄内部にX）</strong> - 最もスタンダード。Google/iOSでおなじみ</li>
+    <li><strong>2. H（丸いX）</strong> - iOS風で視認性が高い</li>
+    <li><strong>3. F or I（全体クリア1ボタン）</strong> - シンプル。ボタン1つで両方消える</li>
+    <li><strong>4. G（トグル式）</strong> - ボタン数が増えないがUXが複雑</li>
+  </ol>
+
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+</html>
