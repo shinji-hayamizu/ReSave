@@ -1,7 +1,7 @@
 'use client'
 
-import { memo, useState } from 'react'
-import { ChevronDown, ChevronUp, Pencil } from 'lucide-react'
+import { memo, useRef, useState } from 'react'
+import { Eye, EyeOff, Pencil } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 
@@ -29,6 +29,19 @@ export const StudyCard = memo(function StudyCard({
   className,
 }: StudyCardProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen)
+  const answerRef = useRef<HTMLDivElement>(null)
+
+  const handleToggle = () => {
+    const willOpen = !isOpen
+    setIsOpen(willOpen)
+
+    if (willOpen) {
+      // アニメーション完了後にスクロール（duration-100 = 100ms）
+      setTimeout(() => {
+        answerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+      }, 100)
+    }
+  }
 
   const showReviewInfo = currentStep !== undefined && totalSteps !== undefined && totalSteps > 0
 
@@ -75,33 +88,38 @@ export const StudyCard = memo(function StudyCard({
 
       {answer && (
         <>
-          <button
-            type="button"
-            className="flex items-center justify-center gap-2 w-full py-3 bg-card text-primary text-sm font-medium hover:bg-secondary transition-colors"
-            onClick={() => setIsOpen(!isOpen)}
-          >
-            {isOpen ? (
-              <>
-                <ChevronUp className="h-4 w-4" />
-                <span>答えを隠す</span>
-              </>
-            ) : (
-              <>
-                <ChevronDown className="h-4 w-4" />
-                <span>答えを見る</span>
-              </>
-            )}
-          </button>
+          <div className="flex justify-center py-2 bg-card">
+            <button
+              type="button"
+              className={cn(
+                'inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full text-sm font-semibold transition-all',
+                isOpen
+                  ? 'bg-muted-foreground text-white shadow-[0_4px_12px_rgba(100,116,139,0.4)]'
+                  : 'bg-primary text-primary-foreground shadow-[0_4px_12px_rgba(37,99,235,0.4)] hover:-translate-y-0.5 hover:shadow-[0_6px_16px_rgba(37,99,235,0.5)]'
+              )}
+              onClick={handleToggle}
+            >
+              {isOpen ? <EyeOff className="h-[18px] w-[18px]" /> : <Eye className="h-[18px] w-[18px]" />}
+              <span>{isOpen ? '答えを隠す' : '答えを見る'}</span>
+            </button>
+          </div>
 
-          {isOpen && (
-            <div className="px-5 py-4 bg-card">
-              <div className="inline-block px-4 py-3 bg-amber-50 border border-amber-200 rounded-lg">
-                <p className="text-base text-foreground leading-relaxed">
-                  {answer}
-                </p>
+          <div
+            className={cn(
+              'grid transition-[grid-template-rows] duration-100 ease-out',
+              isOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
+            )}
+          >
+            <div className="overflow-hidden">
+              <div ref={answerRef} className="px-5 py-4 bg-card">
+                <div className="inline-block px-4 py-3 bg-amber-50 border border-amber-200 rounded-lg">
+                  <p className="text-base text-foreground leading-relaxed">
+                    {answer}
+                  </p>
+                </div>
               </div>
             </div>
-          )}
+          </div>
         </>
       )}
     </div>
