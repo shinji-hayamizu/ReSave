@@ -3,11 +3,11 @@
 import { useState } from 'react';
 
 import { Edit, Plus } from 'lucide-react';
+import TextareaAutosize from 'react-textarea-autosize';
 import { toast } from 'sonner';
 
 import { CreateCardDialog } from '@/components/cards/create-card-dialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { useCreateCard } from '@/hooks/useCards';
 import { cn } from '@/lib/utils';
 
@@ -63,48 +63,52 @@ export function QuickInputForm({ className, onCardCreated }: QuickInputFormProps
   return (
     <>
       <form className={className} onSubmit={handleSubmit}>
-        <div className="grid grid-cols-[1fr_auto] gap-0">
-            <Input
-              className="rounded-r-none border-r-0 mb-0.5 h-8"
+        <div className="flex flex-col gap-0.5">
+          <div className="flex items-stretch">
+            <TextareaAutosize
+              className="flex-1 rounded-md rounded-r-none border border-r-0 border-input bg-transparent px-3 py-1.5 text-base shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm resize-none min-h-[32px]"
               placeholder="覚えたいこと"
               maxLength={MAX_FRONT_LENGTH}
+              minRows={1}
               value={front}
               onChange={(e) => setFront(e.target.value)}
               disabled={createCard.isPending}
             />
-            <div className="row-span-2 flex flex-col gap-1">
-              <Button
-                type="submit"
-                size="icon"
-                className={cn(
-                  'flex-1 rounded-l-none rounded-br-none h-auto',
-                  isSubmitDisabled && 'opacity-50'
-                )}
-                disabled={isSubmitDisabled}
-                title="保存"
-              >
-                <Plus className="h-5 w-5" />
-              </Button>
-              <Button
-                type="button"
-                variant="secondary"
-                size="icon"
-                className="flex-1 rounded-l-none rounded-tr-none border-t-0 h-auto"
-                title="詳細入力"
-                onClick={handleOpenDialog}
-              >
-                <Edit className="h-5 w-5" />
-              </Button>
-            </div>
-            <Input
-              className="rounded-r-none border-r-0 h-8"
+            <Button
+              type="submit"
+              size="icon"
+              className={cn(
+                'rounded-l-none w-10 h-auto',
+                isSubmitDisabled && 'opacity-50'
+              )}
+              disabled={isSubmitDisabled}
+              title="保存"
+            >
+              <Plus className="h-5 w-5" />
+            </Button>
+          </div>
+          <div className="flex items-stretch">
+            <TextareaAutosize
+              className="flex-1 rounded-md rounded-r-none border border-r-0 border-input bg-transparent px-3 py-1.5 text-base shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm resize-none min-h-[32px]"
               placeholder="答え（任意）"
               maxLength={MAX_BACK_LENGTH}
+              minRows={1}
               value={back}
               onChange={(e) => setBack(e.target.value)}
               disabled={createCard.isPending}
             />
+            <Button
+              type="button"
+              variant="secondary"
+              size="icon"
+              className="rounded-l-none w-10 h-auto"
+              title="詳細入力"
+              onClick={handleOpenDialog}
+            >
+              <Edit className="h-5 w-5" />
+            </Button>
           </div>
+        </div>
       </form>
       <CreateCardDialog
         open={dialogOpen}
