@@ -94,8 +94,10 @@ export default function DashboardPage() {
   const activeCards = categorizedCards[activeTab];
 
   return (
-    <div className="pt-1 pb-2 md:pt-2 md:pb-4 space-y-2">
-        <QuickInputForm onCardCreated={handleCardCreated} />
+    <div className="pt-1 pb-2 md:pt-2 md:pb-4">
+        <div className="mb-2">
+          <QuickInputForm onCardCreated={handleCardCreated} />
+        </div>
 
         <CardTabs counts={counts} value={activeTab} onChange={setActiveTab} />
 
@@ -116,7 +118,7 @@ export default function DashboardPage() {
         ) : activeTab === 'completed' ? (
           <CardList cards={activeCards} />
         ) : (
-          <div className="space-y-0.5">
+          <div className="bg-card shadow-sm divide-y divide-border">
             {activeCards.map((card) => (
               <HomeStudyCard
                 key={card.id}

@@ -101,7 +101,7 @@ export const StudyCard = memo(function StudyCard({
   return (
     <div
       className={cn(
-        'bg-card rounded-xl shadow-sm overflow-hidden transition-shadow hover:shadow-md',
+        'bg-card',
         className
       )}
     >
