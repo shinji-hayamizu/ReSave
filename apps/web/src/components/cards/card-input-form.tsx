@@ -5,9 +5,9 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Info } from 'lucide-react';
+import TextareaAutosize from 'react-textarea-autosize';
 
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import {
   Form,
@@ -132,10 +132,11 @@ export function CardInputForm({
                     />
                   </div>
                   <FormControl>
-                    <Textarea
+                    <TextareaAutosize
                       placeholder="覚えたいことを入力"
-                      className="min-h-[80px] resize-none"
+                      minRows={3}
                       maxLength={TEXT_MAX_LENGTH}
+                      className="flex w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm resize-none"
                       {...field}
                     />
                   </FormControl>
@@ -157,10 +158,11 @@ export function CardInputForm({
                     />
                   </div>
                   <FormControl>
-                    <Textarea
+                    <TextareaAutosize
                       placeholder="答え（任意）"
-                      className="min-h-[80px] resize-none"
+                      minRows={3}
                       maxLength={HIDDEN_TEXT_MAX_LENGTH}
+                      className="flex w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm resize-none"
                       {...field}
                     />
                   </FormControl>
