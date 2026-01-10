@@ -101,6 +101,7 @@ const CardItem = memo(function CardItem({
       answer={card.back}
       question={card.front}
       ratingButtons={<ResetButton disabled={isResetting} onReset={handleReset} />}
+      reviewLevel={card.reviewLevel}
       tags={tags}
       onEdit={handleEdit}
     />

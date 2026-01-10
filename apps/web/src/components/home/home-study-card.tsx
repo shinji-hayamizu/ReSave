@@ -16,6 +16,7 @@ interface HomeStudyCardProps {
   front: string;
   back: string;
   tags?: Tag[];
+  reviewLevel?: number;
   intervals?: { ok?: string; again?: string };
   onAssessmentComplete?: () => void;
   onEdit?: () => void;
@@ -33,6 +34,7 @@ export const HomeStudyCard = memo(function HomeStudyCard({
   front,
   back,
   tags = [],
+  reviewLevel,
   intervals,
   onAssessmentComplete,
   onEdit,
@@ -67,6 +69,7 @@ export const HomeStudyCard = memo(function HomeStudyCard({
           onRate={handleRate}
         />
       }
+      reviewLevel={reviewLevel}
       tags={
         tags.length > 0 ? (
           <>

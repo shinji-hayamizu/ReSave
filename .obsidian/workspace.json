@@ -178,6 +178,7 @@
   },
   "active": "62a71329f653509f",
   "lastOpenFiles": [
+    "apps/web/src/components/home/home-study-card.tsx.tmp.22034.1767790859025",
     "docs/screens/mock/v1-fix/js/main.js",
     "docs/screens/mock/v1-fix/css/style.css",
     "docs/screens/mock/v1-fix/tags.html",
@@ -188,7 +189,6 @@
     "docs/screens/mock/v1-fix/profile.html",
     "docs/screens/mock/v1-fix/password-reset.html",
     "docs/screens/mock/v1-fix/main.html",
-    "docs/screens/mock/v1-fix/login.html",
     "apps/web/playwright-report/data/56e42966ee3c2ab43ea87c2c7993112975133fbb.md",
     "apps/web/test-results/auth.setup.ts-authenticate-setup/error-context.md",
     "apps/web/test-results/auth-認証フロー-ログイン画面-無効なメール形式でバリデーションエラー-chromium-no-auth/error-context.md",

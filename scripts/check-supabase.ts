@@ -209,3 +209,4 @@ const mode = args.includes('--local') ? 'local' : 'env';
 checkSupabase(mode);
 
 
+
