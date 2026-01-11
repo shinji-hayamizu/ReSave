@@ -53,11 +53,9 @@ export async function submitAssessment(
   let completedAt: string | null = card.completed_at;
 
   if (assessment === 'ok') {
+    newCurrentStep = card.current_step + 1;
     if (isNewCard) {
-      newCurrentStep = 0;
       newStatus = 'active';
-    } else {
-      newCurrentStep = card.current_step + 1;
     }
 
     if (newCurrentStep >= schedule.length) {

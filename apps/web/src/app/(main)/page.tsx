@@ -18,11 +18,13 @@ import type { CardWithTags } from '@/types/card';
 
 /**
  * カードのscheduleとcurrentStepから次回の復習間隔を計算
- * 未学習カード(isNew=true): schedule[0]が適用される
- * 学習中カード(isNew=false): schedule[currentStep+1]が適用される
+ * 未学習カード(isNew=true): schedule[0]が適用される（初回学習で1日後）
+ * 学習中カード(isNew=false): schedule[currentStep]が適用される
+ *   - current_step=1 → schedule[1]=3日後（2回目の復習）
+ *   - current_step=2 → schedule[2]=7日後（3回目の復習）
  */
 function getNextInterval(schedule: number[], currentStep: number, isNew: boolean): string {
-  const nextStep = isNew ? 0 : currentStep + 1;
+  const nextStep = isNew ? 0 : currentStep;
   if (nextStep >= schedule.length) {
     return '完了';
   }
