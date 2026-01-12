@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const cardStatusSchema = z.enum(['active', 'completed']);
+export const cardStatusSchema = z.enum(['new', 'active', 'completed']);
 
 export const cardSchema = z.object({
   id: z.string().uuid(),
@@ -29,7 +29,7 @@ export const cardQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(100).default(20),
   offset: z.coerce.number().int().min(0).default(0),
   tagId: z.string().uuid().optional(),
-  status: z.enum(['all', 'due', 'completed']).default('all'),
+  status: z.enum(['all', 'new', 'due', 'completed']).default('all'),
 });
 
 export type Card = z.infer<typeof cardSchema>;

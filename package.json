@@ -6,6 +6,8 @@
     "dev:admin": "turbo run dev --filter=admin",
     "dev:mobile": "turbo run start --filter=mobile",
     "build": "turbo run build",
+    "build:web": "turbo run build --filter=web",
+    "start:web": "turbo run start --filter=web",
     "lint": "turbo run lint"
   },
   "devDependencies": {

@@ -12,7 +12,7 @@ export interface Database {
           schedule: number[];
           current_step: number;
           next_review_at: string | null;
-          status: 'active' | 'completed';
+          status: 'new' | 'active' | 'completed';
           completed_at: string | null;
           created_at: string;
           updated_at: string;
@@ -25,7 +25,7 @@ export interface Database {
           schedule?: number[];
           current_step?: number;
           next_review_at?: string | null;
-          status?: 'active' | 'completed';
+          status?: 'new' | 'active' | 'completed';
           completed_at?: string | null;
           created_at?: string;
           updated_at?: string;
@@ -38,7 +38,7 @@ export interface Database {
           schedule?: number[];
           current_step?: number;
           next_review_at?: string | null;
-          status?: 'active' | 'completed';
+          status?: 'new' | 'active' | 'completed';
           completed_at?: string | null;
           created_at?: string;
           updated_at?: string;
