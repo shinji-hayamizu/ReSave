@@ -1,153 +1,19 @@
-# 開発ガイド
-
-## 概要
-
-本ドキュメントは日常的な開発作業に必要な手順とルールを定義します。
-初回セットアップは `README.md` を参照してください。
-　
----
+# 開発ルール
 
 ## セキュリティ原則
 
-※ 詳細なガイドラインは `.claude/rules/share-rules/common/security.md` を参照してください。
-
-### 環境変数管理
-- 秘密情報（APIキー、パスワード等）は環境変数使用必須
-- `.env` ファイルは `.gitignore` に追加
-- クライアント公開が必要な場合のみ `NEXT_PUBLIC_` 等のプレフィックス使用
-- APIキー・パスワード等の秘密情報はハードコード絶対禁止
+- 秘密情報（APIキー、パスワード等）は環境変数使用必須、ハードコード禁止
 - 秘密情報をログ・コンソール・エラーメッセージに出力しない
-
-### 認証情報の扱い
-- Cookie-based認証: `credentials: 'include'` 必須
-- CSRF対策: POST/PUT/PATCH/DELETE に `X-CSRF-Token` ヘッダー必須
-- 詳細は `docs/ARCHITECTURE.md` の認証セクション参照
 - ユーザー入力・外部データは必ず検証してから使用
+- 詳細は `.claude/rules/share-rules/common/security.md` 参照
 
----
+## ブランチ戦略
 
-## ブランチ戦略とワークフロー
+- **main**: 本番環境（Production）
+- **develop**: ステージング/QA（Preview）
+- **feature/***: 機能開発 → develop へ PR
 
-### ブランチ構成
-
-本プロジェクトでは3種類のブランチを使用します：
-
-- **main**: 安定版コード（本番環境で稼働中のコード）
-- **develop**: 開発統合用（QA環境で検証中のコード）
-- **開発用ブランチ**: Linearが自動生成（例: `username/issue-123-add-feature`）
-
-ブランチ命名規則は不要です。Linearが自動的に適切な名前を生成します。
-
-### 開発フロー
-
-1. **開発**: Linearのイシューから開発用ブランチを作成し、機能開発・修正を実施
-2. **統合**: 開発用ブランチをdevelopにマージ（プルリクエスト経由）
-3. **QA**: developブランチでQA作業を実施、必要に応じて修正開発
-4. **本番リリース**: アップデートされたdevelopブランチを本番環境にデプロイ
-5. **監視**: リリースが無事に済んだかを監視
-6. **切り戻し判断**:
-   - 問題が発生した場合: mainブランチを使って本番環境に切り戻し
-   - 問題がない場合: mainブランチにdevelopブランチをマージして安定版を更新
-7. **次のサイクル**: 1に戻る
-
-### Linear統合
-
-本プロジェクトではLinearを使用してイシュー管理とブランチ作成を統合しています：
-
-- Linearのイシューから直接ブランチを作成
-- ブランチ名はLinearが自動生成（命名規則は不要）
-- プルリクエストとイシューが自動連携
-- イシューのステータスがプルリクエストと同期
-
----
-
-## pre-commit フック
-
-### セットアップ
-
-プロジェクトルートで実行:
-
-```bash
-# pre-commit インストール
-brew install pre-commit  # macOS
-# または: pip install pre-commit
-
-# Git フックを設定
-pre-commit install
-pre-commit install --hook-type commit-msg
-```
-
-### 実行される検証
-
-- コミットメッセージ形式チェック
-- コード整形（ESLint、Prettier等）
-- その他プロジェクト固有の検証
-
-詳細は `.pre-commit-config.yaml` を参照。
-
-### 一時的なスキップ
-
-緊急時のみ使用:
-
-```bash
-SKIP=eslint git commit -m "message"
-```
-
----
-
-## マイグレーション実行
-
-### 開発環境
-
-```bash
-# プロジェクトルートから実行
-docker-compose run --rm migrate
-```
-
-### マイグレーションファイル作成・詳細
-
-`docs/MIGRATION.md` を参照。
-
----
-
-## トラブルシューティング
-
-### Dockerコンテナが起動しない
-
-```bash
-# コンテナとボリュームを削除して再起動
-docker-compose down -v
-docker-compose up -d
-```
-
-### ポート衝突
-
-```bash
-# 使用中のポートを確認
-lsof -i :3000
-lsof -i :8081
-lsof -i :8082
-
-# プロセスを終了
-kill -9 <PID>
-```
-
-### ホットリロードが効かない
-
-Docker環境ではファイル監視にポーリングが必要です。
-各サービスの設定を確認してください（例: `next.config.ts` の `watchOptions`）。
-
-### データベース接続エラー
-
-```bash
-# MySQLコンテナの状態確認
-docker-compose ps mysql
-docker-compose logs mysql
-
-# ヘルスチェック確認
-docker inspect bf_mysql | grep -A 10 Health
-
----
+詳細は `docs/DEPLOYMENT.md` 参照。
 
 ## 【厳命】スクリプト・テンポラルファイルの取り扱い
 
