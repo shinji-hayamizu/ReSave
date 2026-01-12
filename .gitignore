@@ -29,7 +29,7 @@ expo-env.d.ts
 .env.local
 .env.development.local
 .env.test.local
-.env.production.local
+.env.production
 
 # IDE
 .idea
@@ -63,9 +63,6 @@ e2e/.auth/
 # Misc
 *.tsbuildinfo
 *.log
-
-# MCP (contains access tokens)
-.mcp.json
 
 # Claude
 .claude/settings.local.json

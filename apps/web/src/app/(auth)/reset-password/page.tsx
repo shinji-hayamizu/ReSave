@@ -1,6 +1,7 @@
+import type { Metadata } from 'next';
 import { ResetPasswordForm } from '@/components/auth/reset-password-form';
 
-export const metadata = {
+export const metadata: Metadata = {
   title: 'パスワードリセット',
 };
 
