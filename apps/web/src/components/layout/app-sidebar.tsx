@@ -3,9 +3,7 @@
 import {
   BarChart,
   BookOpen,
-  GraduationCap,
   Home,
-  Library,
   LogOut,
   Settings,
   Tag,
@@ -28,8 +26,6 @@ import {
 
 const navItems = [
   { title: 'ホーム', href: '/', icon: Home },
-  { title: 'カード', href: '/cards', icon: Library },
-  { title: '学習', href: '/study', icon: GraduationCap },
   { title: 'タグ', href: '/tags', icon: Tag },
   { title: '統計', href: '/stats', icon: BarChart },
   { title: '設定', href: '/settings', icon: Settings },

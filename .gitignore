@@ -26,6 +26,7 @@ expo-env.d.ts
 
 # Environment
 .env
+.envrc
 .env.local
 .env.development.local
 .env.test.local

@@ -186,6 +186,32 @@ Features are organized by phase based on priority and implementation complexity.
 
 ---
 
+## TODO: 開発環境・インフラ
+
+### GitHub
+
+| タスク | 説明 | ステータス |
+|--------|------|-----------|
+| GitHub Pro 契約 | ブランチ保護ルール利用のため（$4/月） | 未着手 |
+| ブランチ保護設定 | main/develop への直接push禁止、レビュー必須化 | 未着手 |
+
+### Vercel
+
+| タスク | 説明 | ステータス |
+|--------|------|-----------|
+| Production 環境変数設定 | 本番Supabase接続情報 | 未着手 |
+| Preview 環境変数設定 | 開発Supabase接続情報 | 未着手 |
+| ドメイン設定 | カスタムドメイン（必要に応じて） | 未着手 |
+
+### Supabase
+
+| タスク | 説明 | ステータス |
+|--------|------|-----------|
+| 本番環境マイグレーション同期 | dev → prd のスキーマ同期 | 未着手 |
+| RLS ポリシー確認 | 本番環境のセキュリティ確認 | 未着手 |
+
+---
+
 ## 変更履歴 / Change History
 
 | 日付 / Date | バージョン / Version | 変更内容 / Changes | 作成者 / Author |
