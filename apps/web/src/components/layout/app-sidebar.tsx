@@ -1,21 +1,12 @@
 'use client';
 
-import {
-  BarChart,
-  BookOpen,
-  Home,
-  LogOut,
-  Settings,
-  Tag,
-} from 'lucide-react';
+import { BookOpen, Home, Settings, Tag } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-import { signOut } from '@/actions/auth';
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarHeader,
@@ -27,7 +18,6 @@ import {
 const navItems = [
   { title: 'ホーム', href: '/', icon: Home },
   { title: 'タグ', href: '/tags', icon: Tag },
-  { title: '統計', href: '/stats', icon: BarChart },
   { title: '設定', href: '/settings', icon: Settings },
 ];
 
@@ -59,16 +49,6 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter className="border-t p-2">
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton onClick={() => signOut()}>
-              <LogOut className="h-4 w-4" />
-              <span>ログアウト</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarFooter>
     </Sidebar>
   );
 }

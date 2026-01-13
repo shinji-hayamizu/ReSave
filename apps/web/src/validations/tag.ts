@@ -1,21 +1,27 @@
 import { z } from 'zod';
 
-const hexColorRegex = /^#[0-9A-Fa-f]{6}$/;
+const validTagColors = [
+  'blue',
+  'green',
+  'purple',
+  'orange',
+  'pink',
+  'cyan',
+  'yellow',
+  'gray',
+] as const;
 
 export const tagSchema = z.object({
   id: z.string().uuid(),
   userId: z.string().uuid(),
   name: z.string().min(1, '必須項目です').max(50, '50文字以内で入力してください'),
-  color: z.string().regex(hexColorRegex, '有効な色コードを入力してください'),
+  color: z.string(),
   createdAt: z.string().datetime(),
 });
 
 export const createTagSchema = z.object({
   name: z.string().min(1, '必須項目です').max(50, '50文字以内で入力してください'),
-  color: z
-    .string()
-    .regex(hexColorRegex, '有効な色コードを入力してください')
-    .default('#6366f1'),
+  color: z.enum(validTagColors).default('blue'),
 });
 
 export const updateTagSchema = createTagSchema.partial();

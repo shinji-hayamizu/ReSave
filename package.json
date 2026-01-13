@@ -8,6 +8,7 @@
     "build": "turbo run build",
     "build:web": "turbo run build --filter=web",
     "start:web": "turbo run start --filter=web",
+    "prod:web": "turbo run build --filter=web && turbo run start --filter=web",
     "lint": "turbo run lint"
   },
   "devDependencies": {
