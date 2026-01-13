@@ -67,3 +67,4 @@ e2e/.auth/
 
 # Claude
 .claude/settings.local.json
+.mcp.json
