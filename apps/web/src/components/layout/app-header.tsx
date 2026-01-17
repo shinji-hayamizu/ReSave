@@ -29,13 +29,13 @@ export function AppHeader() {
   };
 
   return (
-    <header className="sticky top-0 z-40 border-b bg-background">
+    <header className="sticky top-0 z-40 bg-background">
       <div className="mx-auto flex h-12 max-w-3xl items-center justify-between px-4">
         <div className="flex items-center gap-2">
         <Button
           variant="ghost"
           size="icon"
-          className="md:hidden"
+          className="lg:hidden"
           onClick={toggleSidebar}
           aria-label="Toggle menu"
         >
