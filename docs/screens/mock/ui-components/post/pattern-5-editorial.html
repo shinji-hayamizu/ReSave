@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ReSave - Card Input | Pattern 5: Editorial Serif</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Source+Sans+3:wght@400;500;600&family=Shippori+Mincho:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /*
+      Pattern 5: Editorial Serif
+      Theme: Sophisticated, literary, magazine-style
+      Aesthetic: Classic typography, generous whitespace, refined details
+      Typography: Cormorant Garamond (elegant serif) + Source Sans 3 (clean sans) + Shippori Mincho (Japanese serif)
+      Key feature: Strong typographic hierarchy, editorial layout, subtle borders
+    */
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg-cream: #faf8f5;
+      --bg-paper: #ffffff;
+      --bg-subtle: #f5f3f0;
+
+      --ink-black: #1a1a1a;
+      --ink-dark: #333333;
+      --ink-medium: #666666;
+      --ink-light: #999999;
+      --ink-faint: #cccccc;
+
+      --accent-wine: #8b2942;
+      --accent-gold: #c9a227;
+      --accent-navy: #1e3a5f;
+
+      --border-color: #e5e2dd;
+      --border-dark: #d4d0c8;
+
+      --font-serif: 'Cormorant Garamond', 'Shippori Mincho', serif;
+      --font-sans: 'Source Sans 3', sans-serif;
+      --font-jp: 'Shippori Mincho', serif;
+
+      --space-xs: 8px;
+      --space-sm: 16px;
+      --space-md: 24px;
+      --space-lg: 40px;
+      --space-xl: 64px;
+    }
+
+    html {
+      font-size: 17px;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg-cream);
+      color: var(--ink-dark);
+      min-height: 100vh;
+      line-height: 1.7;
+    }
+
+    /* Page Layout */
+    .page {
+      min-height: 100vh;
+      padding: var(--space-md);
+    }
+
+    /* Article Container */
+    .article {
+      max-width: 640px;
+      margin: 0 auto;
+      background: var(--bg-paper);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    }
+
+    /* Header */
+    .header {
+      padding: var(--space-lg) var(--space-lg) var(--space-md);
+      border-bottom: 1px solid var(--border-color);
+      text-align: center;
+      position: relative;
+    }
+
+    .header__nav {
+      position: absolute;
+      top: var(--space-md);
+      left: var(--space-md);
+    }
+
+    .header__back {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-sans);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--ink-light);
+      text-decoration: none;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      transition: color 0.2s;
+    }
+
+    .header__back:hover {
+      color: var(--accent-wine);
+    }
+
+    .header__back svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .header__eyebrow {
+      font-family: var(--font-sans);
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: var(--accent-wine);
+      margin-bottom: var(--space-sm);
+    }
+
+    .header__title {
+      font-family: var(--font-serif);
+      font-size: 42px;
+      font-weight: 400;
+      font-style: italic;
+      color: var(--ink-black);
+      line-height: 1.2;
+      margin-bottom: var(--space-xs);
+    }
+
+    .header__subtitle {
+      font-family: var(--font-serif);
+      font-size: 18px;
+      color: var(--ink-medium);
+      font-style: italic;
+    }
+
+    /* Decorative Line */
+    .ornament {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin: var(--space-md) 0;
+    }
+
+    .ornament__line {
+      width: 60px;
+      height: 1px;
+      background: var(--border-dark);
+    }
+
+    .ornament__diamond {
+      width: 6px;
+      height: 6px;
+      background: var(--accent-gold);
+      transform: rotate(45deg);
+    }
+
+    /* Form Body */
+    .form-body {
+      padding: var(--space-lg);
+    }
+
+    /* Form Group */
+    .form-group {
+      margin-bottom: var(--space-lg);
+    }
+
+    .form-group:last-child {
+      margin-bottom: 0;
+    }
+
+    /* Label */
+    .label {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: var(--space-sm);
+      padding-bottom: var(--space-xs);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .label__text {
+      font-family: var(--font-serif);
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--ink-dark);
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+    }
+
+    .label__text--required::after {
+      content: ' *';
+      color: var(--accent-wine);
+      font-style: italic;
+    }
+
+    .label__counter {
+      font-family: var(--font-sans);
+      font-size: 12px;
+      color: var(--ink-light);
+    }
+
+    .label__counter--warning {
+      color: var(--accent-gold);
+    }
+
+    .label__counter--danger {
+      color: var(--accent-wine);
+    }
+
+    /* Textarea */
+    .textarea {
+      width: 100%;
+      padding: var(--space-md);
+      font-family: var(--font-jp);
+      font-size: 17px;
+      line-height: 1.9;
+      border: 1px solid var(--border-color);
+      background: var(--bg-subtle);
+      color: var(--ink-dark);
+      resize: vertical;
+      min-height: 140px;
+      transition: all 0.3s ease;
+    }
+
+    .textarea::placeholder {
+      color: var(--ink-faint);
+      font-style: italic;
+    }
+
+    .textarea:focus {
+      outline: none;
+      border-color: var(--accent-navy);
+      background: var(--bg-paper);
+      box-shadow: inset 0 0 0 1px var(--accent-navy);
+    }
+
+    /* Input */
+    .input {
+      width: 100%;
+      padding: var(--space-sm) var(--space-md);
+      font-family: var(--font-sans);
+      font-size: 15px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-subtle);
+      color: var(--ink-dark);
+      transition: all 0.3s ease;
+    }
+
+    .input::placeholder {
+      color: var(--ink-faint);
+    }
+
+    .input:focus {
+      outline: none;
+      border-color: var(--accent-navy);
+      background: var(--bg-paper);
+      box-shadow: inset 0 0 0 1px var(--accent-navy);
+    }
+
+    /* Tags */
+    .tags-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: var(--space-sm);
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-color);
+      min-height: 56px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      background: var(--bg-paper);
+      border: 1px solid var(--border-dark);
+      color: var(--ink-dark);
+      font-family: var(--font-sans);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .tag:hover {
+      border-color: var(--accent-navy);
+      color: var(--accent-navy);
+    }
+
+    .tag__remove {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 14px;
+      height: 14px;
+      background: transparent;
+      border: none;
+      color: var(--ink-light);
+      cursor: pointer;
+      padding: 0;
+      transition: color 0.2s;
+    }
+
+    .tag__remove:hover {
+      color: var(--accent-wine);
+    }
+
+    .tag__remove svg {
+      width: 10px;
+      height: 10px;
+    }
+
+    /* Select */
+    .select-wrapper {
+      position: relative;
+    }
+
+    .select {
+      width: 100%;
+      padding: var(--space-sm) var(--space-md);
+      padding-right: 44px;
+      font-family: var(--font-sans);
+      font-size: 15px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-subtle);
+      color: var(--ink-dark);
+      cursor: pointer;
+      appearance: none;
+      transition: all 0.3s ease;
+    }
+
+    .select:focus {
+      outline: none;
+      border-color: var(--accent-navy);
+      background: var(--bg-paper);
+    }
+
+    .select-wrapper::after {
+      content: '';
+      position: absolute;
+      right: 18px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 0;
+      height: 0;
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+      border-top: 6px solid var(--ink-medium);
+      pointer-events: none;
+    }
+
+    /* Info Link */
+    .info-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-serif);
+      font-size: 14px;
+      font-style: italic;
+      color: var(--accent-navy);
+      text-decoration: none;
+      margin-top: var(--space-sm);
+      transition: color 0.2s;
+    }
+
+    .info-link:hover {
+      color: var(--accent-wine);
+    }
+
+    .info-link svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    /* Section Title */
+    .section-title {
+      font-family: var(--font-serif);
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: var(--ink-light);
+      margin-bottom: var(--space-md);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .section-title::before,
+    .section-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border-color);
+    }
+
+    /* Actions */
+    .actions {
+      display: flex;
+      gap: var(--space-sm);
+      justify-content: center;
+    }
+
+    .btn {
+      padding: 14px 32px;
+      font-family: var(--font-sans);
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      border: 1px solid;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .btn--primary {
+      background: var(--ink-black);
+      border-color: var(--ink-black);
+      color: var(--bg-paper);
+    }
+
+    .btn--primary:hover {
+      background: var(--accent-wine);
+      border-color: var(--accent-wine);
+    }
+
+    .btn--secondary {
+      background: transparent;
+      border-color: var(--border-dark);
+      color: var(--ink-medium);
+    }
+
+    .btn--secondary:hover {
+      border-color: var(--ink-dark);
+      color: var(--ink-dark);
+    }
+
+    .btn--danger {
+      background: transparent;
+      border-color: var(--accent-wine);
+      color: var(--accent-wine);
+    }
+
+    .btn--danger:hover {
+      background: var(--accent-wine);
+      color: var(--bg-paper);
+    }
+
+    /* Footer */
+    .footer {
+      padding: var(--space-md) var(--space-lg) var(--space-lg);
+      border-top: 1px solid var(--border-color);
+      background: var(--bg-subtle);
+    }
+
+    /* Colophon */
+    .colophon {
+      text-align: center;
+      padding-top: var(--space-md);
+      margin-top: var(--space-md);
+      border-top: 1px solid var(--border-color);
+    }
+
+    .colophon__text {
+      font-family: var(--font-serif);
+      font-size: 12px;
+      font-style: italic;
+      color: var(--ink-light);
+    }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      html {
+        font-size: 16px;
+      }
+
+      .page {
+        padding: var(--space-sm);
+      }
+
+      .header {
+        padding: var(--space-xl) var(--space-md) var(--space-md);
+      }
+
+      .header__nav {
+        top: var(--space-sm);
+        left: var(--space-sm);
+      }
+
+      .header__title {
+        font-size: 32px;
+      }
+
+      .form-body {
+        padding: var(--space-md);
+      }
+
+      .footer {
+        padding: var(--space-md);
+      }
+
+      .actions {
+        flex-direction: column;
+      }
+
+      .btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <article class="article">
+      <!-- Header -->
+      <header class="header">
+        <nav class="header__nav">
+          <a href="#" class="header__back">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+            <span>Back</span>
+          </a>
+        </nav>
+        <span class="header__eyebrow">New Entry</span>
+        <h1 class="header__title">Create a Card</h1>
+        <p class="header__subtitle">Compose your thoughts for future recollection</p>
+      </header>
+
+      <!-- Form Body -->
+      <div class="form-body">
+        <form>
+          <!-- Ornament -->
+          <div class="ornament">
+            <span class="ornament__line"></span>
+            <span class="ornament__diamond"></span>
+            <span class="ornament__line"></span>
+          </div>
+
+          <!-- Required Section -->
+          <div class="section-title">Essential</div>
+
+          <!-- Text Input -->
+          <div class="form-group">
+            <div class="label">
+              <span class="label__text label__text--required">Question</span>
+              <span class="label__counter" id="text-counter">0 / 500</span>
+            </div>
+            <textarea
+              class="textarea"
+              id="card-text"
+              placeholder="Write down what you wish to remember..."
+              maxlength="500"
+              rows="5"
+              required
+            ></textarea>
+          </div>
+
+          <!-- Hidden Text Input -->
+          <div class="form-group">
+            <div class="label">
+              <span class="label__text">Answer</span>
+              <span class="label__counter" id="hidden-counter">0 / 2000</span>
+            </div>
+            <textarea
+              class="textarea"
+              id="card-hidden"
+              placeholder="The revelation awaits..."
+              maxlength="2000"
+              rows="4"
+            ></textarea>
+          </div>
+
+          <!-- Primary Action -->
+          <div class="actions">
+            <button type="submit" class="btn btn--primary">Save Entry</button>
+          </div>
+
+          <!-- Ornament -->
+          <div class="ornament">
+            <span class="ornament__line"></span>
+            <span class="ornament__diamond"></span>
+            <span class="ornament__line"></span>
+          </div>
+
+          <!-- Optional Section -->
+          <div class="section-title">Additional</div>
+
+          <!-- Tags -->
+          <div class="form-group">
+            <div class="label">
+              <span class="label__text">Categories</span>
+            </div>
+            <div class="tags-container" id="tags-container">
+              <span class="tag">
+                <span>Geography</span>
+                <button type="button" class="tag__remove">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 6L6 18M6 6l12 12"/>
+                  </svg>
+                </button>
+              </span>
+              <span class="tag">
+                <span>Japan</span>
+                <button type="button" class="tag__remove">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 6L6 18M6 6l12 12"/>
+                  </svg>
+                </button>
+              </span>
+            </div>
+          </div>
+
+          <!-- Source URL -->
+          <div class="form-group">
+            <div class="label">
+              <span class="label__text">Source</span>
+            </div>
+            <input
+              type="url"
+              class="input"
+              id="card-source"
+              placeholder="https://..."
+            >
+          </div>
+
+          <!-- Repeat Mode -->
+          <div class="form-group">
+            <div class="label">
+              <span class="label__text">Review Schedule</span>
+            </div>
+            <div class="select-wrapper">
+              <select class="select" id="card-repeat">
+                <option value="spaced" selected>Spaced Repetition</option>
+                <option value="daily">Daily</option>
+                <option value="weekly">Weekly</option>
+                <option value="none">None</option>
+              </select>
+            </div>
+            <a href="#" class="info-link">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M12 16v-4M12 8h.01"/>
+              </svg>
+              <span>On the science of spaced repetition</span>
+            </a>
+          </div>
+        </form>
+      </div>
+
+      <!-- Footer -->
+      <div class="footer">
+        <div class="actions">
+          <button type="button" class="btn btn--secondary">Discard</button>
+          <button type="submit" class="btn btn--primary">Save All</button>
+        </div>
+
+        <div class="ornament">
+          <span class="ornament__line"></span>
+          <span class="ornament__diamond"></span>
+          <span class="ornament__line"></span>
+        </div>
+
+        <div class="actions">
+          <button type="button" class="btn btn--danger">Delete Entry</button>
+        </div>
+
+        <div class="colophon">
+          <p class="colophon__text">ReSave Journal of Memory</p>
+        </div>
+      </div>
+    </article>
+  </div>
+
+  <script>
+    // Character counters
+    function setupCounter(textareaId, counterId, maxLength) {
+      const textarea = document.getElementById(textareaId);
+      const counter = document.getElementById(counterId);
+
+      textarea.addEventListener('input', function() {
+        const length = this.value.length;
+        counter.textContent = `${length} / ${maxLength}`;
+
+        counter.classList.remove('label__counter--warning', 'label__counter--danger');
+        if (length >= maxLength) {
+          counter.classList.add('label__counter--danger');
+        } else if (length >= maxLength * 0.9) {
+          counter.classList.add('label__counter--warning');
+        }
+      });
+    }
+
+    setupCounter('card-text', 'text-counter', 500);
+    setupCounter('card-hidden', 'hidden-counter', 2000);
+
+    // Tag removal
+    document.getElementById('tags-container').addEventListener('click', function(e) {
+      const removeBtn = e.target.closest('.tag__remove');
+      if (removeBtn) {
+        removeBtn.closest('.tag').remove();
+      }
+    });
+
+    // Form submission
+    document.querySelector('form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const text = document.getElementById('card-text').value.trim();
+      if (!text) {
+        document.getElementById('card-text').focus();
+        return;
+      }
+      alert('Entry saved to your collection.');
+    });
+  </script>
+</body>
+</html>

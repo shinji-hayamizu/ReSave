@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ReSave - Splash</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!--
+    @screen: スプラッシュ画面
+    @path: /splash
+    @description: アプリ起動時のスプラッシュ画面。認証状態をチェックしてリダイレクト
+    @file: app/(auth)/splash/page.tsx
+
+    @state-management:
+      - isChecking: boolean - 認証チェック中フラグ (useState)
+
+    @api-dependencies:
+      - supabase.auth.getUser() - ユーザー認証状態取得
+
+    @routing:
+      - 認証済み: router.replace('/') - ホーム画面へ
+      - 未認証: router.replace('/login') - ログイン画面へ
+
+    @behavior:
+      - 最低2秒間表示後にリダイレクト (UX考慮)
+  -->
+
+  <!-- ================================================================
+       @component: SplashPage
+       @description: スプラッシュ画面のルートコンポーネント
+       @file: app/(auth)/splash/page.tsx
+       ================================================================ -->
+  <div class="splash" data-component="SplashPage">
+    <div class="splash__content">
+      <!-- @section: ロゴエリア -->
+      <div class="splash__logo">
+        <!-- @icon: lucide-react Layers -->
+        <svg class="splash__logo-icon" xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/>
+          <path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/>
+          <path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/>
+        </svg>
+        <h1 class="splash__app-name">ReSave</h1>
+      </div>
+
+      <!-- @section: サブタイトル -->
+      <p class="splash__subtitle">- 記憶を科学する -</p>
+
+      <!-- @section: ローディングインジケーター -->
+      <!-- @condition: {isChecking && <LoadingIndicator />} -->
+      <div class="splash__loading" data-show-if="isChecking">
+        <!-- @icon: lucide-react Loader2 (animate-spin) -->
+        <svg class="splash__spinner" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+        </svg>
+        <span class="splash__loading-text">読み込み中...</span>
+      </div>
+    </div>
+  </div>
+  <!-- [/Component: SplashPage] -->
+
+</body>
+</html>

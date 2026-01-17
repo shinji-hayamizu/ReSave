@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Settings - Pattern 5: Editorial Magazine</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    /*
+      Pattern 5: Editorial Magazine
+      Theme: High-end editorial / magazine aesthetic
+      - Strong typography hierarchy
+      - Black & white with accent color
+      - Grid-based layout with asymmetry
+    */
+
+    :root {
+      --bg: #f8f7f4;
+      --bg-card: #ffffff;
+      --black: #1a1a1a;
+      --gray: #6b6b6b;
+      --gray-light: #e5e3df;
+      --accent: #c41e3a;
+      --accent-light: #fff0f2;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Source Sans 3', -apple-system, sans-serif;
+      background: var(--bg);
+      min-height: 100vh;
+      color: var(--black);
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 60px 32px;
+    }
+
+    /* Header */
+    .header {
+      margin-bottom: 60px;
+      position: relative;
+    }
+
+    .header__back {
+      position: absolute;
+      top: 0;
+      left: -8px;
+      width: 40px;
+      height: 40px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s;
+    }
+
+    .header__back:hover {
+      transform: translateX(-4px);
+    }
+
+    .header__back svg {
+      width: 24px;
+      height: 24px;
+      stroke: var(--black);
+    }
+
+    .header__content {
+      padding-left: 48px;
+      border-left: 3px solid var(--accent);
+    }
+
+    .header__eyebrow {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+
+    .header__title {
+      font-family: 'Playfair Display', serif;
+      font-size: 48px;
+      font-weight: 700;
+      letter-spacing: -1px;
+      line-height: 1.1;
+    }
+
+    .header__subtitle {
+      font-size: 16px;
+      color: var(--gray);
+      margin-top: 12px;
+      font-weight: 300;
+    }
+
+    /* Section */
+    .section {
+      margin-bottom: 48px;
+    }
+
+    .section__header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--gray-light);
+    }
+
+    .section__number {
+      font-family: 'Playfair Display', serif;
+      font-size: 14px;
+      font-style: italic;
+      color: var(--gray);
+      margin-right: 16px;
+    }
+
+    .section__title {
+      font-family: 'Playfair Display', serif;
+      font-size: 24px;
+      font-weight: 600;
+      letter-spacing: -0.5px;
+      flex: 1;
+    }
+
+    .section__badge {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--accent);
+      padding: 4px 10px;
+      background: var(--accent-light);
+      border-radius: 2px;
+    }
+
+    .section__card {
+      background: var(--bg-card);
+      border: 1px solid var(--gray-light);
+    }
+
+    /* Settings Item */
+    .settings-item {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 24px;
+      align-items: center;
+      padding: 24px;
+      border-bottom: 1px solid var(--gray-light);
+    }
+
+    .settings-item:last-child {
+      border-bottom: none;
+    }
+
+    .settings-item__info {
+      min-width: 0;
+    }
+
+    .settings-item__label {
+      font-weight: 500;
+      font-size: 16px;
+      margin-bottom: 4px;
+    }
+
+    .settings-item__desc {
+      font-size: 14px;
+      color: var(--gray);
+      font-weight: 300;
+    }
+
+    /* Disabled State */
+    .settings-item--disabled {
+      opacity: 0.5;
+    }
+
+    .settings-item--disabled .settings-item__label::after {
+      content: 'Coming Soon';
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--gray);
+      margin-left: 12px;
+      padding: 2px 8px;
+      background: var(--gray-light);
+    }
+
+    /* Number Input - Editorial */
+    .number-input {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .number-input__control {
+      display: flex;
+      align-items: center;
+      border: 1px solid var(--gray-light);
+    }
+
+    .number-input__btn {
+      width: 40px;
+      height: 40px;
+      border: none;
+      background: transparent;
+      font-family: 'Playfair Display', serif;
+      font-size: 20px;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: var(--gray);
+    }
+
+    .number-input__btn:hover {
+      background: var(--black);
+      color: white;
+    }
+
+    .number-input__field {
+      width: 56px;
+      height: 40px;
+      border: none;
+      border-left: 1px solid var(--gray-light);
+      border-right: 1px solid var(--gray-light);
+      text-align: center;
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: 16px;
+      font-weight: 500;
+      background: transparent;
+    }
+
+    .number-input__field:focus {
+      outline: none;
+      background: var(--accent-light);
+    }
+
+    .number-input__unit {
+      font-size: 14px;
+      color: var(--gray);
+      font-style: italic;
+    }
+
+    /* Toggle - Editorial */
+    .toggle {
+      width: 56px;
+      height: 28px;
+      background: var(--gray-light);
+      border-radius: 0;
+      position: relative;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .toggle::after {
+      content: '';
+      position: absolute;
+      width: 24px;
+      height: 24px;
+      background: white;
+      border: 1px solid var(--gray-light);
+      top: 2px;
+      left: 2px;
+      transition: transform 0.3s;
+    }
+
+    .toggle.active {
+      background: var(--black);
+    }
+
+    .toggle.active::after {
+      transform: translateX(28px);
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .toggle.disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    /* Select - Editorial */
+    .select-wrapper {
+      position: relative;
+    }
+
+    .select {
+      appearance: none;
+      padding: 12px 40px 12px 16px;
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: 14px;
+      background: transparent;
+      border: 1px solid var(--gray-light);
+      cursor: pointer;
+      min-width: 160px;
+      transition: all 0.2s;
+    }
+
+    .select:hover {
+      border-color: var(--black);
+    }
+
+    .select:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .select:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .select-wrapper::after {
+      content: '';
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 0;
+      height: 0;
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+      border-top: 6px solid var(--black);
+      pointer-events: none;
+    }
+
+    /* Link Button - Editorial */
+    .link-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--black);
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      padding: 10px 0;
+      border-bottom: 1px solid transparent;
+    }
+
+    .link-btn:hover {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+
+    .link-btn svg {
+      width: 16px;
+      height: 16px;
+      transition: transform 0.2s;
+    }
+
+    .link-btn:hover svg {
+      transform: translateX(4px);
+    }
+
+    /* Email Display */
+    .email-display {
+      font-size: 15px;
+      color: var(--gray);
+      font-style: italic;
+    }
+
+    /* Logout Button */
+    .btn-logout {
+      width: 100%;
+      padding: 16px;
+      background: transparent;
+      color: var(--accent);
+      border: 1px solid var(--accent);
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .btn-logout:hover {
+      background: var(--accent);
+      color: white;
+    }
+
+    .logout-wrapper {
+      padding: 24px;
+      border-top: 1px solid var(--gray-light);
+    }
+
+    /* App Info - Editorial */
+    .app-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-top: 60px;
+      padding-top: 24px;
+      border-top: 1px solid var(--gray-light);
+    }
+
+    .app-info__left {
+      font-size: 12px;
+      color: var(--gray);
+    }
+
+    .app-info__version {
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 4px;
+    }
+
+    .app-info__copyright {
+      font-style: italic;
+    }
+
+    .app-info__links {
+      display: flex;
+      gap: 24px;
+    }
+
+    .app-info__link {
+      font-size: 12px;
+      color: var(--gray);
+      text-decoration: none;
+      transition: color 0.2s;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .app-info__link:hover {
+      color: var(--accent);
+    }
+
+    /* Pull Quote Style for Featured Section */
+    .pull-quote {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px;
+      font-style: italic;
+      color: var(--gray);
+      padding: 32px;
+      border-left: 3px solid var(--accent);
+      background: var(--accent-light);
+      margin: 24px;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(16px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .section {
+      animation: fadeIn 0.6s ease-out both;
+    }
+
+    .section:nth-child(2) { animation-delay: 0.1s; }
+    .section:nth-child(3) { animation-delay: 0.2s; }
+    .section:nth-child(4) { animation-delay: 0.3s; }
+    .section:nth-child(5) { animation-delay: 0.4s; }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .container {
+        padding: 40px 20px;
+      }
+
+      .header__title {
+        font-size: 36px;
+      }
+
+      .header__content {
+        padding-left: 32px;
+      }
+
+      .section__title {
+        font-size: 20px;
+      }
+
+      .settings-item {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+
+      .app-info {
+        flex-direction: column;
+        gap: 20px;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <button class="header__back">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5">
+          <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+      </button>
+      <div class="header__content">
+        <div class="header__eyebrow">Configuration</div>
+        <h1 class="header__title">Settings</h1>
+        <p class="header__subtitle">Personalize your learning experience</p>
+      </div>
+    </header>
+
+    <!-- Learning Settings -->
+    <section class="section">
+      <div class="section__header">
+        <span class="section__number">01</span>
+        <h2 class="section__title">Learning</h2>
+      </div>
+      <div class="section__card">
+        <div class="settings-item">
+          <div class="settings-item__info">
+            <div class="settings-item__label">Daily New Card Limit</div>
+            <div class="settings-item__desc">Set the maximum number of new cards to learn each day</div>
+          </div>
+          <div class="number-input">
+            <div class="number-input__control">
+              <button class="number-input__btn">-</button>
+              <input type="number" class="number-input__field" value="20">
+              <button class="number-input__btn">+</button>
+            </div>
+            <span class="number-input__unit">cards</span>
+          </div>
+        </div>
+
+        <div class="settings-item">
+          <div class="settings-item__info">
+            <div class="settings-item__label">Review Intervals</div>
+            <div class="settings-item__desc">Configure your spaced repetition schedule</div>
+          </div>
+          <a href="#" class="link-btn">
+            Configure
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M9 18l6-6-6-6"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Notifications -->
+    <section class="section">
+      <div class="section__header">
+        <span class="section__number">02</span>
+        <h2 class="section__title">Notifications</h2>
+        <span class="section__badge">Coming Soon</span>
+      </div>
+      <div class="section__card">
+        <div class="settings-item settings-item--disabled">
+          <div class="settings-item__info">
+            <div class="settings-item__label">Daily Reminder</div>
+            <div class="settings-item__desc">Receive notifications when reviews are due</div>
+          </div>
+          <div class="toggle disabled"></div>
+        </div>
+
+        <div class="settings-item settings-item--disabled">
+          <div class="settings-item__info">
+            <div class="settings-item__label">Reminder Time</div>
+            <div class="settings-item__desc">Choose when to receive notifications</div>
+          </div>
+          <div class="select-wrapper">
+            <select class="select" disabled>
+              <option>Morning (8:00)</option>
+              <option>Noon (12:00)</option>
+              <option selected>Evening (18:00)</option>
+              <option>Night (21:00)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Account -->
+    <section class="section">
+      <div class="section__header">
+        <span class="section__number">03</span>
+        <h2 class="section__title">Account</h2>
+      </div>
+      <div class="section__card">
+        <div class="settings-item">
+          <div class="settings-item__info">
+            <div class="settings-item__label">Email Address</div>
+          </div>
+          <span class="email-display">user@example.com</span>
+        </div>
+
+        <div class="settings-item">
+          <div class="settings-item__info">
+            <div class="settings-item__label">Password</div>
+            <div class="settings-item__desc">Update your account password</div>
+          </div>
+          <a href="#" class="link-btn">
+            Change Password
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M9 18l6-6-6-6"/>
+            </svg>
+          </a>
+        </div>
+
+        <div class="logout-wrapper">
+          <button class="btn-logout">Sign Out</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Data -->
+    <section class="section">
+      <div class="section__header">
+        <span class="section__number">04</span>
+        <h2 class="section__title">Data Management</h2>
+        <span class="section__badge">Coming Soon</span>
+      </div>
+      <div class="section__card">
+        <div class="settings-item settings-item--disabled">
+          <div class="settings-item__info">
+            <div class="settings-item__label">Export Cards</div>
+            <div class="settings-item__desc">Download all your flashcard data</div>
+          </div>
+          <a href="#" class="link-btn" style="opacity: 0.5; pointer-events: none;">
+            Export
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M9 18l6-6-6-6"/>
+            </svg>
+          </a>
+        </div>
+
+        <div class="settings-item settings-item--disabled">
+          <div class="settings-item__info">
+            <div class="settings-item__label">Import Cards</div>
+            <div class="settings-item__desc">Load flashcards from an external file</div>
+          </div>
+          <a href="#" class="link-btn" style="opacity: 0.5; pointer-events: none;">
+            Import
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M9 18l6-6-6-6"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- App Info -->
+    <footer class="app-info">
+      <div class="app-info__left">
+        <div class="app-info__version">ReSave v1.0.0</div>
+        <div class="app-info__copyright">Memory, reimagined.</div>
+      </div>
+      <div class="app-info__links">
+        <a href="#" class="app-info__link">Terms</a>
+        <a href="#" class="app-info__link">Privacy</a>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    // Toggle functionality
+    document.querySelectorAll('.toggle:not(.disabled)').forEach(toggle => {
+      toggle.addEventListener('click', () => {
+        toggle.classList.toggle('active');
+      });
+    });
+
+    // Number input
+    document.querySelectorAll('.number-input').forEach(input => {
+      const field = input.querySelector('.number-input__field');
+      const btns = input.querySelectorAll('.number-input__btn');
+
+      btns[0].addEventListener('click', () => {
+        const val = parseInt(field.value) || 0;
+        if (val > 1) field.value = val - 1;
+      });
+
+      btns[1].addEventListener('click', () => {
+        const val = parseInt(field.value) || 0;
+        if (val < 100) field.value = val + 1;
+      });
+    });
+  </script>
+</body>
+</html>

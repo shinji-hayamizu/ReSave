@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body style="background: hsl(210 40% 98%);">
+  <!--
+    @screen: タグ管理画面
+    @path: /tags
+    @description: カードを整理するためのタグを管理する画面
+    @file: app/(main)/tags/page.tsx
+    @feature: F-015 (タグ管理)
+
+    @state-management:
+      - modalState: ModalState - モーダルの状態管理 (useState)
+
+    @types:
+      - ModalState = { type: 'closed' } | { type: 'create' } | { type: 'edit', tag } | { type: 'delete', tag }
+      - TagWithCardCount = Tag & { cardCount: number }
+
+    @hooks:
+      - useTags() - タグ一覧取得
+      - useCreateTag() - タグ作成
+      - useUpdateTag() - タグ更新
+      - useDeleteTag() - タグ削除
+
+    @api-dependencies:
+      - GET /api/tags - タグ一覧取得
+      - POST /api/tags - タグ作成
+      - PATCH /api/tags/:id - タグ更新
+      - DELETE /api/tags/:id - タグ削除
+  -->
+
+  <!-- ================================================================
+       @component: TagsPage
+       @description: タグ管理画面のルートコンポーネント
+       @file: app/(main)/tags/page.tsx
+       ================================================================ -->
+  <div data-component="TagsPage">
+
+    <!-- ================================================================
+         @component: PageHeader
+         @props:
+           - title: "タグ管理"
+           - description: "カードを整理するためのタグを管理"
+           - action: <Button onClick={handleOpenCreateModal}>タグ追加</Button>
+         ================================================================ -->
+    <div class="page-header" data-component="PageHeader">
+      <div class="page-header__content">
+        <h1>タグ管理</h1>
+        <p class="text-sm text-muted">カードを整理するためのタグを管理</p>
+      </div>
+      <div class="page-header__action">
+        <!-- @event: onClick={handleOpenCreateModal} -->
+        <button
+          type="button"
+          class="btn btn--primary"
+          data-action="onClick:handleOpenCreateModal"
+        >
+          <!-- @icon: lucide-react Plus -->
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+          タグ追加
+        </button>
+      </div>
+    </div>
+
+    <div class="content-wrapper p-4">
+
+      <!-- ================================================================
+           @section: タグリスト
+           @condition:
+             - {isLoading && <Skeleton />}
+             - {tags && tags.length > 0 && <TagList />}
+             - {tags && tags.length === 0 && <EmptyState />}
+           ================================================================ -->
+      <div class="space-y-2" data-component="TagList" data-list="tags">
+
+        <!-- ================================================================
+             @component: TagItem
+             @description: 個別のタグアイテム
+             @file: components/tags/tag-item.tsx
+
+             @props:
+               - id: string
+               - name: string
+               - color: string
+               - cardCount: number
+               - onEdit: (id: string) => void
+               - onDelete: (id: string) => void
+
+             @list-rendering: tags.map(tag => <TagItem key={tag.id} {...tag} />)
+             ================================================================ -->
+        <div
+          class="tag-item"
+          data-component="TagItem"
+          data-list-item
+          data-key="tag.id"
+          data-props="id,name,color,cardCount,onEdit,onDelete"
+        >
+          <div class="tag-item__info">
+            <!-- @prop: style={{ backgroundColor: color }} -->
+            <div class="tag-item__color" style="background-color: #ef4444;" data-prop="color"></div>
+            <div>
+              <!-- @prop: name -->
+              <div class="tag-item__name" data-prop="name">React</div>
+              <!-- @prop: `${cardCount}枚のカード` -->
+              <div class="tag-item__count" data-prop="cardCount">12枚のカード</div>
+            </div>
+          </div>
+          <div class="tag-item__actions">
+            <!-- @event: onClick={() => onEdit(id)} -->
+            <button
+              type="button"
+              class="btn btn--ghost btn--icon"
+              title="編集"
+              data-action="onClick:handleOpenEditModal"
+            >
+              <!-- @icon: lucide-react Edit -->
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+            </button>
+            <!-- @event: onClick={() => onDelete(id)} -->
+            <button
+              type="button"
+              class="btn btn--ghost btn--icon"
+              title="削除"
+              data-action="onClick:handleOpenDeleteModal"
+            >
+              <!-- @icon: lucide-react Trash2 -->
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+            </button>
+          </div>
+        </div>
+        <!-- [/Component: TagItem] -->
+
+        <!-- @sample: サンプルタグ 2 -->
+        <div class="tag-item" data-list-item>
+          <div class="tag-item__info">
+            <div class="tag-item__color" style="background-color: #3b82f6;"></div>
+            <div>
+              <div class="tag-item__name">JavaScript</div>
+              <div class="tag-item__count">8枚のカード</div>
+            </div>
+          </div>
+          <div class="tag-item__actions">
+            <button type="button" class="btn btn--ghost btn--icon" title="編集">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+            </button>
+            <button type="button" class="btn btn--ghost btn--icon" title="削除">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- @sample: サンプルタグ 3 -->
+        <div class="tag-item" data-list-item>
+          <div class="tag-item__info">
+            <div class="tag-item__color" style="background-color: #10b981;"></div>
+            <div>
+              <div class="tag-item__name">アルゴリズム</div>
+              <div class="tag-item__count">5枚のカード</div>
+            </div>
+          </div>
+          <div class="tag-item__actions">
+            <button type="button" class="btn btn--ghost btn--icon" title="編集">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+            </button>
+            <button type="button" class="btn btn--ghost btn--icon" title="削除">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- @sample: サンプルタグ 4 -->
+        <div class="tag-item" data-list-item>
+          <div class="tag-item__info">
+            <div class="tag-item__color" style="background-color: #f59e0b;"></div>
+            <div>
+              <div class="tag-item__name">英語</div>
+              <div class="tag-item__count">23枚のカード</div>
+            </div>
+          </div>
+          <div class="tag-item__actions">
+            <button type="button" class="btn btn--ghost btn--icon" title="編集">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+            </button>
+            <button type="button" class="btn btn--ghost btn--icon" title="削除">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+            </button>
+          </div>
+        </div>
+
+      </div>
+      <!-- [/Component: TagList] -->
+
+      <!-- ================================================================
+           @component: EmptyState
+           @condition: {tags && tags.length === 0 && <EmptyState />}
+           ================================================================ -->
+      <div class="empty-state" data-component="EmptyState" data-show-if="tags.length === 0" style="display: none;">
+        <!-- @icon: lucide-react Tags -->
+        <svg class="empty-state__icon" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 6.3 6.3a2.4 2.4 0 0 1 0 3.4L17 19"/><path d="M9.586 5.586A2 2 0 0 0 8.172 5H3a1 1 0 0 0-1 1v5.172a2 2 0 0 0 .586 1.414L8.29 18.29a2.426 2.426 0 0 0 3.42 0l3.58-3.58a2.426 2.426 0 0 0 0-3.42z"/><circle cx="6.5" cy="9.5" r=".5" fill="currentColor"/></svg>
+        <h3 class="empty-state__title">タグがありません</h3>
+        <p class="empty-state__description">タグを作成して、カードを整理しましょう</p>
+      </div>
+
+    </div>
+
+    <!-- ================================================================
+         @component: TagFormModal (Create)
+         @description: タグ作成モーダル
+         @file: components/tags/tag-form-modal.tsx
+         @condition: {modalState.type === 'create' && <TagFormModal />}
+
+         @props:
+           - isOpen: boolean
+           - mode: 'create' | 'edit'
+           - defaultValues?: { name: string, color: string }
+           - onSubmit: (data: { name: string, color: string }) => Promise<void>
+           - onClose: () => void
+           - isSubmitting: boolean
+         ================================================================ -->
+    <!-- Modal shown conditionally - static example below -->
+
+    <!-- ================================================================
+         @component: DeleteConfirmModal
+         @description: タグ削除確認モーダル
+         @file: components/tags/delete-confirm-modal.tsx
+         @condition: {modalState.type === 'delete' && <DeleteConfirmModal />}
+
+         @props:
+           - isOpen: boolean
+           - tagName: string
+           - cardCount: number
+           - onConfirm: () => Promise<void>
+           - onClose: () => void
+           - isDeleting: boolean
+         ================================================================ -->
+    <!-- Modal shown conditionally -->
+
+  </div>
+  <!-- [/Component: TagsPage] -->
+
+</body>
+</html>

@@ -9,9 +9,12 @@
     "build:web": "turbo run build --filter=web",
     "start:web": "turbo run start --filter=web",
     "prod:web": "turbo run build --filter=web && turbo run start --filter=web",
-    "lint": "turbo run lint"
+    "lint": "turbo run lint",
+    "prepare": "husky"
   },
   "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
     "turbo": "^2.3.3"
   },
   "pnpm": {
@@ -21,6 +24,13 @@
       "react-dom": "19.1.0"
     }
   },
-  "packageManager": "pnpm@9.15.1"
+  "packageManager": "pnpm@9.15.1",
+  "lint-staged": {
+    "apps/web/**/*.{js,jsx,ts,tsx}": [
+      "eslint --fix"
+    ],
+    "apps/admin/**/*.{js,jsx,ts,tsx}": [
+      "eslint --fix"
+    ]
+  }
 }
-

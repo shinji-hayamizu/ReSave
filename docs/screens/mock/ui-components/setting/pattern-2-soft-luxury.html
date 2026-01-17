@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Settings - Pattern 2: Soft Luxury</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    /*
+      Pattern 2: Soft Luxury
+      Theme: Refined minimalism with warmth
+      - Cream/beige palette with gold accents
+      - Elegant serif typography
+      - Generous whitespace, subtle shadows
+    */
+
+    :root {
+      --bg: #faf8f5;
+      --bg-card: #ffffff;
+      --text: #2c2825;
+      --text-secondary: #8a8279;
+      --gold: #c9a962;
+      --gold-light: #f5edd6;
+      --border: #e8e4de;
+      --danger: #b35d5d;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'DM Sans', -apple-system, sans-serif;
+      background: var(--bg);
+      min-height: 100vh;
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 560px;
+      margin: 0 auto;
+      padding: 48px 24px;
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 48px;
+    }
+
+    .header__back {
+      width: 44px;
+      height: 44px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-left: -12px;
+      border-radius: 50%;
+      transition: background 0.3s;
+    }
+
+    .header__back:hover {
+      background: rgba(0,0,0,0.04);
+    }
+
+    .header__back svg {
+      width: 20px;
+      height: 20px;
+      stroke: var(--text);
+    }
+
+    .header__title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 28px;
+      font-weight: 500;
+      letter-spacing: 0.03em;
+      margin-left: 8px;
+    }
+
+    /* Section */
+    .section {
+      margin-bottom: 32px;
+    }
+
+    .section__title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--gold);
+      margin-bottom: 16px;
+      padding-left: 2px;
+    }
+
+    .section__card {
+      background: var(--bg-card);
+      border-radius: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.02);
+      overflow: hidden;
+    }
+
+    /* Settings Item */
+    .settings-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.2s;
+    }
+
+    .settings-item:last-child {
+      border-bottom: none;
+    }
+
+    .settings-item:hover {
+      background: rgba(0,0,0,0.01);
+    }
+
+    .settings-item__info {
+      flex: 1;
+      padding-right: 16px;
+    }
+
+    .settings-item__label {
+      font-weight: 500;
+      font-size: 15px;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+
+    .settings-item__desc {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    /* Disabled State */
+    .settings-item--disabled {
+      opacity: 0.5;
+    }
+
+    .settings-item--disabled .settings-item__label::after {
+      content: 'Soon';
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--gold);
+      margin-left: 8px;
+      padding: 2px 6px;
+      background: var(--gold-light);
+      border-radius: 4px;
+    }
+
+    /* Number Input - Elegant */
+    .number-input {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .number-input__control {
+      display: flex;
+      align-items: center;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .number-input__btn {
+      width: 36px;
+      height: 36px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      font-size: 18px;
+      color: var(--text-secondary);
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .number-input__btn:hover {
+      background: var(--gold-light);
+      color: var(--gold);
+    }
+
+    .number-input__field {
+      width: 48px;
+      height: 36px;
+      border: none;
+      border-left: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+      text-align: center;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 500;
+      background: transparent;
+    }
+
+    .number-input__field:focus {
+      outline: none;
+      background: var(--gold-light);
+    }
+
+    .number-input__unit {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    /* Toggle - Luxury */
+    .toggle {
+      width: 52px;
+      height: 28px;
+      background: var(--border);
+      border-radius: 14px;
+      position: relative;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .toggle::after {
+      content: '';
+      position: absolute;
+      width: 22px;
+      height: 22px;
+      background: white;
+      border-radius: 50%;
+      top: 3px;
+      left: 3px;
+      transition: transform 0.3s ease;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .toggle.active {
+      background: linear-gradient(135deg, var(--gold), #d4b76a);
+    }
+
+    .toggle.active::after {
+      transform: translateX(24px);
+    }
+
+    .toggle.disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    /* Select - Elegant */
+    .select-wrapper {
+      position: relative;
+    }
+
+    .select {
+      appearance: none;
+      padding: 10px 36px 10px 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      color: var(--text);
+      min-width: 140px;
+      transition: all 0.2s;
+    }
+
+    .select:hover {
+      border-color: var(--gold);
+    }
+
+    .select:focus {
+      outline: none;
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px var(--gold-light);
+    }
+
+    .select:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .select-wrapper::after {
+      content: '';
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 0;
+      height: 0;
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+      border-top: 5px solid var(--text-secondary);
+      pointer-events: none;
+    }
+
+    /* Link Item */
+    .link-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: background 0.2s;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .link-item:last-child {
+      border-bottom: none;
+    }
+
+    .link-item:hover {
+      background: rgba(0,0,0,0.01);
+    }
+
+    .link-item__arrow {
+      width: 18px;
+      height: 18px;
+      stroke: var(--text-secondary);
+      transition: transform 0.2s, stroke 0.2s;
+    }
+
+    .link-item:hover .link-item__arrow {
+      transform: translateX(4px);
+      stroke: var(--gold);
+    }
+
+    /* Email Display */
+    .email-display {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    /* Divider */
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 8px 24px;
+    }
+
+    /* Logout Button */
+    .btn-logout {
+      width: calc(100% - 48px);
+      margin: 20px 24px;
+      padding: 14px;
+      background: transparent;
+      color: var(--danger);
+      border: 1px solid var(--danger);
+      border-radius: 10px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .btn-logout:hover {
+      background: var(--danger);
+      color: white;
+    }
+
+    /* App Info */
+    .app-info {
+      text-align: center;
+      padding: 32px 24px;
+    }
+
+    .app-info__version {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+    }
+
+    .app-info__links {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+    }
+
+    .app-info__link {
+      font-size: 13px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      position: relative;
+      transition: color 0.2s;
+    }
+
+    .app-info__link::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 0;
+      height: 1px;
+      background: var(--gold);
+      transition: width 0.3s;
+    }
+
+    .app-info__link:hover {
+      color: var(--gold);
+    }
+
+    .app-info__link:hover::after {
+      width: 100%;
+    }
+
+    /* Animations */
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .section {
+      animation: fadeUp 0.5s ease-out both;
+    }
+
+    .section:nth-child(2) { animation-delay: 0.05s; }
+    .section:nth-child(3) { animation-delay: 0.1s; }
+    .section:nth-child(4) { animation-delay: 0.15s; }
+    .section:nth-child(5) { animation-delay: 0.2s; }
+    .section:nth-child(6) { animation-delay: 0.25s; }
+
+    /* Responsive */
+    @media (max-width: 480px) {
+      .container {
+        padding: 32px 16px;
+      }
+
+      .header__title {
+        font-size: 24px;
+      }
+
+      .settings-item {
+        padding: 16px 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <button class="header__back">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5">
+          <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+      </button>
+      <h1 class="header__title">Settings</h1>
+    </header>
+
+    <!-- Learning Settings -->
+    <section class="section">
+      <h2 class="section__title">Learning</h2>
+      <div class="section__card">
+        <div class="settings-item">
+          <div class="settings-item__info">
+            <div class="settings-item__label">Daily Card Limit</div>
+            <div class="settings-item__desc">New cards to learn each day</div>
+          </div>
+          <div class="number-input">
+            <div class="number-input__control">
+              <button class="number-input__btn">-</button>
+              <input type="number" class="number-input__field" value="20">
+              <button class="number-input__btn">+</button>
+            </div>
+            <span class="number-input__unit">cards</span>
+          </div>
+        </div>
+
+        <a href="#" class="link-item">
+          <div class="settings-item__info">
+            <div class="settings-item__label">Review Intervals</div>
+            <div class="settings-item__desc">Customize your learning schedule</div>
+          </div>
+          <svg class="link-item__arrow" viewBox="0 0 24 24" fill="none" stroke-width="1.5">
+            <path d="M9 18l6-6-6-6"/>
+          </svg>
+        </a>
+      </div>
+    </section>
+
+    <!-- Notifications -->
+    <section class="section">
+      <h2 class="section__title">Notifications</h2>
+      <div class="section__card">
+        <div class="settings-item settings-item--disabled">
+          <div class="settings-item__info">
+            <div class="settings-item__label">Daily Reminder</div>
+            <div class="settings-item__desc">Notify when reviews are due</div>
+          </div>
+          <div class="toggle disabled"></div>
+        </div>
+
+        <div class="settings-item settings-item--disabled">
+          <div class="settings-item__info">
+            <div class="settings-item__label">Reminder Time</div>
+            <div class="settings-item__desc">Choose your preferred time</div>
+          </div>
+          <div class="select-wrapper">
+            <select class="select" disabled>
+              <option>8:00 AM</option>
+              <option>12:00 PM</option>
+              <option selected>6:00 PM</option>
+              <option>9:00 PM</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Account -->
+    <section class="section">
+      <h2 class="section__title">Account</h2>
+      <div class="section__card">
+        <div class="settings-item">
+          <div class="settings-item__info">
+            <div class="settings-item__label">Email Address</div>
+          </div>
+          <span class="email-display">user@example.com</span>
+        </div>
+
+        <a href="#" class="link-item">
+          <div class="settings-item__info">
+            <div class="settings-item__label">Change Password</div>
+          </div>
+          <svg class="link-item__arrow" viewBox="0 0 24 24" fill="none" stroke-width="1.5">
+            <path d="M9 18l6-6-6-6"/>
+          </svg>
+        </a>
+
+        <div class="divider"></div>
+
+        <button class="btn-logout">Sign Out</button>
+      </div>
+    </section>
+
+    <!-- Data -->
+    <section class="section">
+      <h2 class="section__title">Data</h2>
+      <div class="section__card">
+        <a href="#" class="link-item settings-item--disabled" style="pointer-events: none;">
+          <div class="settings-item__info">
+            <div class="settings-item__label">Export Cards</div>
+            <div class="settings-item__desc">Download your data</div>
+          </div>
+          <svg class="link-item__arrow" viewBox="0 0 24 24" fill="none" stroke-width="1.5">
+            <path d="M9 18l6-6-6-6"/>
+          </svg>
+        </a>
+
+        <a href="#" class="link-item settings-item--disabled" style="pointer-events: none;">
+          <div class="settings-item__info">
+            <div class="settings-item__label">Import Cards</div>
+            <div class="settings-item__desc">Load from file</div>
+          </div>
+          <svg class="link-item__arrow" viewBox="0 0 24 24" fill="none" stroke-width="1.5">
+            <path d="M9 18l6-6-6-6"/>
+          </svg>
+        </a>
+      </div>
+    </section>
+
+    <!-- App Info -->
+    <section class="section">
+      <div class="app-info">
+        <div class="app-info__version">ReSave Version 1.0.0</div>
+        <div class="app-info__links">
+          <a href="#" class="app-info__link">Terms of Service</a>
+          <a href="#" class="app-info__link">Privacy Policy</a>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // Toggle functionality
+    document.querySelectorAll('.toggle:not(.disabled)').forEach(toggle => {
+      toggle.addEventListener('click', () => {
+        toggle.classList.toggle('active');
+      });
+    });
+
+    // Number input
+    document.querySelectorAll('.number-input').forEach(input => {
+      const field = input.querySelector('.number-input__field');
+      const btns = input.querySelectorAll('.number-input__btn');
+
+      btns[0].addEventListener('click', () => {
+        const val = parseInt(field.value) || 0;
+        if (val > 1) field.value = val - 1;
+      });
+
+      btns[1].addEventListener('click', () => {
+        const val = parseInt(field.value) || 0;
+        if (val < 100) field.value = val + 1;
+      });
+    });
+  </script>
+</body>
+</html>

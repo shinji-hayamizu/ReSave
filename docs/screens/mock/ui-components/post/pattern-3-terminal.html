@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ReSave - Card Input | Pattern 3: Retro Terminal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=VT323&display=swap" rel="stylesheet">
+  <style>
+    /*
+      Pattern 3: Retro Terminal
+      Theme: Nostalgic, hacker aesthetic, CRT vibes
+      Aesthetic: Green-on-black, scanlines, phosphor glow
+      Typography: IBM Plex Mono + VT323 (pixel font)
+      Key feature: CRT effects, typing cursor, command-line feel
+    */
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg-dark: #0a0a0a;
+      --bg-terminal: #0d1117;
+      --green-dim: #1a472a;
+      --green-main: #00ff41;
+      --green-bright: #39ff14;
+      --green-glow: rgba(0, 255, 65, 0.4);
+      --amber: #ffb000;
+      --amber-dim: #8b5e00;
+      --red: #ff3333;
+      --white: #c9d1d9;
+      --gray: #484f58;
+
+      --font-mono: 'IBM Plex Mono', monospace;
+      --font-pixel: 'VT323', monospace;
+    }
+
+    html {
+      font-size: 16px;
+    }
+
+    body {
+      font-family: var(--font-mono);
+      background: var(--bg-dark);
+      color: var(--green-main);
+      min-height: 100vh;
+      line-height: 1.5;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* CRT Effects */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0, 0, 0, 0.3) 2px,
+        rgba(0, 0, 0, 0.3) 4px
+      );
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(
+        ellipse at center,
+        transparent 0%,
+        rgba(0, 0, 0, 0.4) 100%
+      );
+      pointer-events: none;
+      z-index: 99;
+    }
+
+    /* Page Layout */
+    .page {
+      min-height: 100vh;
+      padding: 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Terminal Window */
+    .terminal {
+      max-width: 800px;
+      margin: 0 auto;
+      background: var(--bg-terminal);
+      border: 2px solid var(--green-dim);
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow:
+        0 0 20px var(--green-glow),
+        inset 0 0 60px rgba(0, 255, 65, 0.03);
+    }
+
+    /* Terminal Header */
+    .terminal__header {
+      background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid var(--green-dim);
+    }
+
+    .terminal__dots {
+      display: flex;
+      gap: 8px;
+    }
+
+    .terminal__dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+
+    .terminal__dot--red { background: #ff5f56; }
+    .terminal__dot--yellow { background: #ffbd2e; }
+    .terminal__dot--green { background: #27ca40; }
+
+    .terminal__title {
+      flex: 1;
+      text-align: center;
+      font-family: var(--font-pixel);
+      font-size: 18px;
+      color: var(--gray);
+      letter-spacing: 0.1em;
+    }
+
+    /* Terminal Body */
+    .terminal__body {
+      padding: 24px;
+    }
+
+    /* Command Line */
+    .command-line {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 24px;
+      font-family: var(--font-mono);
+      font-size: 14px;
+    }
+
+    .command-line__prompt {
+      color: var(--amber);
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .command-line__text {
+      color: var(--white);
+    }
+
+    .command-line__cursor {
+      display: inline-block;
+      width: 10px;
+      height: 18px;
+      background: var(--green-main);
+      animation: blink 1s step-end infinite;
+      vertical-align: middle;
+      margin-left: 2px;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    /* Output Block */
+    .output {
+      margin-bottom: 32px;
+      padding-left: 24px;
+      border-left: 2px solid var(--green-dim);
+    }
+
+    .output__header {
+      font-family: var(--font-pixel);
+      font-size: 24px;
+      color: var(--green-bright);
+      margin-bottom: 8px;
+      text-shadow: 0 0 10px var(--green-glow);
+    }
+
+    .output__text {
+      color: var(--gray);
+      font-size: 13px;
+    }
+
+    /* Form */
+    .form {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* Form Group */
+    .form-group {
+      position: relative;
+    }
+
+    /* Label */
+    .label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .label__text {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--amber);
+    }
+
+    .label__text--required::after {
+      content: ' [REQUIRED]';
+      color: var(--red);
+    }
+
+    .label__counter {
+      font-family: var(--font-pixel);
+      font-size: 16px;
+      color: var(--green-main);
+    }
+
+    .label__counter--warning {
+      color: var(--amber);
+    }
+
+    .label__counter--danger {
+      color: var(--red);
+      animation: pulse 0.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+
+    /* Textarea */
+    .textarea {
+      width: 100%;
+      padding: 16px;
+      font-family: var(--font-mono);
+      font-size: 15px;
+      line-height: 1.6;
+      border: 2px solid var(--green-dim);
+      border-radius: 4px;
+      background: var(--bg-dark);
+      color: var(--green-main);
+      resize: vertical;
+      min-height: 120px;
+      transition: all 0.2s;
+    }
+
+    .textarea::placeholder {
+      color: var(--gray);
+    }
+
+    .textarea:focus {
+      outline: none;
+      border-color: var(--green-main);
+      box-shadow: 0 0 15px var(--green-glow);
+    }
+
+    /* Input */
+    .input {
+      width: 100%;
+      padding: 14px 16px;
+      font-family: var(--font-mono);
+      font-size: 14px;
+      border: 2px solid var(--green-dim);
+      border-radius: 4px;
+      background: var(--bg-dark);
+      color: var(--green-main);
+      transition: all 0.2s;
+    }
+
+    .input::placeholder {
+      color: var(--gray);
+    }
+
+    .input:focus {
+      outline: none;
+      border-color: var(--green-main);
+      box-shadow: 0 0 15px var(--green-glow);
+    }
+
+    /* Tags */
+    .tags-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 16px;
+      background: var(--bg-dark);
+      border: 2px solid var(--green-dim);
+      border-radius: 4px;
+      min-height: 56px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      background: transparent;
+      border: 1px solid var(--green-main);
+      color: var(--green-main);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tag:hover {
+      background: var(--green-main);
+      color: var(--bg-dark);
+      box-shadow: 0 0 10px var(--green-glow);
+    }
+
+    .tag__remove {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 14px;
+      height: 14px;
+      background: transparent;
+      border: none;
+      color: inherit;
+      cursor: pointer;
+      padding: 0;
+    }
+
+    .tag__remove svg {
+      width: 10px;
+      height: 10px;
+    }
+
+    /* Select */
+    .select-wrapper {
+      position: relative;
+    }
+
+    .select {
+      width: 100%;
+      padding: 14px 16px;
+      padding-right: 40px;
+      font-family: var(--font-mono);
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border: 2px solid var(--green-dim);
+      border-radius: 4px;
+      background: var(--bg-dark);
+      color: var(--green-main);
+      cursor: pointer;
+      appearance: none;
+      transition: all 0.2s;
+    }
+
+    .select:focus {
+      outline: none;
+      border-color: var(--green-main);
+      box-shadow: 0 0 15px var(--green-glow);
+    }
+
+    .select option {
+      background: var(--bg-dark);
+      color: var(--green-main);
+    }
+
+    .select-wrapper::after {
+      content: '>';
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%) rotate(90deg);
+      color: var(--green-main);
+      font-family: var(--font-mono);
+      font-weight: bold;
+      pointer-events: none;
+    }
+
+    /* Info Link */
+    .info-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--amber);
+      text-decoration: none;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-top: 8px;
+      transition: color 0.2s;
+    }
+
+    .info-link:hover {
+      color: var(--amber);
+      text-shadow: 0 0 10px rgba(255, 176, 0, 0.5);
+    }
+
+    .info-link svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    /* Divider */
+    .divider {
+      height: 1px;
+      background: var(--green-dim);
+      margin: 8px 0;
+      position: relative;
+    }
+
+    .divider::before {
+      content: '---';
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      background: var(--bg-terminal);
+      padding: 0 12px;
+      color: var(--gray);
+      font-size: 12px;
+    }
+
+    /* Section Label */
+    .section-label {
+      font-family: var(--font-pixel);
+      font-size: 20px;
+      color: var(--amber);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-label::before {
+      content: '>';
+      color: var(--green-main);
+    }
+
+    /* Actions */
+    .actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 14px 24px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      border: 2px solid;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      transition: left 0.5s;
+    }
+
+    .btn:hover::before {
+      left: 100%;
+    }
+
+    .btn--primary {
+      background: var(--green-main);
+      border-color: var(--green-main);
+      color: var(--bg-dark);
+    }
+
+    .btn--primary:hover {
+      background: var(--green-bright);
+      border-color: var(--green-bright);
+      box-shadow: 0 0 20px var(--green-glow);
+    }
+
+    .btn--secondary {
+      background: transparent;
+      border-color: var(--gray);
+      color: var(--gray);
+    }
+
+    .btn--secondary:hover {
+      border-color: var(--white);
+      color: var(--white);
+    }
+
+    .btn--danger {
+      background: transparent;
+      border-color: var(--red);
+      color: var(--red);
+    }
+
+    .btn--danger:hover {
+      background: var(--red);
+      color: var(--bg-dark);
+      box-shadow: 0 0 15px rgba(255, 51, 51, 0.4);
+    }
+
+    /* Status Bar */
+    .status-bar {
+      padding: 12px 16px;
+      background: var(--bg-dark);
+      border-top: 1px solid var(--green-dim);
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--gray);
+    }
+
+    .status-bar__item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .status-bar__dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--green-main);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      .page {
+        padding: 12px;
+      }
+
+      .terminal__body {
+        padding: 16px;
+      }
+
+      .output__header {
+        font-size: 20px;
+      }
+
+      .actions {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="terminal">
+      <!-- Terminal Header -->
+      <div class="terminal__header">
+        <div class="terminal__dots">
+          <span class="terminal__dot terminal__dot--red"></span>
+          <span class="terminal__dot terminal__dot--yellow"></span>
+          <span class="terminal__dot terminal__dot--green"></span>
+        </div>
+        <span class="terminal__title">RESAVE TERMINAL v2.0</span>
+      </div>
+
+      <!-- Terminal Body -->
+      <div class="terminal__body">
+        <!-- Command Line -->
+        <div class="command-line">
+          <span class="command-line__prompt">user@resave:~$</span>
+          <span class="command-line__text">create --card --new<span class="command-line__cursor"></span></span>
+        </div>
+
+        <!-- Output -->
+        <div class="output">
+          <div class="output__header">CREATE_NEW_CARD</div>
+          <div class="output__text">Initializing memory allocation... Ready for input.</div>
+        </div>
+
+        <!-- Form -->
+        <form class="form">
+          <!-- Required Section -->
+          <div class="section-label">INPUT_REQUIRED</div>
+
+          <!-- Text Input -->
+          <div class="form-group">
+            <div class="label">
+              <span class="label__text label__text--required">content.question</span>
+              <span class="label__counter" id="text-counter">[0/500]</span>
+            </div>
+            <textarea
+              class="textarea"
+              id="card-text"
+              placeholder="// Enter knowledge to store in memory..."
+              maxlength="500"
+              rows="4"
+              required
+            ></textarea>
+          </div>
+
+          <!-- Hidden Text Input -->
+          <div class="form-group">
+            <div class="label">
+              <span class="label__text">content.answer</span>
+              <span class="label__counter" id="hidden-counter">[0/2000]</span>
+            </div>
+            <textarea
+              class="textarea"
+              id="card-hidden"
+              placeholder="// Enter answer data (optional)..."
+              maxlength="2000"
+              rows="3"
+            ></textarea>
+          </div>
+
+          <!-- Primary Action -->
+          <div class="actions">
+            <button type="submit" class="btn btn--primary">[EXECUTE] Save Card</button>
+          </div>
+
+          <div class="divider"></div>
+
+          <!-- Optional Section -->
+          <div class="section-label">CONFIG_OPTIONAL</div>
+
+          <!-- Tags -->
+          <div class="form-group">
+            <div class="label">
+              <span class="label__text">metadata.tags[]</span>
+            </div>
+            <div class="tags-container" id="tags-container">
+              <span class="tag">
+                <span>#geography</span>
+                <button type="button" class="tag__remove">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                    <path d="M18 6L6 18M6 6l12 12"/>
+                  </svg>
+                </button>
+              </span>
+              <span class="tag">
+                <span>#japan</span>
+                <button type="button" class="tag__remove">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                    <path d="M18 6L6 18M6 6l12 12"/>
+                  </svg>
+                </button>
+              </span>
+            </div>
+          </div>
+
+          <!-- Source URL -->
+          <div class="form-group">
+            <div class="label">
+              <span class="label__text">source.url</span>
+            </div>
+            <input
+              type="url"
+              class="input"
+              id="card-source"
+              placeholder="https://..."
+            >
+          </div>
+
+          <!-- Repeat Mode -->
+          <div class="form-group">
+            <div class="label">
+              <span class="label__text">schedule.mode</span>
+            </div>
+            <div class="select-wrapper">
+              <select class="select" id="card-repeat">
+                <option value="spaced" selected>SPACED_REPETITION</option>
+                <option value="daily">DAILY_REPEAT</option>
+                <option value="weekly">WEEKLY_REPEAT</option>
+                <option value="none">NO_SCHEDULE</option>
+              </select>
+            </div>
+            <a href="#" class="info-link">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M12 16v-4M12 8h.01"/>
+              </svg>
+              <span>man spaced-repetition</span>
+            </a>
+          </div>
+
+          <!-- Secondary Actions -->
+          <div class="actions">
+            <button type="button" class="btn btn--secondary">[CANCEL] Abort</button>
+            <button type="submit" class="btn btn--primary">[COMMIT] Save All</button>
+          </div>
+
+          <div class="divider"></div>
+
+          <!-- Danger Zone -->
+          <div class="section-label" style="color: var(--red);">DANGER_ZONE</div>
+          <div class="actions">
+            <button type="button" class="btn btn--danger">[DELETE] Remove Card</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Status Bar -->
+      <div class="status-bar">
+        <div class="status-bar__item">
+          <span class="status-bar__dot"></span>
+          <span>CONNECTED</span>
+        </div>
+        <div class="status-bar__item">
+          <span>MODE: CREATE</span>
+        </div>
+        <div class="status-bar__item">
+          <span>UTF-8</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Character counters
+    function setupCounter(textareaId, counterId, maxLength) {
+      const textarea = document.getElementById(textareaId);
+      const counter = document.getElementById(counterId);
+
+      textarea.addEventListener('input', function() {
+        const length = this.value.length;
+        counter.textContent = `[${length}/${maxLength}]`;
+
+        counter.classList.remove('label__counter--warning', 'label__counter--danger');
+        if (length >= maxLength) {
+          counter.classList.add('label__counter--danger');
+        } else if (length >= maxLength * 0.9) {
+          counter.classList.add('label__counter--warning');
+        }
+      });
+    }
+
+    setupCounter('card-text', 'text-counter', 500);
+    setupCounter('card-hidden', 'hidden-counter', 2000);
+
+    // Tag removal
+    document.getElementById('tags-container').addEventListener('click', function(e) {
+      const removeBtn = e.target.closest('.tag__remove');
+      if (removeBtn) {
+        removeBtn.closest('.tag').remove();
+      }
+    });
+
+    // Form submission
+    document.querySelector('.form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const text = document.getElementById('card-text').value.trim();
+      if (!text) {
+        document.getElementById('card-text').focus();
+        return;
+      }
+      alert('>> CARD_SAVED\n>> Operation completed successfully.');
+    });
+  </script>
+</body>
+</html>

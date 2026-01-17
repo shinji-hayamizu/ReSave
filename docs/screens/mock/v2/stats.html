@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body style="background: hsl(210 40% 98%);">
+  <!--
+    @screen: 統計画面
+    @path: /stats
+    @description: 学習の進捗を確認する統計画面
+    @file: app/(main)/stats/page.tsx
+
+    @state-management:
+      - activePeriod: StatsPeriod - 'today' | 'week' | 'month' (useState)
+
+    @hooks:
+      - useTodayStats() - 今日の統計取得
+      - useSummaryStats() - 累計統計取得
+      - useDailyStats(days) - 日別統計取得
+
+    @api-dependencies:
+      - GET /api/stats/today - 今日の統計
+      - GET /api/stats/summary - 累計統計
+      - GET /api/stats/daily?days=7|30 - 日別統計
+  -->
+
+  <!-- ================================================================
+       @component: StatsPage
+       @description: 統計画面のルートコンポーネント
+       @file: app/(main)/stats/page.tsx
+       ================================================================ -->
+  <div data-component="StatsPage">
+
+    <!-- ================================================================
+         @component: PageHeader
+         @description: ページヘッダー
+         @file: components/layout/page-header.tsx
+         @props:
+           - title: string
+           - description?: string
+           - action?: ReactNode
+         ================================================================ -->
+    <div class="page-header" data-component="PageHeader">
+      <div class="page-header__content">
+        <h1>統計</h1>
+        <p class="text-sm text-muted">学習の進捗を確認しましょう</p>
+      </div>
+    </div>
+    <!-- [/Component: PageHeader] -->
+
+    <div class="content-wrapper space-y-5 p-4">
+
+      <!-- ================================================================
+           @component: TodaySummary
+           @description: 今日の学習サマリーカード
+           @file: components/stats/today-summary.tsx
+
+           @hooks:
+             - useTodayStats() - { reviewedCount, correctCount, timeSpentMinutes }
+             - useSummaryStats() - { currentStreak }
+
+           @computed:
+             - accuracyRate = (correctCount / reviewedCount) * 100
+           ================================================================ -->
+      <div class="stat-card" data-component="TodaySummary">
+        <h2 class="stat-card__title">今日の学習</h2>
+        <div class="stat-grid">
+          <!-- @prop: todayStats.reviewedCount -->
+          <div class="stat-item stat-item--primary">
+            <div class="stat-item__value" data-prop="reviewedCount">12<span class="stat-item__unit">枚</span></div>
+            <div class="stat-item__label">学習カード数</div>
+          </div>
+
+          <!-- @prop: computed accuracyRate -->
+          <div class="stat-item stat-item--success">
+            <div class="stat-item__value" data-prop="accuracyRate">85<span class="stat-item__unit">%</span></div>
+            <div class="stat-item__label">正答率</div>
+          </div>
+
+          <!-- @prop: todayStats.timeSpentMinutes -->
+          <div class="stat-item">
+            <div class="stat-item__value" data-prop="timeSpentMinutes">15<span class="stat-item__unit">分</span></div>
+            <div class="stat-item__label">学習時間</div>
+          </div>
+
+          <!-- @prop: summaryStats.currentStreak -->
+          <div class="stat-item stat-item--warning">
+            <div class="stat-item__value" data-prop="currentStreak">7<span class="stat-item__unit">日</span></div>
+            <div class="stat-item__label">連続学習日数</div>
+          </div>
+        </div>
+      </div>
+      <!-- [/Component: TodaySummary] -->
+
+      <!-- ================================================================
+           @component: PeriodTabs
+           @description: 期間切り替えタブ
+           @file: components/stats/period-tabs.tsx
+
+           @props:
+             - activePeriod: StatsPeriod
+             - onPeriodChange: (period: StatsPeriod) => void
+
+           @types:
+             - StatsPeriod = 'today' | 'week' | 'month'
+           ================================================================ -->
+      <div class="period-tabs" data-component="PeriodTabs" data-props="activePeriod,onPeriodChange">
+        <button
+          type="button"
+          class="period-tab"
+          data-period="today"
+          data-action="onClick:onPeriodChange('today')"
+        >今日</button>
+        <button
+          type="button"
+          class="period-tab active"
+          data-period="week"
+          data-action="onClick:onPeriodChange('week')"
+        >週間</button>
+        <button
+          type="button"
+          class="period-tab"
+          data-period="month"
+          data-action="onClick:onPeriodChange('month')"
+        >月間</button>
+      </div>
+      <!-- [/Component: PeriodTabs] -->
+
+      <!-- ================================================================
+           @component: DailyStatsChart
+           @description: 日別学習統計チャート
+           @file: components/stats/daily-stats-chart.tsx
+
+           @props:
+             - days: number - 7 or 30
+
+           @hooks:
+             - useDailyStats(days)
+
+           @library: recharts or similar chart library
+           ================================================================ -->
+      <div class="stat-card" data-component="DailyStatsChart" data-props="days">
+        <h3 class="stat-card__title">学習推移</h3>
+        <!-- @note: Chart component rendered here -->
+        <!-- @component: BarChart from recharts -->
+        <div class="chart-placeholder">
+          チャートエリア（recharts等で実装）
+        </div>
+      </div>
+      <!-- [/Component: DailyStatsChart] -->
+
+      <!-- ================================================================
+           @component: CumulativeStats
+           @description: 累計統計
+           @file: components/stats/cumulative-stats.tsx
+
+           @hooks:
+             - useSummaryStats()
+
+           @data:
+             - totalCards: 総カード数
+             - completedCards: 完了カード数
+             - totalReviews: 総復習回数
+             - longestStreak: 最長連続学習日数
+           ================================================================ -->
+      <div class="stat-card" data-component="CumulativeStats">
+        <h3 class="stat-card__title">累計統計</h3>
+        <div class="stat-grid">
+          <div class="stat-item">
+            <div class="stat-item__value" data-prop="totalCards">156<span class="stat-item__unit">枚</span></div>
+            <div class="stat-item__label">総カード数</div>
+          </div>
+
+          <div class="stat-item stat-item--success">
+            <div class="stat-item__value" data-prop="completedCards">89<span class="stat-item__unit">枚</span></div>
+            <div class="stat-item__label">完了カード</div>
+          </div>
+
+          <div class="stat-item stat-item--primary">
+            <div class="stat-item__value" data-prop="totalReviews">1,234<span class="stat-item__unit">回</span></div>
+            <div class="stat-item__label">総復習回数</div>
+          </div>
+
+          <div class="stat-item stat-item--warning">
+            <div class="stat-item__value" data-prop="longestStreak">14<span class="stat-item__unit">日</span></div>
+            <div class="stat-item__label">最長連続</div>
+          </div>
+        </div>
+      </div>
+      <!-- [/Component: CumulativeStats] -->
+
+    </div>
+  </div>
+  <!-- [/Component: StatsPage] -->
+
+</body>
+</html>

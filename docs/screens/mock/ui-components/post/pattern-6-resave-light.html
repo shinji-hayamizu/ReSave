@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="ja">
+<!--
+  @screen: カード入力画面 (CardInputPage) - Pattern 6: ReSave Light (Optimized)
+  @description: 既存ReSaveデザインを踏襲したライトモード投稿画面 - UI/UX最適化版
+  @route: /cards/new (新規作成) | /cards/[id]/edit (編集)
+  @feature: F-013 (カード作成), F-014 (カード編集), F-016 (タグ付け)
+  @spec: docs/requirements/functions/card/F-013-card-create.md
+
+  @design-system: ReSave Professional Blue
+  - Primary: #2563eb (Blue 600)
+  - Accent: #0ea5e9 (Sky 500)
+  - Success: #10b981, Warning: #f59e0b, Danger: #ef4444
+  - Border Radius: 8px / 12px
+  - Font: System fonts
+
+  @ux-improvements:
+  - 保存ボタンを1つに統合（認知負荷軽減）
+  - タッチターゲット44px以上確保
+  - オプション項目をアコーディオンで整理
+  - スティッキーヘッダーで保存アクション常時表示
+  - フォーカス状態の明確化
+  - キーボードナビゲーション対応
+-->
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ReSave - カード作成</title>
+  <style>
+    /*
+      Pattern 6: ReSave Light - UI/UX Optimized
+      既存のReSaveデザインシステムを完全踏襲 + UX強化
+
+      Key Changes:
+      - Single save button (removed confusion)
+      - Sticky header with save action
+      - Collapsible optional section
+      - Enhanced touch targets (44px min)
+      - Better focus states
+    */
+
+    :root {
+      /* Colors - Professional Blue Theme */
+      --color-primary: #2563eb;
+      --color-primary-hover: #1d4ed8;
+      --color-primary-light: rgba(37, 99, 235, 0.08);
+      --color-accent: #0ea5e9;
+      --color-success: #10b981;
+      --color-warning: #f59e0b;
+      --color-danger: #ef4444;
+      --color-danger-light: rgba(239, 68, 68, 0.08);
+
+      /* Backgrounds */
+      --bg-primary: #ffffff;
+      --bg-secondary: #f8fafc;
+      --bg-tertiary: #f1f5f9;
+
+      /* Text */
+      --text-primary: #0f172a;
+      --text-secondary: #64748b;
+      --text-muted: #94a3b8;
+
+      /* Borders */
+      --border-color: #e2e8f0;
+      --border-radius: 8px;
+      --border-radius-lg: 12px;
+
+      /* Shadows */
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      --shadow-focus: 0 0 0 3px rgba(37, 99, 235, 0.15);
+
+      /* Transitions */
+      --transition-fast: 150ms ease;
+      --transition-normal: 250ms ease;
+
+      /* Spacing */
+      --touch-target: 44px;
+    }
+
+    /* Reset & Base */
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', sans-serif;
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Focus visible for keyboard navigation */
+    *:focus {
+      outline: none;
+    }
+
+    *:focus-visible {
+      outline: 2px solid var(--color-primary);
+      outline-offset: 2px;
+    }
+
+    /* Page Container */
+    .page {
+      min-height: 100vh;
+      padding-bottom: 100px; /* Space for sticky footer */
+    }
+
+    /* Content Wrapper */
+    .content-wrapper {
+      padding: 0 16px 24px;
+      max-width: 640px;
+      margin: 0 auto;
+    }
+
+    /* ========================================
+       Sticky Header
+       ======================================== */
+    .page-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(248, 250, 252, 0.95);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      margin: 0 -16px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border-bottom: 1px solid transparent;
+      transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+    }
+
+    .page-header--scrolled {
+      border-bottom-color: var(--border-color);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .page-header__left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .page-header__back {
+      width: var(--touch-target);
+      height: var(--touch-target);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg-primary);
+      border: none;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      color: var(--text-secondary);
+      transition: all var(--transition-fast);
+      flex-shrink: 0;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .page-header__back:hover {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+    }
+
+    .page-header__back:active {
+      transform: scale(0.95);
+    }
+
+    .page-header__back svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .page-header__title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .page-header__action {
+      flex-shrink: 0;
+    }
+
+    /* ========================================
+       Card Input Form
+       ======================================== */
+    .card-input-form {
+      margin-top: 16px;
+    }
+
+    .form-card {
+      background: var(--bg-primary);
+      border-radius: var(--border-radius-lg);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+
+    .form-card__content {
+      padding: 20px;
+    }
+
+    /* ========================================
+       Form Group
+       ======================================== */
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group:last-child {
+      margin-bottom: 0;
+    }
+
+    /* Label */
+    .form-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .form-label__text {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .form-label__text--required::after {
+      content: " *";
+      color: var(--color-danger);
+    }
+
+    .form-label__counter {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
+      transition: color var(--transition-fast);
+    }
+
+    .form-label__counter--warning {
+      color: var(--color-warning);
+    }
+
+    .form-label__counter--danger {
+      color: var(--color-danger);
+      font-weight: 500;
+    }
+
+    /* Textarea */
+    .form-textarea {
+      width: 100%;
+      padding: 14px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--border-radius);
+      font-size: 16px; /* Prevents iOS zoom */
+      font-family: inherit;
+      line-height: 1.6;
+      resize: vertical;
+      min-height: 120px;
+      transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+    }
+
+    .form-textarea::placeholder {
+      color: var(--text-muted);
+    }
+
+    .form-textarea:hover {
+      border-color: var(--text-muted);
+    }
+
+    .form-textarea:focus {
+      border-color: var(--color-primary);
+      box-shadow: var(--shadow-focus);
+    }
+
+    .form-textarea--error {
+      border-color: var(--color-danger);
+    }
+
+    .form-textarea--error:focus {
+      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+    }
+
+    /* Input */
+    .form-input {
+      width: 100%;
+      height: var(--touch-target);
+      padding: 0 14px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--border-radius);
+      font-size: 16px;
+      font-family: inherit;
+      transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+    }
+
+    .form-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .form-input:hover {
+      border-color: var(--text-muted);
+    }
+
+    .form-input:focus {
+      border-color: var(--color-primary);
+      box-shadow: var(--shadow-focus);
+    }
+
+    /* Select */
+    .form-select {
+      width: 100%;
+      height: var(--touch-target);
+      padding: 0 40px 0 14px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--border-radius);
+      font-size: 16px;
+      font-family: inherit;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+    }
+
+    .form-select:hover {
+      border-color: var(--text-muted);
+    }
+
+    .form-select:focus {
+      border-color: var(--color-primary);
+      box-shadow: var(--shadow-focus);
+    }
+
+    /* Error Message */
+    .form-error {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--color-danger);
+      margin-top: 8px;
+      opacity: 0;
+      transform: translateY(-4px);
+      transition: opacity var(--transition-fast), transform var(--transition-fast);
+    }
+
+    .form-error.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .form-error svg {
+      width: 14px;
+      height: 14px;
+      flex-shrink: 0;
+    }
+
+    /* Hint */
+    .form-hint {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 8px;
+    }
+
+    /* ========================================
+       Tag Selector
+       ======================================== */
+    .tag-selector {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 12px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--border-radius);
+      background: var(--bg-primary);
+      min-height: 52px;
+      cursor: pointer;
+      transition: border-color var(--transition-fast);
+    }
+
+    .tag-selector:hover {
+      border-color: var(--text-muted);
+    }
+
+    .tag-selector:focus-within {
+      border-color: var(--color-primary);
+      box-shadow: var(--shadow-focus);
+    }
+
+    .tag-selector__tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      height: 32px;
+      padding: 0 12px;
+      background: var(--color-primary);
+      color: white;
+      font-size: 13px;
+      font-weight: 500;
+      border-radius: 16px;
+      cursor: default;
+      transition: background var(--transition-fast);
+    }
+
+    .tag-selector__tag:hover {
+      background: var(--color-primary-hover);
+    }
+
+    .tag-selector__tag-remove {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 18px;
+      height: 18px;
+      border: none;
+      background: rgba(255, 255, 255, 0.25);
+      border-radius: 50%;
+      cursor: pointer;
+      padding: 0;
+      transition: background var(--transition-fast);
+      margin-right: -4px;
+    }
+
+    .tag-selector__tag-remove:hover {
+      background: rgba(255, 255, 255, 0.4);
+    }
+
+    .tag-selector__tag-remove svg {
+      width: 10px;
+      height: 10px;
+      color: white;
+    }
+
+    .tag-selector__placeholder {
+      color: var(--text-muted);
+      font-size: 14px;
+      line-height: 28px;
+    }
+
+    .tag-selector__add {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      height: 32px;
+      padding: 0 12px;
+      background: var(--bg-secondary);
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 500;
+      border-radius: 16px;
+      border: 1px dashed var(--border-color);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .tag-selector__add:hover {
+      background: var(--color-primary-light);
+      color: var(--color-primary);
+      border-color: var(--color-primary);
+    }
+
+    .tag-selector__add svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    /* ========================================
+       Accordion (Optional Section)
+       ======================================== */
+    .accordion {
+      border-top: 1px solid var(--border-color);
+    }
+
+    .accordion__trigger {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      background: var(--bg-secondary);
+      border: none;
+      cursor: pointer;
+      transition: background var(--transition-fast);
+    }
+
+    .accordion__trigger:hover {
+      background: var(--bg-tertiary);
+    }
+
+    .accordion__trigger-text {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+
+    .accordion__trigger-icon {
+      width: 20px;
+      height: 20px;
+      color: var(--text-muted);
+      transition: transform var(--transition-normal);
+    }
+
+    .accordion__trigger[aria-expanded="true"] .accordion__trigger-icon {
+      transform: rotate(180deg);
+    }
+
+    .accordion__content {
+      display: none;
+      padding: 20px;
+      background: var(--bg-secondary);
+      border-top: 1px solid var(--border-color);
+    }
+
+    .accordion__content.open {
+      display: block;
+      animation: slideDown 0.25s ease-out;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Info Link */
+    .info-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      color: var(--text-muted);
+      font-size: 13px;
+      text-decoration: none;
+      margin-top: 8px;
+      padding: 4px 0;
+      transition: color var(--transition-fast);
+    }
+
+    .info-link:hover {
+      color: var(--color-primary);
+    }
+
+    .info-link svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    /* ========================================
+       Buttons
+       ======================================== */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: var(--touch-target);
+      padding: 0 20px;
+      border: none;
+      border-radius: var(--border-radius);
+      font-size: 15px;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      text-decoration: none;
+    }
+
+    .btn--primary {
+      background: var(--color-primary);
+      color: white;
+    }
+
+    .btn--primary:hover {
+      background: var(--color-primary-hover);
+    }
+
+    .btn--primary:active {
+      transform: scale(0.98);
+    }
+
+    .btn--primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn--ghost {
+      background: transparent;
+      color: var(--text-secondary);
+    }
+
+    .btn--ghost:hover {
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+    }
+
+    .btn--danger {
+      background: var(--color-danger-light);
+      color: var(--color-danger);
+    }
+
+    .btn--danger:hover {
+      background: var(--color-danger);
+      color: white;
+    }
+
+    .btn--block {
+      width: 100%;
+    }
+
+    .btn svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* ========================================
+       Danger Zone (Edit Mode)
+       ======================================== */
+    .danger-zone {
+      background: var(--bg-primary);
+      border-radius: var(--border-radius-lg);
+      box-shadow: var(--shadow-sm);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .danger-zone__text {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .danger-zone__text strong {
+      color: var(--text-primary);
+      font-weight: 500;
+    }
+
+    /* ========================================
+       Sticky Footer (Save Action)
+       ======================================== */
+    .sticky-footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border-top: 1px solid var(--border-color);
+      padding: 12px 16px;
+      padding-bottom: max(12px, env(safe-area-inset-bottom));
+    }
+
+    .sticky-footer__inner {
+      max-width: 640px;
+      margin: 0 auto;
+      display: flex;
+      gap: 12px;
+    }
+
+    .sticky-footer__btn {
+      flex: 1;
+    }
+
+    /* Hide on desktop - show in header instead */
+    @media (min-width: 768px) {
+      .sticky-footer {
+        display: none;
+      }
+
+      .page {
+        padding-bottom: 24px;
+      }
+    }
+
+    /* ========================================
+       Responsive
+       ======================================== */
+    @media (min-width: 768px) {
+      .content-wrapper {
+        padding: 0 24px 32px;
+      }
+
+      .page-header {
+        margin: 0 -24px;
+        padding: 16px 24px;
+      }
+
+      .page-header__title {
+        font-size: 20px;
+      }
+
+      .form-card__content {
+        padding: 24px;
+      }
+
+      .accordion__trigger {
+        padding: 18px 24px;
+      }
+
+      .accordion__content {
+        padding: 24px;
+      }
+    }
+
+    /* ========================================
+       Reduce Motion
+       ======================================== */
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="content-wrapper">
+      <!-- Sticky Header -->
+      <header class="page-header" id="page-header">
+        <div class="page-header__left">
+          <button type="button" class="page-header__back" aria-label="戻る">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m15 18-6-6 6-6"/>
+            </svg>
+          </button>
+          <h1 class="page-header__title">カード作成</h1>
+        </div>
+        <!-- Desktop Save Button -->
+        <div class="page-header__action">
+          <button type="submit" form="card-form" class="btn btn--primary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 12l5 5L20 7"/>
+            </svg>
+            <span>保存</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Card Input Form -->
+      <form class="card-input-form" id="card-form">
+        <div class="form-card">
+          <div class="form-card__content">
+            <!-- Text Input (Required) -->
+            <div class="form-group">
+              <label class="form-label" for="card-text">
+                <span class="form-label__text form-label__text--required">テキスト</span>
+                <span class="form-label__counter" id="text-counter">0 / 500</span>
+              </label>
+              <textarea
+                id="card-text"
+                class="form-textarea"
+                placeholder="覚えたいことを入力してください"
+                maxlength="500"
+                rows="4"
+                required
+                aria-describedby="text-error"
+              ></textarea>
+              <p class="form-error" id="text-error" role="alert">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <path d="M12 8v4M12 16h.01"/>
+                </svg>
+                <span>テキストを入力してください</span>
+              </p>
+            </div>
+
+            <!-- Hidden Text Input (Optional but in main area) -->
+            <div class="form-group">
+              <label class="form-label" for="card-hidden">
+                <span class="form-label__text">隠しテキスト（答え）</span>
+                <span class="form-label__counter" id="hidden-counter">0 / 2000</span>
+              </label>
+              <textarea
+                id="card-hidden"
+                class="form-textarea"
+                placeholder="タップで表示される答えを入力（任意）"
+                maxlength="2000"
+                rows="3"
+              ></textarea>
+            </div>
+
+            <!-- Tags -->
+            <div class="form-group">
+              <label class="form-label">
+                <span class="form-label__text">タグ</span>
+              </label>
+              <div class="tag-selector" id="tag-selector" role="group" aria-label="選択されたタグ">
+                <span class="tag-selector__tag">
+                  <span>地理</span>
+                  <button type="button" class="tag-selector__tag-remove" aria-label="地理タグを削除">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                      <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+                    </svg>
+                  </button>
+                </span>
+                <span class="tag-selector__tag">
+                  <span>日本</span>
+                  <button type="button" class="tag-selector__tag-remove" aria-label="日本タグを削除">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                      <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+                    </svg>
+                  </button>
+                </span>
+                <button type="button" class="tag-selector__add" aria-label="タグを追加">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 5v14M5 12h14"/>
+                  </svg>
+                  <span>追加</span>
+                </button>
+              </div>
+              <p class="form-hint">タグは最大10個まで設定できます</p>
+            </div>
+          </div>
+
+          <!-- Optional Settings (Accordion) -->
+          <div class="accordion">
+            <button
+              type="button"
+              class="accordion__trigger"
+              id="optional-trigger"
+              aria-expanded="false"
+              aria-controls="optional-content"
+            >
+              <span class="accordion__trigger-text">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                  <circle cx="12" cy="12" r="3"/>
+                  <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                </svg>
+                <span>詳細設定</span>
+              </span>
+              <svg class="accordion__trigger-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="m6 9 6 6 6-6"/>
+              </svg>
+            </button>
+            <div class="accordion__content" id="optional-content" aria-labelledby="optional-trigger">
+              <!-- Source URL -->
+              <div class="form-group">
+                <label class="form-label" for="card-source">
+                  <span class="form-label__text">ソースURL</span>
+                </label>
+                <input
+                  type="url"
+                  id="card-source"
+                  class="form-input"
+                  placeholder="https://example.com"
+                >
+                <p class="form-hint">参照元のURLを記録できます</p>
+              </div>
+
+              <!-- Repeat Mode -->
+              <div class="form-group">
+                <label class="form-label" for="card-repeat">
+                  <span class="form-label__text">リピートモード</span>
+                </label>
+                <select id="card-repeat" class="form-select">
+                  <option value="spaced" selected>間隔反復（推奨）</option>
+                  <option value="daily">毎日</option>
+                  <option value="weekly">毎週</option>
+                  <option value="none">リピートなし</option>
+                </select>
+                <a href="#" class="info-link" id="info-link">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M12 16v-4M12 8h.01"/>
+                  </svg>
+                  <span>間隔反復について詳しく</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Danger Zone (Edit Mode Only) -->
+        <div class="danger-zone" id="danger-zone">
+          <div class="danger-zone__text">
+            <strong>このカードを削除</strong><br>
+            削除すると復元できません
+          </div>
+          <button type="button" class="btn btn--danger" id="delete-btn">
+            削除
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Sticky Footer (Mobile) -->
+  <div class="sticky-footer">
+    <div class="sticky-footer__inner">
+      <button type="button" class="btn btn--ghost sticky-footer__btn" id="cancel-btn">
+        キャンセル
+      </button>
+      <button type="submit" form="card-form" class="btn btn--primary sticky-footer__btn">
+        保存
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // Character counters
+    function setupCounter(textareaId, counterId, maxLength) {
+      const textarea = document.getElementById(textareaId);
+      const counter = document.getElementById(counterId);
+
+      const updateCounter = () => {
+        const length = textarea.value.length;
+        counter.textContent = `${length} / ${maxLength}`;
+
+        counter.classList.remove('form-label__counter--warning', 'form-label__counter--danger');
+        if (length >= maxLength) {
+          counter.classList.add('form-label__counter--danger');
+        } else if (length >= maxLength * 0.9) {
+          counter.classList.add('form-label__counter--warning');
+        }
+      };
+
+      textarea.addEventListener('input', updateCounter);
+      updateCounter();
+    }
+
+    setupCounter('card-text', 'text-counter', 500);
+    setupCounter('card-hidden', 'hidden-counter', 2000);
+
+    // Sticky header scroll effect
+    const pageHeader = document.getElementById('page-header');
+    let lastScroll = 0;
+
+    window.addEventListener('scroll', () => {
+      const currentScroll = window.scrollY;
+      if (currentScroll > 10) {
+        pageHeader.classList.add('page-header--scrolled');
+      } else {
+        pageHeader.classList.remove('page-header--scrolled');
+      }
+      lastScroll = currentScroll;
+    }, { passive: true });
+
+    // Accordion toggle
+    const accordionTrigger = document.getElementById('optional-trigger');
+    const accordionContent = document.getElementById('optional-content');
+
+    accordionTrigger.addEventListener('click', () => {
+      const isExpanded = accordionTrigger.getAttribute('aria-expanded') === 'true';
+      accordionTrigger.setAttribute('aria-expanded', !isExpanded);
+      accordionContent.classList.toggle('open');
+    });
+
+    // Tag removal
+    document.getElementById('tag-selector').addEventListener('click', (e) => {
+      const removeBtn = e.target.closest('.tag-selector__tag-remove');
+      if (removeBtn) {
+        const tag = removeBtn.closest('.tag-selector__tag');
+        tag.style.transform = 'scale(0.8)';
+        tag.style.opacity = '0';
+        setTimeout(() => tag.remove(), 150);
+      }
+
+      // Add tag button
+      const addBtn = e.target.closest('.tag-selector__add');
+      if (addBtn) {
+        alert('タグ選択モーダルを表示');
+      }
+    });
+
+    // Form submission
+    document.getElementById('card-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const textArea = document.getElementById('card-text');
+      const text = textArea.value.trim();
+      const errorEl = document.getElementById('text-error');
+
+      if (!text) {
+        errorEl.classList.add('visible');
+        textArea.classList.add('form-textarea--error');
+        textArea.focus();
+        return;
+      }
+
+      errorEl.classList.remove('visible');
+      textArea.classList.remove('form-textarea--error');
+
+      // Success feedback
+      const submitBtns = document.querySelectorAll('[type="submit"]');
+      submitBtns.forEach(btn => {
+        btn.disabled = true;
+        btn.innerHTML = `
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18" style="animation: spin 1s linear infinite">
+            <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+          </svg>
+          <span>保存中...</span>
+        `;
+      });
+
+      setTimeout(() => {
+        alert('カードを保存しました');
+        submitBtns.forEach(btn => {
+          btn.disabled = false;
+          btn.innerHTML = `
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+              <path d="M5 12l5 5L20 7"/>
+            </svg>
+            <span>保存</span>
+          `;
+        });
+      }, 800);
+    });
+
+    // Hide error on input
+    document.getElementById('card-text').addEventListener('input', function() {
+      document.getElementById('text-error').classList.remove('visible');
+      this.classList.remove('form-textarea--error');
+    });
+
+    // Delete button
+    document.getElementById('delete-btn').addEventListener('click', () => {
+      if (confirm('このカードを削除しますか？\n削除すると復元できません。')) {
+        alert('カードを削除しました');
+      }
+    });
+
+    // Cancel button
+    document.getElementById('cancel-btn').addEventListener('click', () => {
+      if (document.getElementById('card-text').value.trim()) {
+        if (confirm('入力内容が破棄されます。よろしいですか？')) {
+          history.back();
+        }
+      } else {
+        history.back();
+      }
+    });
+
+    // Back button
+    document.querySelector('.page-header__back').addEventListener('click', () => {
+      if (document.getElementById('card-text').value.trim()) {
+        if (confirm('入力内容が破棄されます。よろしいですか？')) {
+          history.back();
+        }
+      } else {
+        history.back();
+      }
+    });
+
+    // Info link
+    document.getElementById('info-link').addEventListener('click', (e) => {
+      e.preventDefault();
+      alert('間隔反復（Spaced Repetition）とは:\n\n記憶の定着を最大化するため、復習間隔を徐々に延ばしていく学習法です。\n\nReSaveの間隔: 1日 → 3日 → 7日 → 14日 → 30日 → 180日\n\n「覚えた」を押すと次の間隔へ、「もう一度」を押すと最初からやり直しになります。');
+    });
+
+    // Spin animation for loading
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
+    `;
+    document.head.appendChild(style);
+  </script>
+</body>
+</html>

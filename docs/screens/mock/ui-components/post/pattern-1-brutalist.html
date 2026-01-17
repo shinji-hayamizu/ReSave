@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ReSave - Card Input | Pattern 1: Brutalist Monochrome</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
+  <style>
+    /*
+      Pattern 1: Brutalist Monochrome
+      Theme: Raw, honest, industrial
+      Aesthetic: High contrast black/white, bold typography, exposed structure
+      Typography: JetBrains Mono (code-like precision) + Noto Sans JP (Japanese)
+      Key feature: Stark contrast, asymmetric layout, visible grid lines
+    */
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --black: #000000;
+      --white: #ffffff;
+      --gray-100: #f5f5f5;
+      --gray-200: #e5e5e5;
+      --gray-400: #a3a3a3;
+      --gray-600: #525252;
+      --gray-800: #262626;
+      --accent: #ff3300;
+
+      --font-mono: 'JetBrains Mono', monospace;
+      --font-sans: 'Noto Sans JP', sans-serif;
+
+      --border-thick: 3px;
+      --border-thin: 1px;
+    }
+
+    html {
+      font-size: 16px;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--white);
+      color: var(--black);
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+
+    /* Page Layout */
+    .page {
+      min-height: 100vh;
+      display: grid;
+      grid-template-rows: auto 1fr;
+    }
+
+    /* Header - Raw industrial bar */
+    .header {
+      background: var(--black);
+      color: var(--white);
+      padding: 16px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: var(--border-thick) solid var(--accent);
+    }
+
+    .header__back {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--white);
+      text-decoration: none;
+      font-family: var(--font-mono);
+      font-size: 14px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      transition: color 0.15s;
+    }
+
+    .header__back:hover {
+      color: var(--accent);
+    }
+
+    .header__back svg {
+      width: 20px;
+      height: 20px;
+      stroke-width: 2.5;
+    }
+
+    .header__title {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: var(--gray-400);
+    }
+
+    /* Main Content */
+    .main {
+      padding: 40px 24px;
+      max-width: 720px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* Page Title */
+    .page-title {
+      font-family: var(--font-sans);
+      font-size: 48px;
+      font-weight: 900;
+      line-height: 1.1;
+      margin-bottom: 8px;
+      letter-spacing: -0.02em;
+    }
+
+    .page-subtitle {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      color: var(--gray-600);
+      margin-bottom: 48px;
+      padding-bottom: 24px;
+      border-bottom: var(--border-thin) solid var(--gray-200);
+    }
+
+    /* Form */
+    .form {
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+
+    /* Form Group */
+    .form-group {
+      position: relative;
+    }
+
+    .form-group::before {
+      content: '';
+      position: absolute;
+      left: -24px;
+      top: 0;
+      bottom: 0;
+      width: var(--border-thick);
+      background: var(--gray-200);
+      transition: background 0.2s;
+    }
+
+    .form-group:focus-within::before {
+      background: var(--accent);
+    }
+
+    /* Label */
+    .label {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 12px;
+    }
+
+    .label__text {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--gray-600);
+    }
+
+    .label__text--required::after {
+      content: '*';
+      color: var(--accent);
+      margin-left: 4px;
+    }
+
+    .label__counter {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--gray-400);
+    }
+
+    .label__counter--warning {
+      color: #f59e0b;
+    }
+
+    .label__counter--danger {
+      color: var(--accent);
+    }
+
+    /* Textarea */
+    .textarea {
+      width: 100%;
+      padding: 16px;
+      font-family: var(--font-sans);
+      font-size: 18px;
+      line-height: 1.6;
+      border: var(--border-thick) solid var(--black);
+      background: var(--white);
+      color: var(--black);
+      resize: vertical;
+      min-height: 120px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .textarea::placeholder {
+      color: var(--gray-400);
+    }
+
+    .textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 4px 4px 0 var(--black);
+    }
+
+    /* Input */
+    .input {
+      width: 100%;
+      padding: 16px;
+      font-family: var(--font-mono);
+      font-size: 14px;
+      border: var(--border-thick) solid var(--black);
+      background: var(--white);
+      color: var(--black);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .input::placeholder {
+      color: var(--gray-400);
+    }
+
+    .input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 4px 4px 0 var(--black);
+    }
+
+    /* Tags Section */
+    .tags-section {
+      background: var(--gray-100);
+      border: var(--border-thick) solid var(--black);
+      padding: 20px;
+    }
+
+    .tags-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      min-height: 40px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background: var(--black);
+      color: var(--white);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .tag:hover {
+      background: var(--accent);
+    }
+
+    .tag__remove {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 16px;
+      height: 16px;
+      background: transparent;
+      border: none;
+      color: inherit;
+      cursor: pointer;
+      padding: 0;
+    }
+
+    .tag__remove svg {
+      width: 12px;
+      height: 12px;
+    }
+
+    .tags-placeholder {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--gray-400);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    /* Select */
+    .select-wrapper {
+      position: relative;
+    }
+
+    .select {
+      width: 100%;
+      padding: 16px;
+      padding-right: 48px;
+      font-family: var(--font-mono);
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border: var(--border-thick) solid var(--black);
+      background: var(--white);
+      color: var(--black);
+      cursor: pointer;
+      appearance: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 4px 4px 0 var(--black);
+    }
+
+    .select-wrapper::after {
+      content: '';
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 0;
+      height: 0;
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-top: 8px solid var(--black);
+      pointer-events: none;
+    }
+
+    /* Divider */
+    .divider {
+      height: var(--border-thin);
+      background: var(--gray-200);
+      margin: 16px 0;
+    }
+
+    /* Info Link */
+    .info-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--gray-600);
+      text-decoration: none;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-top: 12px;
+      transition: color 0.15s;
+    }
+
+    .info-link:hover {
+      color: var(--accent);
+    }
+
+    .info-link svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    /* Actions */
+    .actions {
+      display: flex;
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 20px 32px;
+      font-family: var(--font-mono);
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      border: var(--border-thick) solid var(--black);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .btn--primary {
+      background: var(--black);
+      color: var(--white);
+    }
+
+    .btn--primary:hover {
+      background: var(--accent);
+      border-color: var(--accent);
+      box-shadow: 4px 4px 0 var(--black);
+      transform: translate(-2px, -2px);
+    }
+
+    .btn--secondary {
+      background: var(--white);
+      color: var(--black);
+    }
+
+    .btn--secondary:hover {
+      background: var(--gray-100);
+      box-shadow: 4px 4px 0 var(--black);
+      transform: translate(-2px, -2px);
+    }
+
+    .btn--danger {
+      background: var(--white);
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .btn--danger:hover {
+      background: var(--accent);
+      color: var(--white);
+    }
+
+    /* Section Labels */
+    .section-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: var(--gray-400);
+      margin-bottom: 24px;
+      padding-bottom: 8px;
+      border-bottom: var(--border-thin) solid var(--gray-200);
+    }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      .main {
+        padding: 24px 16px;
+      }
+
+      .page-title {
+        font-size: 32px;
+      }
+
+      .form-group::before {
+        left: -16px;
+      }
+
+      .actions {
+        flex-direction: column;
+      }
+
+      .btn {
+        width: 100%;
+      }
+    }
+
+    /* Animation */
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-4px); }
+      75% { transform: translateX(4px); }
+    }
+
+    .shake {
+      animation: shake 0.3s ease-in-out;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <!-- Header -->
+    <header class="header">
+      <a href="#" class="header__back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+        <span>Back</span>
+      </a>
+      <span class="header__title">New Card</span>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+      <h1 class="page-title">Create Card</h1>
+      <p class="page-subtitle">// Add new knowledge to your memory bank</p>
+
+      <form class="form">
+        <!-- Required Section -->
+        <div class="section-label">Required Fields</div>
+
+        <!-- Text Input -->
+        <div class="form-group">
+          <div class="label">
+            <span class="label__text label__text--required">Question / Front</span>
+            <span class="label__counter"><span id="text-count">0</span>/500</span>
+          </div>
+          <textarea
+            class="textarea"
+            id="card-text"
+            placeholder="Enter what you want to memorize..."
+            maxlength="500"
+            rows="4"
+            required
+          ></textarea>
+        </div>
+
+        <!-- Hidden Text Input -->
+        <div class="form-group">
+          <div class="label">
+            <span class="label__text">Answer / Back</span>
+            <span class="label__counter"><span id="hidden-count">0</span>/2000</span>
+          </div>
+          <textarea
+            class="textarea"
+            id="card-hidden"
+            placeholder="Enter the answer (optional)..."
+            maxlength="2000"
+            rows="4"
+          ></textarea>
+        </div>
+
+        <!-- Primary Action -->
+        <div class="actions">
+          <button type="submit" class="btn btn--primary">Save Card</button>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Optional Section -->
+        <div class="section-label">Optional Settings</div>
+
+        <!-- Tags -->
+        <div class="form-group">
+          <div class="label">
+            <span class="label__text">Tags</span>
+          </div>
+          <div class="tags-section">
+            <div class="tags-container" id="tags-container">
+              <span class="tag">
+                <span>Geography</span>
+                <button type="button" class="tag__remove">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                    <path d="M18 6L6 18M6 6l12 12"/>
+                  </svg>
+                </button>
+              </span>
+              <span class="tag">
+                <span>Japan</span>
+                <button type="button" class="tag__remove">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                    <path d="M18 6L6 18M6 6l12 12"/>
+                  </svg>
+                </button>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Source URL -->
+        <div class="form-group">
+          <div class="label">
+            <span class="label__text">Source URL</span>
+          </div>
+          <input
+            type="url"
+            class="input"
+            id="card-source"
+            placeholder="https://..."
+          >
+        </div>
+
+        <!-- Repeat Mode -->
+        <div class="form-group">
+          <div class="label">
+            <span class="label__text">Repeat Mode</span>
+          </div>
+          <div class="select-wrapper">
+            <select class="select" id="card-repeat">
+              <option value="spaced" selected>Spaced Repetition</option>
+              <option value="daily">Daily</option>
+              <option value="weekly">Weekly</option>
+              <option value="none">None</option>
+            </select>
+          </div>
+          <a href="#" class="info-link">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 16v-4M12 8h.01"/>
+            </svg>
+            <span>What is spaced repetition?</span>
+          </a>
+        </div>
+
+        <!-- Secondary Actions -->
+        <div class="actions">
+          <button type="button" class="btn btn--secondary">Cancel</button>
+          <button type="submit" class="btn btn--primary">Save All</button>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Danger Zone (Edit Mode Only) -->
+        <div class="section-label" style="color: var(--accent);">Danger Zone</div>
+        <div class="actions">
+          <button type="button" class="btn btn--danger">Delete Card</button>
+        </div>
+      </form>
+    </main>
+  </div>
+
+  <script>
+    // Character counter
+    document.querySelectorAll('.textarea').forEach(textarea => {
+      const counterId = textarea.id === 'card-text' ? 'text-count' : 'hidden-count';
+      const counter = document.getElementById(counterId);
+      const maxLength = parseInt(textarea.getAttribute('maxlength'));
+
+      textarea.addEventListener('input', function() {
+        const length = this.value.length;
+        counter.textContent = length;
+
+        const counterParent = counter.parentElement;
+        counterParent.classList.remove('label__counter--warning', 'label__counter--danger');
+
+        if (length >= maxLength) {
+          counterParent.classList.add('label__counter--danger');
+        } else if (length >= maxLength * 0.9) {
+          counterParent.classList.add('label__counter--warning');
+        }
+      });
+    });
+
+    // Tag removal
+    document.getElementById('tags-container').addEventListener('click', function(e) {
+      const removeBtn = e.target.closest('.tag__remove');
+      if (removeBtn) {
+        removeBtn.closest('.tag').remove();
+      }
+    });
+
+    // Form submission
+    document.querySelector('.form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const text = document.getElementById('card-text').value.trim();
+      if (!text) {
+        document.getElementById('card-text').classList.add('shake');
+        setTimeout(() => {
+          document.getElementById('card-text').classList.remove('shake');
+        }, 300);
+        return;
+      }
+      alert('Card saved!');
+    });
+  </script>
+</body>
+</html>

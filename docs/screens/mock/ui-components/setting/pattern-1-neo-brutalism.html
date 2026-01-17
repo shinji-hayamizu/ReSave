@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Settings - Pattern 1: Neo-Brutalism</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Archivo+Black&display=swap" rel="stylesheet">
+  <style>
+    /*
+      Pattern 1: Neo-Brutalism
+      Theme: Bold, raw, unapologetically loud
+      - Hard shadows, thick borders
+      - High contrast colors
+      - Playful but functional
+    */
+
+    :root {
+      --bg: #fffef0;
+      --black: #1a1a1a;
+      --yellow: #fde047;
+      --pink: #f472b6;
+      --blue: #3b82f6;
+      --red: #ef4444;
+      --green: #22c55e;
+      --border: 3px solid var(--black);
+      --shadow: 6px 6px 0 var(--black);
+      --shadow-sm: 4px 4px 0 var(--black);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Space Mono', monospace;
+      background: var(--bg);
+      background-image:
+        radial-gradient(circle at 2px 2px, rgba(0,0,0,0.08) 1px, transparent 0);
+      background-size: 24px 24px;
+      min-height: 100vh;
+      padding: 24px;
+      color: var(--black);
+    }
+
+    .container {
+      max-width: 640px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .header__back {
+      width: 48px;
+      height: 48px;
+      background: var(--yellow);
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.1s;
+    }
+
+    .header__back:hover {
+      transform: translate(2px, 2px);
+      box-shadow: 2px 2px 0 var(--black);
+    }
+
+    .header__back:active {
+      transform: translate(4px, 4px);
+      box-shadow: none;
+    }
+
+    .header__back svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    .header__title {
+      font-family: 'Archivo Black', sans-serif;
+      font-size: 32px;
+      text-transform: uppercase;
+      letter-spacing: -1px;
+    }
+
+    /* Section */
+    .section {
+      background: white;
+      border: var(--border);
+      box-shadow: var(--shadow);
+      margin-bottom: 24px;
+      overflow: hidden;
+    }
+
+    .section__header {
+      background: var(--black);
+      color: white;
+      padding: 12px 20px;
+      font-weight: 700;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section__header svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .section__content {
+      padding: 0;
+    }
+
+    /* Settings Item */
+    .settings-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px;
+      border-bottom: 2px dashed rgba(0,0,0,0.15);
+    }
+
+    .settings-item:last-child {
+      border-bottom: none;
+    }
+
+    .settings-item__info {
+      flex: 1;
+    }
+
+    .settings-item__label {
+      font-weight: 700;
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+
+    .settings-item__desc {
+      font-size: 11px;
+      color: #666;
+      line-height: 1.5;
+    }
+
+    /* Number Input - Neo Brutalism */
+    .number-input {
+      display: flex;
+      align-items: center;
+      gap: 0;
+    }
+
+    .number-input__btn {
+      width: 36px;
+      height: 36px;
+      background: var(--yellow);
+      border: 2px solid var(--black);
+      font-family: 'Archivo Black', sans-serif;
+      font-size: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.1s;
+    }
+
+    .number-input__btn:hover {
+      background: var(--pink);
+    }
+
+    .number-input__btn:active {
+      transform: scale(0.95);
+    }
+
+    .number-input__field {
+      width: 64px;
+      height: 36px;
+      border: 2px solid var(--black);
+      border-left: none;
+      border-right: none;
+      text-align: center;
+      font-family: 'Archivo Black', sans-serif;
+      font-size: 18px;
+      background: white;
+    }
+
+    .number-input__field:focus {
+      outline: none;
+      background: var(--yellow);
+    }
+
+    .number-input__unit {
+      margin-left: 8px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    /* Toggle Switch - Neo Brutalism */
+    .toggle {
+      width: 64px;
+      height: 36px;
+      background: #e5e5e5;
+      border: 2px solid var(--black);
+      position: relative;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .toggle::after {
+      content: '';
+      position: absolute;
+      width: 28px;
+      height: 28px;
+      background: white;
+      border: 2px solid var(--black);
+      top: 2px;
+      left: 2px;
+      transition: transform 0.2s;
+    }
+
+    .toggle.active {
+      background: var(--green);
+    }
+
+    .toggle.active::after {
+      transform: translateX(28px);
+      background: var(--yellow);
+    }
+
+    .toggle.disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    /* Select - Neo Brutalism */
+    .select-wrapper {
+      position: relative;
+    }
+
+    .select {
+      appearance: none;
+      padding: 10px 40px 10px 14px;
+      font-family: 'Space Mono', monospace;
+      font-size: 13px;
+      font-weight: 700;
+      background: white;
+      border: 2px solid var(--black);
+      cursor: pointer;
+      min-width: 140px;
+    }
+
+    .select:focus {
+      outline: none;
+      background: var(--yellow);
+    }
+
+    .select:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .select-wrapper::after {
+      content: '';
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 0;
+      height: 0;
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-top: 8px solid var(--black);
+      pointer-events: none;
+    }
+
+    /* Link Button */
+    .link-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      background: var(--blue);
+      color: white;
+      border: 2px solid var(--black);
+      font-family: 'Space Mono', monospace;
+      font-size: 12px;
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.1s;
+    }
+
+    .link-btn:hover {
+      background: var(--pink);
+      transform: translate(-2px, -2px);
+      box-shadow: 4px 4px 0 var(--black);
+    }
+
+    .link-btn svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    /* Email Display */
+    .email-display {
+      font-size: 13px;
+      background: var(--yellow);
+      padding: 8px 12px;
+      border: 2px solid var(--black);
+      display: inline-block;
+    }
+
+    /* Disabled State */
+    .settings-item--disabled {
+      opacity: 0.5;
+      position: relative;
+    }
+
+    .settings-item--disabled::before {
+      content: 'COMING SOON';
+      position: absolute;
+      top: 8px;
+      right: 20px;
+      font-size: 9px;
+      font-weight: 700;
+      background: var(--pink);
+      color: var(--black);
+      padding: 2px 8px;
+      border: 2px solid var(--black);
+      letter-spacing: 1px;
+      transform: rotate(-3deg);
+    }
+
+    /* Logout Button */
+    .btn-logout {
+      width: 100%;
+      padding: 16px;
+      background: var(--red);
+      color: white;
+      border: var(--border);
+      font-family: 'Archivo Black', sans-serif;
+      font-size: 16px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      cursor: pointer;
+      transition: all 0.1s;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn-logout:hover {
+      background: #dc2626;
+      transform: translate(2px, 2px);
+      box-shadow: 2px 2px 0 var(--black);
+    }
+
+    .btn-logout:active {
+      transform: translate(4px, 4px);
+      box-shadow: none;
+    }
+
+    /* App Info */
+    .app-info {
+      padding: 20px;
+    }
+
+    .app-info__version {
+      font-size: 13px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .app-info__version-badge {
+      background: var(--black);
+      color: var(--yellow);
+      padding: 4px 10px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    .app-info__links {
+      display: flex;
+      gap: 12px;
+    }
+
+    .app-info__link {
+      font-size: 12px;
+      color: var(--black);
+      text-decoration: none;
+      border-bottom: 2px solid var(--black);
+      padding-bottom: 2px;
+      transition: all 0.1s;
+    }
+
+    .app-info__link:hover {
+      background: var(--yellow);
+    }
+
+    /* Animations */
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .section {
+      animation: slideIn 0.4s ease-out;
+    }
+
+    .section:nth-child(2) { animation-delay: 0.1s; }
+    .section:nth-child(3) { animation-delay: 0.2s; }
+    .section:nth-child(4) { animation-delay: 0.3s; }
+    .section:nth-child(5) { animation-delay: 0.4s; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <button class="header__back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+          <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+      </button>
+      <h1 class="header__title">Settings</h1>
+    </header>
+
+    <!-- Learning Settings -->
+    <section class="section">
+      <div class="section__header">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+          <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+        </svg>
+        Learning
+      </div>
+      <div class="section__content">
+        <div class="settings-item">
+          <div class="settings-item__info">
+            <div class="settings-item__label">Daily New Card Limit</div>
+            <div class="settings-item__desc">Maximum new cards per day</div>
+          </div>
+          <div class="number-input">
+            <button class="number-input__btn">-</button>
+            <input type="number" class="number-input__field" value="20">
+            <button class="number-input__btn">+</button>
+            <span class="number-input__unit">cards</span>
+          </div>
+        </div>
+
+        <div class="settings-item">
+          <div class="settings-item__info">
+            <div class="settings-item__label">Review Intervals</div>
+            <div class="settings-item__desc">Spaced repetition schedule</div>
+          </div>
+          <a href="#" class="link-btn">
+            Configure
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+              <path d="M9 18l6-6-6-6"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Notifications -->
+    <section class="section">
+      <div class="section__header">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+          <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+        </svg>
+        Notifications
+      </div>
+      <div class="section__content">
+        <div class="settings-item settings-item--disabled">
+          <div class="settings-item__info">
+            <div class="settings-item__label">Review Reminder</div>
+            <div class="settings-item__desc">Get notified when cards are due</div>
+          </div>
+          <div class="toggle disabled"></div>
+        </div>
+
+        <div class="settings-item settings-item--disabled">
+          <div class="settings-item__info">
+            <div class="settings-item__label">Notification Time</div>
+            <div class="settings-item__desc">When to send reminders</div>
+          </div>
+          <div class="select-wrapper">
+            <select class="select" disabled>
+              <option>Morning (8:00)</option>
+              <option>Noon (12:00)</option>
+              <option selected>Evening (18:00)</option>
+              <option>Night (21:00)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Account -->
+    <section class="section">
+      <div class="section__header">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+          <circle cx="12" cy="7" r="4"/>
+        </svg>
+        Account
+      </div>
+      <div class="section__content">
+        <div class="settings-item">
+          <div class="settings-item__info">
+            <div class="settings-item__label">Email</div>
+          </div>
+          <span class="email-display">user@example.com</span>
+        </div>
+
+        <div class="settings-item">
+          <div class="settings-item__info">
+            <div class="settings-item__label">Password</div>
+          </div>
+          <a href="#" class="link-btn">
+            Change
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+              <path d="M9 18l6-6-6-6"/>
+            </svg>
+          </a>
+        </div>
+
+        <div class="settings-item" style="border-bottom: none; padding-top: 24px;">
+          <button class="btn-logout">Logout</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Data Management -->
+    <section class="section">
+      <div class="section__header">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/>
+          <line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        Data
+      </div>
+      <div class="section__content">
+        <div class="settings-item settings-item--disabled">
+          <div class="settings-item__info">
+            <div class="settings-item__label">Export Data</div>
+            <div class="settings-item__desc">Download all your cards</div>
+          </div>
+          <a href="#" class="link-btn" style="opacity: 0.5; pointer-events: none;">Export</a>
+        </div>
+
+        <div class="settings-item settings-item--disabled">
+          <div class="settings-item__info">
+            <div class="settings-item__label">Import Data</div>
+            <div class="settings-item__desc">Load cards from file</div>
+          </div>
+          <a href="#" class="link-btn" style="opacity: 0.5; pointer-events: none;">Import</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- App Info -->
+    <section class="section">
+      <div class="section__header">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="16" x2="12" y2="12"/>
+          <line x1="12" y1="8" x2="12.01" y2="8"/>
+        </svg>
+        About
+      </div>
+      <div class="app-info">
+        <div class="app-info__version">
+          Version: <span class="app-info__version-badge">1.0.0</span>
+        </div>
+        <div class="app-info__links">
+          <a href="#" class="app-info__link">Terms of Service</a>
+          <a href="#" class="app-info__link">Privacy Policy</a>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // Toggle functionality
+    document.querySelectorAll('.toggle:not(.disabled)').forEach(toggle => {
+      toggle.addEventListener('click', () => {
+        toggle.classList.toggle('active');
+      });
+    });
+
+    // Number input
+    document.querySelectorAll('.number-input').forEach(input => {
+      const field = input.querySelector('.number-input__field');
+      const [minus, plus] = input.querySelectorAll('.number-input__btn');
+
+      minus.addEventListener('click', () => {
+        const val = parseInt(field.value) || 0;
+        if (val > 1) field.value = val - 1;
+      });
+
+      plus.addEventListener('click', () => {
+        const val = parseInt(field.value) || 0;
+        if (val < 100) field.value = val + 1;
+      });
+    });
+  </script>
+</body>
+</html>

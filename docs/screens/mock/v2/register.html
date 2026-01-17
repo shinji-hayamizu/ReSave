@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>新規登録 - ReSave</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!--
+    @screen: 新規登録画面
+    @path: /signup
+    @description: 新規ユーザー登録画面
+    @file: app/(auth)/signup/page.tsx
+    @feature: F-001 (ユーザー認証)
+
+    @state-management:
+      - error: string | null - エラーメッセージ (useState)
+      - loading: boolean - 登録処理中フラグ (useState)
+      - success: boolean - 登録成功フラグ (useState)
+
+    @form-validation:
+      - email: required, email format (Zod: signupSchema)
+      - password: required, min 6 chars
+      - passwordConfirm: required, must match password
+
+    @api-dependencies:
+      - supabase.auth.signUp() - 新規登録処理
+
+    @routing:
+      - 成功時: 確認メール送信画面 or /login
+      - ログイン: /login
+  -->
+
+  <!-- ================================================================
+       @component: SignupPage
+       @description: 新規登録画面のルートコンポーネント
+       @file: app/(auth)/signup/page.tsx
+       ================================================================ -->
+  <div class="auth-layout" data-component="SignupPage">
+
+    <!-- @section: ロゴ -->
+    <div class="auth-logo">
+      <!-- @icon: lucide-react Layers -->
+      <svg class="auth-logo__icon" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/>
+        <path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/>
+        <path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/>
+      </svg>
+      <span class="auth-logo__text">ReSave</span>
+    </div>
+
+    <!-- ================================================================
+         @component: SignupForm
+         @description: 新規登録フォーム
+         @file: components/auth/signup-form.tsx
+         @uses: react-hook-form, @hookform/resolvers/zod
+         ================================================================ -->
+    <div class="auth-card" data-component="SignupForm">
+      <div class="card">
+        <div class="card-header" style="text-align: center;">
+          <h2 class="card-title" style="font-size: 1.5rem;">アカウント作成</h2>
+          <p class="card-description">必要な情報を入力してください</p>
+        </div>
+        <div class="card-content">
+          <form class="space-y-4" data-action="onSubmit:handleSignup" novalidate>
+
+            <!-- @component: FormField - email -->
+            <div class="form-group" data-component="FormField" data-field="email">
+              <label class="form-label" for="email">メールアドレス</label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                class="form-input"
+                placeholder="email@example.com"
+                autocomplete="email"
+                data-prop="email"
+              >
+              <p class="form-error" data-show-if="errors.email" style="display: none;">有効なメールアドレスを入力してください</p>
+            </div>
+
+            <!-- @component: FormField - password -->
+            <div class="form-group" data-component="FormField" data-field="password">
+              <label class="form-label" for="password">パスワード</label>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                class="form-input"
+                autocomplete="new-password"
+                data-prop="password"
+              >
+              <p class="form-hint">6文字以上で入力してください</p>
+              <p class="form-error" data-show-if="errors.password" style="display: none;">パスワードは6文字以上で入力してください</p>
+            </div>
+
+            <!-- @component: FormField - passwordConfirm -->
+            <div class="form-group" data-component="FormField" data-field="passwordConfirm">
+              <label class="form-label" for="password-confirm">パスワード（確認）</label>
+              <input
+                type="password"
+                id="password-confirm"
+                name="passwordConfirm"
+                class="form-input"
+                autocomplete="new-password"
+                data-prop="passwordConfirm"
+              >
+              <p class="form-error" data-show-if="errors.passwordConfirm" style="display: none;">パスワードが一致しません</p>
+            </div>
+
+            <!-- @section: エラーメッセージ -->
+            <p class="text-sm text-destructive" data-show-if="error" style="display: none;" data-prop="error">登録に失敗しました</p>
+
+            <!-- @section: 送信ボタン -->
+            <button
+              type="submit"
+              class="btn btn--primary btn--block"
+              data-prop="disabled:loading"
+            >
+              <span data-prop="buttonText">アカウントを作成</span>
+            </button>
+
+            <!-- @section: リンク -->
+            <div class="auth-links">
+              <p class="text-muted">
+                すでにアカウントをお持ちの方は
+                <a href="login.html">ログイン</a>
+              </p>
+            </div>
+
+          </form>
+        </div>
+      </div>
+    </div>
+    <!-- [/Component: SignupForm] -->
+
+  </div>
+  <!-- [/Component: SignupPage] -->
+
+</body>
+</html>

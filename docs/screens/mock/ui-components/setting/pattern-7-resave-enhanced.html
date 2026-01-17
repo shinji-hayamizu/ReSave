@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>設定 | ReSave</title>
+  <style>
+    /*
+      Pattern 7: ReSave Enhanced (日本語版)
+      - 既存ReSaveデザインシステム準拠
+      - アイコン付きセクションヘッダー
+      - 洗練されたインタラクション
+      - ログアウトは最下部に配置
+    */
+
+    :root {
+      /* Colors - Professional Blue Theme */
+      --color-primary: #2563eb;
+      --color-primary-hover: #1d4ed8;
+      --color-primary-light: rgba(37, 99, 235, 0.08);
+      --color-accent: #0ea5e9;
+      --color-success: #10b981;
+      --color-success-light: rgba(16, 185, 129, 0.1);
+      --color-warning: #f59e0b;
+      --color-warning-light: rgba(245, 158, 11, 0.1);
+      --color-danger: #ef4444;
+      --color-danger-light: rgba(239, 68, 68, 0.08);
+
+      /* Backgrounds */
+      --bg-primary: #ffffff;
+      --bg-secondary: #f8fafc;
+      --bg-tertiary: #f1f5f9;
+
+      /* Text */
+      --text-primary: #0f172a;
+      --text-secondary: #64748b;
+      --text-muted: #94a3b8;
+
+      /* Borders */
+      --border-color: #e2e8f0;
+      --border-radius: 8px;
+      --border-radius-lg: 12px;
+      --border-radius-xl: 16px;
+
+      /* Shadows */
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+
+      /* Transitions */
+      --transition-fast: 150ms ease;
+      --transition-normal: 250ms ease;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', 'Noto Sans JP', sans-serif;
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    .content-wrapper {
+      padding: 0 16px 32px;
+      max-width: 640px;
+      margin: 0 auto;
+    }
+
+    /* Page Header */
+    .page-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 20px 0;
+      margin-bottom: 8px;
+    }
+
+    .page-header__back {
+      width: 40px;
+      height: 40px;
+      border: none;
+      background: var(--bg-primary);
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all var(--transition-fast);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .page-header__back:hover {
+      background: var(--bg-tertiary);
+      transform: translateX(-2px);
+    }
+
+    .page-header__back svg {
+      width: 20px;
+      height: 20px;
+      color: var(--text-secondary);
+    }
+
+    .page-header__content {
+      flex: 1;
+    }
+
+    .page-header__title {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
+    .page-header__subtitle {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+
+    /* Section Card */
+    .section-card {
+      background: var(--bg-primary);
+      border-radius: var(--border-radius-lg);
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
+
+    /* Section Header */
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .section-header__icon {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--border-radius);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .section-header__icon svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .section-header__icon--primary {
+      background: var(--color-primary-light);
+      color: var(--color-primary);
+    }
+
+    .section-header__icon--warning {
+      background: var(--color-warning-light);
+      color: var(--color-warning);
+    }
+
+    .section-header__icon--success {
+      background: var(--color-success-light);
+      color: var(--color-success);
+    }
+
+    .section-header__icon--danger {
+      background: var(--color-danger-light);
+      color: var(--color-danger);
+    }
+
+    .section-header__text {
+      flex: 1;
+    }
+
+    .section-header__title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .section-header__badge {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: var(--color-warning-light);
+      color: var(--color-warning);
+    }
+
+    .section-content {
+      padding: 0;
+    }
+
+    /* Settings Item */
+    .settings-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border-color);
+      transition: background var(--transition-fast);
+      min-height: 56px;
+    }
+
+    .settings-item:last-child {
+      border-bottom: none;
+    }
+
+    .settings-item:hover {
+      background: var(--bg-secondary);
+    }
+
+    .settings-item__label {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      flex: 1;
+      padding-right: 12px;
+      min-width: 0;
+    }
+
+    .settings-item__name {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .settings-item__description {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.4;
+    }
+
+    .settings-item__value {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .settings-item__control {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    /* Disabled State */
+    .settings-item--disabled {
+      opacity: 0.5;
+    }
+
+    .settings-item--disabled:hover {
+      background: transparent;
+    }
+
+    .settings-item--disabled .settings-item__name::after {
+      content: '近日公開';
+      font-size: 10px;
+      font-weight: 500;
+      color: var(--color-warning);
+      margin-left: 8px;
+      padding: 2px 6px;
+      background: var(--color-warning-light);
+      border-radius: 4px;
+    }
+
+    /* Number Input */
+    .number-input {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .number-input__control {
+      display: flex;
+      align-items: center;
+      background: var(--bg-secondary);
+      border-radius: var(--border-radius);
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+    }
+
+    .number-input__btn {
+      width: 32px;
+      height: 32px;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 16px;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .number-input__btn:hover {
+      background: var(--color-primary);
+      color: white;
+    }
+
+    .number-input__btn:active {
+      transform: scale(0.95);
+    }
+
+    .number-input__field {
+      width: 44px;
+      height: 32px;
+      border: none;
+      background: transparent;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: inherit;
+      color: var(--text-primary);
+    }
+
+    .number-input__field:focus {
+      outline: none;
+      background: var(--color-primary-light);
+    }
+
+    .number-input__unit {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    /* Toggle Switch */
+    .toggle-switch {
+      position: relative;
+      width: 44px;
+      height: 24px;
+      background: var(--bg-tertiary);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all var(--transition-normal);
+    }
+
+    .toggle-switch::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 20px;
+      height: 20px;
+      background: white;
+      border-radius: 50%;
+      transition: transform var(--transition-normal);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+    }
+
+    .toggle-switch.active {
+      background: var(--color-primary);
+    }
+
+    .toggle-switch.active::after {
+      transform: translateX(20px);
+    }
+
+    .toggle-switch.disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Select */
+    .settings-select {
+      padding: 8px 28px 8px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--border-radius);
+      font-size: 13px;
+      background: var(--bg-primary);
+      cursor: pointer;
+      appearance: none;
+      font-family: inherit;
+      color: var(--text-primary);
+      transition: all var(--transition-fast);
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+    }
+
+    .settings-select:hover:not(:disabled) {
+      border-color: var(--color-primary);
+    }
+
+    .settings-select:focus {
+      outline: none;
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px var(--color-primary-light);
+    }
+
+    .settings-select:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Link Item */
+    .link-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border-color);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      text-decoration: none;
+      color: inherit;
+      min-height: 56px;
+    }
+
+    .link-item:last-child {
+      border-bottom: none;
+    }
+
+    .link-item:hover {
+      background: var(--bg-secondary);
+    }
+
+    .link-item:hover .link-item__arrow {
+      transform: translateX(3px);
+      color: var(--color-primary);
+    }
+
+    .link-item__arrow {
+      width: 16px;
+      height: 16px;
+      color: var(--text-muted);
+      transition: all var(--transition-fast);
+      flex-shrink: 0;
+    }
+
+    /* Email Display */
+    .email-display {
+      font-size: 13px;
+      color: var(--text-secondary);
+      padding: 6px 10px;
+      background: var(--bg-secondary);
+      border-radius: var(--border-radius);
+      max-width: 180px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* Button */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 20px;
+      border: none;
+      border-radius: var(--border-radius);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      font-family: inherit;
+    }
+
+    .btn--danger {
+      background: var(--color-danger-light);
+      color: var(--color-danger);
+      border: 1px solid transparent;
+    }
+
+    .btn--danger:hover {
+      background: var(--color-danger);
+      color: white;
+    }
+
+    .btn--secondary {
+      background: var(--bg-secondary);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-color);
+    }
+
+    .btn--secondary:hover:not(:disabled) {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+    }
+
+    .btn--block {
+      width: 100%;
+    }
+
+    .btn--sm {
+      padding: 8px 12px;
+      font-size: 12px;
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* Action Area */
+    .action-area {
+      padding: 16px;
+    }
+
+    /* App Info */
+    .app-info {
+      padding: 20px 16px;
+      text-align: center;
+    }
+
+    .app-info__version {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+    }
+
+    .app-info__version strong {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    .app-info__links {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+    }
+
+    .app-info__link {
+      font-size: 12px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color var(--transition-fast);
+    }
+
+    .app-info__link:hover {
+      color: var(--color-primary);
+    }
+
+    /* Logout Section */
+    .logout-section {
+      margin-top: 8px;
+    }
+
+    .logout-section .section-header {
+      border-bottom: none;
+    }
+
+    /* Responsive */
+    @media (min-width: 768px) {
+      .content-wrapper {
+        padding: 0 24px 40px;
+        max-width: 680px;
+      }
+
+      .page-header {
+        padding: 28px 0;
+      }
+
+      .page-header__title {
+        font-size: 26px;
+      }
+
+      .settings-item,
+      .link-item {
+        padding: 16px 20px;
+      }
+
+      .section-header {
+        padding: 16px 20px;
+      }
+
+      .action-area {
+        padding: 20px;
+      }
+    }
+
+    /* Animation */
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .section-card {
+      animation: slideUp 0.35s ease-out both;
+    }
+
+    .section-card:nth-child(2) { animation-delay: 0.04s; }
+    .section-card:nth-child(3) { animation-delay: 0.08s; }
+    .section-card:nth-child(4) { animation-delay: 0.12s; }
+    .section-card:nth-child(5) { animation-delay: 0.16s; }
+    .section-card:nth-child(6) { animation-delay: 0.2s; }
+  </style>
+</head>
+<body>
+  <div class="content-wrapper">
+    <!-- Page Header -->
+    <header class="page-header">
+      <button class="page-header__back" aria-label="戻る">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+      </button>
+      <div class="page-header__content">
+        <h1 class="page-header__title">設定</h1>
+        <p class="page-header__subtitle">学習体験をカスタマイズ</p>
+      </div>
+    </header>
+
+    <!-- 学習設定 -->
+    <div class="section-card">
+      <div class="section-header">
+        <div class="section-header__icon section-header__icon--primary">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+          </svg>
+        </div>
+        <div class="section-header__text">
+          <h2 class="section-header__title">学習設定</h2>
+        </div>
+      </div>
+      <div class="section-content">
+        <div class="settings-item">
+          <div class="settings-item__label">
+            <span class="settings-item__name">1日の新規カード上限</span>
+            <span class="settings-item__description">1日に学習する新規カードの最大枚数</span>
+          </div>
+          <div class="settings-item__control">
+            <div class="number-input">
+              <div class="number-input__control">
+                <button type="button" class="number-input__btn" data-action="decrease" aria-label="減らす">-</button>
+                <input type="number" class="number-input__field" value="20" min="1" max="100" aria-label="カード枚数">
+                <button type="button" class="number-input__btn" data-action="increase" aria-label="増やす">+</button>
+              </div>
+              <span class="number-input__unit">枚</span>
+            </div>
+          </div>
+        </div>
+
+        <a href="#" class="link-item">
+          <div class="settings-item__label">
+            <span class="settings-item__name">復習間隔</span>
+            <span class="settings-item__description">忘却曲線に基づいた復習スケジュール</span>
+          </div>
+          <svg class="link-item__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="m9 18 6-6-6-6"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+
+    <!-- 通知設定 -->
+    <div class="section-card">
+      <div class="section-header">
+        <div class="section-header__icon section-header__icon--warning">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+          </svg>
+        </div>
+        <div class="section-header__text">
+          <h2 class="section-header__title">通知設定</h2>
+        </div>
+        <span class="section-header__badge">近日公開</span>
+      </div>
+      <div class="section-content">
+        <div class="settings-item settings-item--disabled">
+          <div class="settings-item__label">
+            <span class="settings-item__name">復習リマインダー</span>
+            <span class="settings-item__description">復習が必要なカードがある時に通知</span>
+          </div>
+          <div class="settings-item__control">
+            <div class="toggle-switch disabled"></div>
+          </div>
+        </div>
+
+        <div class="settings-item settings-item--disabled">
+          <div class="settings-item__label">
+            <span class="settings-item__name">通知時間帯</span>
+            <span class="settings-item__description">リマインダーを送信する時間</span>
+          </div>
+          <div class="settings-item__control">
+            <select class="settings-select" disabled>
+              <option value="morning">朝 (8:00)</option>
+              <option value="noon">昼 (12:00)</option>
+              <option value="evening" selected>夕方 (18:00)</option>
+              <option value="night">夜 (21:00)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- アカウント -->
+    <div class="section-card">
+      <div class="section-header">
+        <div class="section-header__icon section-header__icon--success">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+        </div>
+        <div class="section-header__text">
+          <h2 class="section-header__title">アカウント</h2>
+        </div>
+      </div>
+      <div class="section-content">
+        <div class="settings-item">
+          <div class="settings-item__label">
+            <span class="settings-item__name">メールアドレス</span>
+          </div>
+          <span class="email-display">user@example.com</span>
+        </div>
+
+        <a href="#" class="link-item">
+          <div class="settings-item__label">
+            <span class="settings-item__name">パスワード変更</span>
+            <span class="settings-item__description">アカウントのパスワードを更新</span>
+          </div>
+          <svg class="link-item__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="m9 18 6-6-6-6"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+
+    <!-- データ管理 -->
+    <div class="section-card">
+      <div class="section-header">
+        <div class="section-header__icon section-header__icon--primary">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+        </div>
+        <div class="section-header__text">
+          <h2 class="section-header__title">データ管理</h2>
+        </div>
+        <span class="section-header__badge">近日公開</span>
+      </div>
+      <div class="section-content">
+        <div class="settings-item settings-item--disabled">
+          <div class="settings-item__label">
+            <span class="settings-item__name">データエクスポート</span>
+            <span class="settings-item__description">全てのカードデータをファイルに書き出し</span>
+          </div>
+          <div class="settings-item__control">
+            <button type="button" class="btn btn--secondary btn--sm" disabled>エクスポート</button>
+          </div>
+        </div>
+
+        <div class="settings-item settings-item--disabled">
+          <div class="settings-item__label">
+            <span class="settings-item__name">データインポート</span>
+            <span class="settings-item__description">ファイルからカードデータを読み込み</span>
+          </div>
+          <div class="settings-item__control">
+            <button type="button" class="btn btn--secondary btn--sm" disabled>インポート</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- アプリ情報 -->
+    <div class="section-card">
+      <div class="app-info">
+        <div class="app-info__version">
+          ReSave <strong>v1.0.0</strong>
+        </div>
+        <div class="app-info__links">
+          <a href="#" class="app-info__link">利用規約</a>
+          <a href="#" class="app-info__link">プライバシーポリシー</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ログアウト（最下部） -->
+    <div class="section-card logout-section">
+      <div class="section-header">
+        <div class="section-header__icon section-header__icon--danger">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+            <polyline points="16 17 21 12 16 7"/>
+            <line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+        </div>
+        <div class="section-header__text">
+          <h2 class="section-header__title">ログアウト</h2>
+        </div>
+      </div>
+      <div class="action-area">
+        <button type="button" class="btn btn--danger btn--block">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+            <polyline points="16 17 21 12 16 7"/>
+            <line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+          ログアウト
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Toggle functionality
+    document.querySelectorAll('.toggle-switch:not(.disabled)').forEach(toggle => {
+      toggle.addEventListener('click', () => {
+        toggle.classList.toggle('active');
+      });
+    });
+
+    // Number input
+    document.querySelectorAll('.number-input').forEach(input => {
+      const field = input.querySelector('.number-input__field');
+      const btns = input.querySelectorAll('.number-input__btn');
+
+      btns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const val = parseInt(field.value) || 0;
+          const min = parseInt(field.min) || 1;
+          const max = parseInt(field.max) || 100;
+
+          if (btn.dataset.action === 'decrease' && val > min) {
+            field.value = val - 1;
+          } else if (btn.dataset.action === 'increase' && val < max) {
+            field.value = val + 1;
+          }
+        });
+      });
+
+      field.addEventListener('change', () => {
+        const val = parseInt(field.value) || 0;
+        const min = parseInt(field.min) || 1;
+        const max = parseInt(field.max) || 100;
+        field.value = Math.min(Math.max(val, min), max);
+      });
+    });
+  </script>
+</body>
+</html>

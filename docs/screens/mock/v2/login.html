@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ログイン - ReSave</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!--
+    @screen: ログイン画面
+    @path: /login
+    @description: ユーザー認証画面。メールアドレスとパスワードでログイン
+    @file: app/(auth)/login/page.tsx
+    @feature: F-001 (ユーザー認証)
+
+    @state-management:
+      - error: string | null - エラーメッセージ (useState)
+      - loading: boolean - ログイン処理中フラグ (useState)
+
+    @form-validation:
+      - email: required, email format (Zod: loginSchema)
+      - password: required, min 6 chars
+
+    @api-dependencies:
+      - supabase.auth.signInWithPassword() - ログイン処理
+
+    @routing:
+      - 成功時: router.push(redirectTo || '/')
+      - 新規登録: /signup
+      - パスワードリセット: /reset-password
+  -->
+
+  <!-- ================================================================
+       @component: LoginPage
+       @description: ログイン画面のルートコンポーネント
+       @file: app/(auth)/login/page.tsx
+       ================================================================ -->
+  <div class="auth-layout" data-component="LoginPage">
+
+    <!-- @section: ロゴ -->
+    <div class="auth-logo">
+      <!-- @icon: lucide-react Layers -->
+      <svg class="auth-logo__icon" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/>
+        <path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/>
+        <path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/>
+      </svg>
+      <span class="auth-logo__text">ReSave</span>
+    </div>
+
+    <!-- ================================================================
+         @component: LoginForm
+         @description: ログインフォーム
+         @file: components/auth/login-form.tsx
+         @uses: react-hook-form, @hookform/resolvers/zod
+
+         @form:
+           - useForm<LoginInput>
+           - resolver: zodResolver(loginSchema)
+         ================================================================ -->
+    <div class="auth-card" data-component="LoginForm">
+      <!-- @component: Card (shadcn/ui) -->
+      <div class="card">
+        <div class="card-header" style="text-align: center;">
+          <h2 class="card-title" style="font-size: 1.5rem;">ログイン</h2>
+          <p class="card-description">アカウントにログインしてください</p>
+        </div>
+        <div class="card-content">
+          <!-- @event: onSubmit={form.handleSubmit(onSubmit)} -->
+          <form class="space-y-4" data-action="onSubmit:handleLogin" novalidate>
+
+            <!-- ================================================================
+                 @component: FormField - email
+                 @validation: required, email format
+                 ================================================================ -->
+            <div class="form-group" data-component="FormField" data-field="email">
+              <label class="form-label" for="email">メールアドレス</label>
+              <!-- @component: Input (shadcn/ui) -->
+              <input
+                type="email"
+                id="email"
+                name="email"
+                class="form-input"
+                placeholder="email@example.com"
+                autocomplete="email"
+                data-prop="email"
+                data-action="onChange:field.onChange"
+              >
+              <!-- @condition: {errors.email && <FormMessage>{errors.email.message}</FormMessage>} -->
+              <p class="form-error" data-show-if="errors.email" style="display: none;">有効なメールアドレスを入力してください</p>
+            </div>
+
+            <!-- ================================================================
+                 @component: FormField - password
+                 @validation: required, min 6 chars
+                 ================================================================ -->
+            <div class="form-group" data-component="FormField" data-field="password">
+              <label class="form-label" for="password">パスワード</label>
+              <!-- @component: PasswordInput (custom) - 表示/非表示切り替え機能付き -->
+              <input
+                type="password"
+                id="password"
+                name="password"
+                class="form-input"
+                autocomplete="current-password"
+                data-prop="password"
+                data-action="onChange:field.onChange"
+              >
+              <!-- @condition: {errors.password && <FormMessage>{errors.password.message}</FormMessage>} -->
+              <p class="form-error" data-show-if="errors.password" style="display: none;">パスワードは6文字以上で入力してください</p>
+            </div>
+
+            <!-- @section: エラーメッセージ (API error) -->
+            <!-- @condition: {error && <p className="text-sm text-destructive">{error}</p>} -->
+            <p class="text-sm text-destructive" data-show-if="error" style="display: none;" data-prop="error">メールアドレスまたはパスワードが正しくありません</p>
+
+            <!-- @section: 送信ボタン -->
+            <!-- @condition: disabled={loading} -->
+            <button
+              type="submit"
+              class="btn btn--primary btn--block"
+              data-prop="disabled:loading"
+              data-action="onClick:handleSubmit"
+            >
+              <!-- @condition: {loading ? 'ログイン中...' : 'ログイン'} -->
+              <span data-prop="buttonText">ログイン</span>
+            </button>
+
+            <!-- @section: リンク -->
+            <div class="auth-links space-y-2">
+              <p>
+                <!-- @navigation: /reset-password -->
+                <a href="password-reset.html">パスワードを忘れた方</a>
+              </p>
+              <p class="text-muted">
+                アカウントをお持ちでない方は
+                <!-- @navigation: /signup -->
+                <a href="register.html">新規登録</a>
+              </p>
+            </div>
+
+          </form>
+        </div>
+      </div>
+      <!-- [/Component: Card] -->
+    </div>
+    <!-- [/Component: LoginForm] -->
+
+  </div>
+  <!-- [/Component: LoginPage] -->
+
+</body>
+</html>

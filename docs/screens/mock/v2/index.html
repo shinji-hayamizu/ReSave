@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ReSave</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!--
+    @screen: AppShell (index.html)
+    @description: ReSaveアプリの基盤シェル。サイドバー、ヘッダー、コンテンツエリアを含むメインレイアウト
+    @file: app/(main)/layout.tsx
+    @architecture: Next.js App Router
+
+    @responsive:
+      - Mobile (<768px): ボトムナビゲーション表示、サイドバー非表示
+      - Desktop (>=768px): サイドバー表示、ボトムナビゲーション非表示
+
+    @auth: 認証必須 - 未認証時は /login にリダイレクト
+
+    @api:
+      - supabase.auth.getUser() - ユーザーセッション取得
+  -->
+
+  <!-- ================================================================
+       @component: MainLayout
+       @description: 認証済みユーザー用のメインレイアウト
+       @file: app/(main)/layout.tsx
+       ================================================================ -->
+  <div class="layout" data-component="MainLayout">
+
+    <!-- ================================================================
+         @component: SidebarOverlay
+         @description: モバイル時のサイドバー背景オーバーレイ
+         @condition: isSidebarOpen && isMobile
+         @event: onClick={closeSidebar}
+         ================================================================ -->
+    <div
+      class="sidebar-overlay"
+      id="sidebar-overlay"
+      data-component="SidebarOverlay"
+      data-action="onClick:closeSidebar"
+    ></div>
+
+    <!-- ================================================================
+         @component: AppSidebar
+         @description: サイドナビゲーション
+         @file: components/layout/app-sidebar.tsx
+
+         @behavior:
+           - Desktop: hover時に展開
+           - Mobile: メニューボタンで開閉
+         ================================================================ -->
+    <aside class="sidebar" id="sidebar" data-component="AppSidebar">
+      <!-- @section: ロゴ -->
+      <div class="sidebar__logo">
+        <!-- @icon: lucide-react Layers -->
+        <svg class="sidebar__logo-icon" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/>
+          <path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/>
+          <path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/>
+        </svg>
+        <span class="sidebar__logo-text">ReSave</span>
+      </div>
+
+      <!-- ================================================================
+           @component: SidebarNav
+           @description: ナビゲーションリンク
+           @file: components/layout/app-sidebar.tsx
+
+           @navigation:
+             - / : ホーム
+             - /tags : タグ管理
+             - /stats : 統計
+             - /settings : 設定
+           ================================================================ -->
+      <nav class="sidebar__nav" data-component="SidebarNav">
+        <!-- @condition: className={pathname === '/' ? 'active' : ''} -->
+        <a href="#" class="sidebar__link active" data-page="main" data-action="onClick:handleNavClick">
+          <!-- @icon: lucide-react Home -->
+          <svg class="sidebar__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          <span class="sidebar__label">ホーム</span>
+        </a>
+
+        <a href="#" class="sidebar__link" data-page="tags" data-action="onClick:handleNavClick">
+          <!-- @icon: lucide-react Tag -->
+          <svg class="sidebar__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r=".5" fill="currentColor"/></svg>
+          <span class="sidebar__label">タグ</span>
+        </a>
+
+        <a href="#" class="sidebar__link" data-page="stats" data-action="onClick:handleNavClick">
+          <!-- @icon: lucide-react BarChart3 -->
+          <svg class="sidebar__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>
+          <span class="sidebar__label">統計</span>
+        </a>
+
+        <a href="#" class="sidebar__link" data-page="settings" data-action="onClick:handleNavClick">
+          <!-- @icon: lucide-react Settings -->
+          <svg class="sidebar__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+          <span class="sidebar__label">設定</span>
+        </a>
+
+        <div style="flex: 1;"></div>
+
+        <!-- @event: onClick={handleLogout} -->
+        <a href="login.html" class="sidebar__link" data-action="onClick:handleLogout">
+          <!-- @icon: lucide-react LogOut -->
+          <svg class="sidebar__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+          <span class="sidebar__label">ログアウト</span>
+        </a>
+      </nav>
+    </aside>
+    <!-- [/Component: AppSidebar] -->
+
+    <!-- ================================================================
+         @component: MainContent
+         @description: メインコンテンツエリア
+         ================================================================ -->
+    <main class="main" data-component="MainContent">
+
+      <!-- ================================================================
+           @component: AppHeader
+           @description: ヘッダー
+           @file: components/layout/app-header.tsx
+           ================================================================ -->
+      <header class="header" data-component="AppHeader">
+        <div class="header__left">
+          <!-- @event: onClick={toggleSidebar} -->
+          <!-- @condition: Mobile only -->
+          <button
+            class="header__menu-btn"
+            id="menu-btn"
+            data-action="onClick:toggleSidebar"
+          >
+            <!-- @icon: lucide-react Menu -->
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+          </button>
+          <h1 class="header__title">ReSave</h1>
+        </div>
+        <div class="header__right">
+          <!-- @component: UserAvatar -->
+          <!-- @event: onClick={openUserMenu} -->
+          <div class="header__avatar" data-component="UserAvatar">U</div>
+        </div>
+      </header>
+      <!-- [/Component: AppHeader] -->
+
+      <!-- ================================================================
+           @section: ContentArea
+           @description: ページコンテンツ表示エリア
+           @implementation: Next.js では {children} として実装
+
+           @routes:
+             - main.html (/) - ホーム画面
+             - tags.html (/tags) - タグ管理
+             - stats.html (/stats) - 統計
+             - settings.html (/settings) - 設定
+             - card-input.html (/cards/:id/edit) - カード編集
+           ================================================================ -->
+      <iframe
+        id="content-frame"
+        class="content-frame"
+        src="main.html"
+        title="Content"
+        style="flex: 1; width: 100%; border: none; background: hsl(210 40% 98%);"
+      ></iframe>
+
+    </main>
+    <!-- [/Component: MainContent] -->
+
+    <!-- ================================================================
+         @component: BottomNav
+         @description: モバイル用ボトムナビゲーション
+         @condition: Mobile only (< 768px)
+         ================================================================ -->
+    <nav class="bottom-nav" data-component="BottomNav">
+      <a href="#" class="bottom-nav__item active" data-page="main" data-action="onClick:handleNavClick">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        <span>ホーム</span>
+      </a>
+      <a href="#" class="bottom-nav__item" data-page="tags" data-action="onClick:handleNavClick">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r=".5" fill="currentColor"/></svg>
+        <span>タグ</span>
+      </a>
+      <a href="#" class="bottom-nav__item" data-page="stats" data-action="onClick:handleNavClick">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>
+        <span>統計</span>
+      </a>
+      <a href="#" class="bottom-nav__item" data-page="settings" data-action="onClick:handleNavClick">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+        <span>設定</span>
+      </a>
+    </nav>
+    <!-- [/Component: BottomNav] -->
+
+  </div>
+  <!-- [/Component: MainLayout] -->
+
+  <script src="js/main.js"></script>
+</body>
+</html>

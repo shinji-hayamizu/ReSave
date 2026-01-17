@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body style="background: hsl(210 40% 98%);">
+  <!--
+    @screen: ホーム画面（メインダッシュボード）
+    @path: /
+    @description: カードの作成・学習・復習を行うメイン画面
+    @file: app/(main)/page.tsx
+    @features: F-013 (カード作成), F-021 (カード学習), F-022 (自己評価)
+
+    @state-management:
+      - activeTab: 'due' | 'learning' | 'completed' - 現在選択中のタブ (useState)
+      - editingCard: CardWithTags | null - 編集中のカード (useState)
+      - isEditDialogOpen: boolean - 編集ダイアログの開閉状態 (useState)
+
+    @hooks:
+      - useNewCards() - 未学習カード取得
+      - useTodayCards() - 今日の復習カード取得
+      - useTodayCompletedCards() - 今日完了したカード取得
+
+    @api-dependencies:
+      - GET /api/cards?status=new - 未学習カード
+      - GET /api/cards?status=active&due=today - 今日の復習カード
+      - GET /api/cards?reviewed_today=true - 今日完了したカード
+      - POST /api/cards - カード作成
+      - POST /api/study/assess - カード評価
+  -->
+
+  <!-- ================================================================
+       @component: DashboardPage
+       @description: ホーム画面のルートコンポーネント
+       @file: app/(main)/page.tsx
+       ================================================================ -->
+  <div class="content-wrapper pt-1 pb-2" data-component="DashboardPage">
+
+    <!-- ================================================================
+         @component: QuickInputForm
+         @description: カードを素早く作成するためのインライン入力フォーム
+         @file: components/home/quick-input-form.tsx
+         @feature: F-013 (カード作成)
+
+         @props:
+           - className?: string
+           - onCardCreated?: () => void
+
+         @state:
+           - front: string - 問題テキスト (useState)
+           - back: string - 答えテキスト (useState)
+           - dialogOpen: boolean - 詳細ダイアログの開閉状態 (useState)
+
+         @hooks:
+           - useCreateCard() - カード作成mutation
+
+         @validation:
+           - MAX_FRONT_LENGTH: 500
+           - MAX_BACK_LENGTH: 2000
+
+         @keyboard:
+           - Cmd/Ctrl+Enter on front: focus back
+           - Cmd/Ctrl+Enter on back: submit
+         ================================================================ -->
+    <div class="quick-input mb-2" data-component="QuickInputForm">
+      <form data-action="onSubmit:handleSubmit">
+        <!-- @row: 問題入力行 -->
+        <div class="quick-input__row">
+          <!-- @component: TextareaAutosize -->
+          <!-- @props: value={front}, onChange={(e) => setFront(e.target.value)} -->
+          <!-- @props: maxLength={MAX_FRONT_LENGTH}, minRows={1} -->
+          <!-- @event: onKeyDown={handleFrontKeyDown} - Cmd/Ctrl+Enter で裏面へフォーカス -->
+          <textarea
+            class="quick-input__input"
+            placeholder="覚えたいこと"
+            maxlength="500"
+            rows="1"
+            data-prop="front"
+            data-action="onChange:setFront, onKeyDown:handleFrontKeyDown"
+          ></textarea>
+          <!-- @condition: {front && <ClearButton />} -->
+          <button
+            type="button"
+            class="quick-input__clear"
+            title="クリア"
+            data-show-if="front"
+            data-action="onClick:clearFront"
+          >
+            <!-- @icon: lucide-react X -->
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+          </button>
+          <!-- @condition: disabled={isSubmitDisabled} -->
+          <!-- @event: onClick - submit form -->
+          <button
+            type="submit"
+            class="btn btn--primary quick-input__btn"
+            title="保存"
+            data-prop="disabled:isSubmitDisabled"
+          >
+            <!-- @icon: lucide-react Plus -->
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+          </button>
+        </div>
+
+        <!-- @row: 答え入力行 -->
+        <div class="quick-input__row">
+          <!-- @component: TextareaAutosize (ref: backTextareaRef) -->
+          <textarea
+            class="quick-input__input"
+            placeholder="答え（任意）"
+            maxlength="2000"
+            rows="1"
+            data-prop="back"
+            data-action="onChange:setBack, onKeyDown:handleBackKeyDown"
+          ></textarea>
+          <button
+            type="button"
+            class="quick-input__clear"
+            title="クリア"
+            data-show-if="back"
+            data-action="onClick:clearBack"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+          </button>
+          <!-- @event: onClick - 詳細入力ダイアログを開く -->
+          <button
+            type="button"
+            class="btn btn--secondary quick-input__btn"
+            title="詳細入力"
+            data-action="onClick:handleOpenDialog"
+          >
+            <!-- @icon: lucide-react Edit -->
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+          </button>
+        </div>
+      </form>
+    </div>
+    <!-- [/Component: QuickInputForm] -->
+
+    <!-- ================================================================
+         @component: CardTabs
+         @description: カードの状態別タブ切り替え
+         @file: components/home/card-tabs.tsx
+
+         @props:
+           - value: CardTabValue - 現在のタブ
+           - onChange: (value: CardTabValue) => void
+           - counts: { due: number, learning: number, completed: number }
+           - className?: string
+
+         @types:
+           - CardTabValue = 'due' | 'learning' | 'completed'
+         ================================================================ -->
+    <div class="tabs" data-component="CardTabs" data-props="value,onChange,counts">
+      <!-- @tab: 未学習 -->
+      <!-- @condition: className={value === 'due' ? 'tab active' : 'tab'} -->
+      <button
+        type="button"
+        class="tab active tab--amber"
+        data-tab="due"
+        data-action="onClick:onChange('due')"
+      >
+        <span class="text-xs">未学習</span>
+        <!-- @prop: counts.due -->
+        <span class="tab__count">5</span>
+      </button>
+
+      <!-- @tab: 復習中 -->
+      <button
+        type="button"
+        class="tab tab--blue"
+        data-tab="learning"
+        data-action="onClick:onChange('learning')"
+      >
+        <span class="text-xs">復習中</span>
+        <span class="tab__count">15</span>
+      </button>
+
+      <!-- @tab: 完了 -->
+      <button
+        type="button"
+        class="tab tab--emerald"
+        data-tab="completed"
+        data-action="onClick:onChange('completed')"
+      >
+        <span class="text-xs">完了</span>
+        <span class="tab__count">45</span>
+      </button>
+    </div>
+    <!-- [/Component: CardTabs] -->
+
+    <!-- ================================================================
+         @section: カードリスト
+         @condition: 各タブに応じてカードをレンダリング
+         @loading: {isLoading && <StudyCardsSkeleton />}
+         @empty: {activeCards.length === 0 && <EmptyState />}
+         ================================================================ -->
+
+    <!-- ================================================================
+         @component: CardList (未学習/復習中タブ)
+         @file: components/home/card-list.tsx (完了タブ用)
+         @render: activeCards.map((card) => <HomeStudyCard key={card.id} {...} />)
+         ================================================================ -->
+    <div class="card-list" data-component="CardList" data-show-if="activeTab !== 'completed'">
+
+      <!-- ================================================================
+           @component: HomeStudyCard
+           @description: 個別の学習カードコンポーネント
+           @file: components/home/home-study-card.tsx
+           @feature: F-021 (カード学習), F-022 (自己評価)
+
+           @props:
+             - id: string
+             - front: string
+             - back: string
+             - tags?: Tag[]
+             - currentStep?: number
+             - schedule?: number[]
+             - intervals?: { ok?: string, again?: string }
+             - showAgain?: boolean
+             - onAssessmentComplete?: () => void
+             - onEdit?: () => void
+             - className?: string
+
+           @state:
+             - isRemoving: boolean - 削除アニメーション中 (useState)
+             - showDeleteDialog: boolean - 削除確認ダイアログ (useState)
+
+           @hooks:
+             - useSubmitAssessment()
+             - useUpdateCard()
+             - useDeleteCard()
+
+           @animation:
+             - REMOVE_ANIMATION_DURATION_MS: 300
+             - grid-rows transition for smooth removal
+           ================================================================ -->
+      <div
+        class="study-card"
+        data-component="HomeStudyCard"
+        data-list-item
+        data-key="card.id"
+        data-props="id,front,back,tags,currentStep,schedule,intervals,showAgain,onEdit"
+      >
+        <div class="study-card__topbar">
+          <!-- ================================================================
+               @component: RatingButtons
+               @description: 自己評価ボタングループ
+               @file: components/ui/rating-buttons.tsx
+               @feature: F-022 (自己評価)
+
+               @props:
+                 - intervals?: { ok?: string, again?: string }
+                 - showAgain?: boolean
+                 - disabled?: boolean
+                 - onRate: (rating: Rating) => void
+
+               @types:
+                 - Rating = 'ok' | 'learned' | 'again'
+
+               @api:
+                 - POST /api/study/assess { cardId, assessment }
+
+               @business-logic:
+                 - ok: review_level +1、次の間隔へ進む
+                 - learned: 完了状態に移行 (next_review_at = NULL)
+                 - again: review_level = 0 にリセット
+               ================================================================ -->
+          <div class="rating-buttons" data-component="RatingButtons" data-show-if="!isCompleted">
+            <!-- @event: onClick={() => onRate('ok')} -->
+            <button
+              type="button"
+              class="rating-btn rating-btn--ok"
+              data-rating="ok"
+              data-action="onClick:handleRate('ok')"
+            >
+              <span>OK</span>
+              <!-- @prop: intervals.ok -->
+              <span class="rating-btn__preview">3日後</span>
+            </button>
+
+            <!-- @event: onClick={() => onRate('learned')} -->
+            <button
+              type="button"
+              class="rating-btn rating-btn--learned"
+              data-rating="learned"
+              data-action="onClick:handleRate('learned')"
+            >
+              <span>覚えた</span>
+              <span class="rating-btn__preview">完了</span>
+            </button>
+
+            <!-- @condition: {showAgain && <AgainButton />} -->
+            <!-- @event: onClick={() => onRate('again')} -->
+            <button
+              type="button"
+              class="rating-btn rating-btn--again"
+              data-rating="again"
+              data-show-if="showAgain"
+              data-action="onClick:handleRate('again')"
+            >
+              <span>もう一度</span>
+              <span class="rating-btn__preview">1日後</span>
+            </button>
+          </div>
+          <!-- [/Component: RatingButtons] -->
+
+          <!-- @component: TagList -->
+          <div class="study-card__tags" data-component="TagList" data-list="tags">
+            <!-- @loop: tags.map(tag => <TagBadge key={tag.id}>{tag.name}</TagBadge>) -->
+            <span class="tag-badge" data-list-item data-key="tag.id">地理</span>
+            <span class="tag-badge" data-list-item>日本</span>
+          </div>
+        </div>
+
+        <!-- @section: カード表面（問題） -->
+        <div class="study-card__front">
+          <!-- @prop: front -->
+          <p class="study-card__question" data-prop="front">日本の首都は？</p>
+          <div class="study-card__actions">
+            <!-- @event: onClick={() => onEdit()} -->
+            <button
+              type="button"
+              class="btn btn--ghost btn--icon"
+              title="編集"
+              data-action="onClick:onEdit"
+            >
+              <!-- @icon: lucide-react Edit -->
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+            </button>
+            <!-- @event: onClick={() => setShowDeleteDialog(true)} -->
+            <button
+              type="button"
+              class="btn btn--ghost btn--icon"
+              title="削除"
+              data-action="onClick:handleDeleteClick"
+            >
+              <!-- @icon: lucide-react Trash2 -->
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- ================================================================
+             @component: StudyCard toggle button
+             @state: isOpen - 答え表示状態
+             @event: onClick={() => setIsOpen(!isOpen)}
+             ================================================================ -->
+        <button
+          type="button"
+          class="study-card__toggle"
+          data-action="onClick:toggleAnswer"
+        >
+          <!-- @condition: {!isOpen && <Eye />} -->
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
+          <!-- @condition: {isOpen ? '答えを隠す' : '答えを見る'} -->
+          <span data-prop="toggleLabel">答えを見る</span>
+        </button>
+
+        <!-- @section: カード裏面（答え） -->
+        <!-- @condition: {isOpen && <AnswerSection />} -->
+        <div class="study-card__back" data-show-if="isOpen">
+          <!-- @prop: back -->
+          <p class="study-card__answer" data-prop="back">東京</p>
+        </div>
+      </div>
+      <!-- [/Component: HomeStudyCard] -->
+
+      <!-- @sample: サンプルカード 2 (答え表示状態) -->
+      <div class="study-card open" data-list-item data-key="card.id" data-state="open">
+        <div class="study-card__topbar">
+          <div class="rating-buttons">
+            <button type="button" class="rating-btn rating-btn--ok">
+              <span>OK</span>
+              <span class="rating-btn__preview">7日後</span>
+            </button>
+            <button type="button" class="rating-btn rating-btn--learned">
+              <span>覚えた</span>
+              <span class="rating-btn__preview">完了</span>
+            </button>
+            <button type="button" class="rating-btn rating-btn--again">
+              <span>もう一度</span>
+              <span class="rating-btn__preview">1日後</span>
+            </button>
+          </div>
+          <div class="study-card__tags">
+            <span class="tag-badge">英語</span>
+            <span class="tag-badge">語彙</span>
+          </div>
+        </div>
+        <div class="study-card__front">
+          <p class="study-card__question">「セレンディピティ」の意味は？</p>
+          <div class="study-card__actions">
+            <button type="button" class="btn btn--ghost btn--icon" title="編集">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+            </button>
+            <button type="button" class="btn btn--ghost btn--icon" title="削除">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+            </button>
+          </div>
+        </div>
+        <button type="button" class="study-card__toggle">
+          <!-- @icon: EyeOff (答え表示中) -->
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"/><path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"/><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"/><path d="m2 2 20 20"/></svg>
+          <span>答えを隠す</span>
+        </button>
+        <div class="study-card__back" style="display: block;">
+          <p class="study-card__answer">偶然の幸運な発見。予期せぬ良い結果に出会うこと。</p>
+        </div>
+      </div>
+
+      <!-- @sample: サンプルカード 3 -->
+      <div class="study-card" data-list-item data-key="card.id">
+        <div class="study-card__topbar">
+          <div class="rating-buttons">
+            <button type="button" class="rating-btn rating-btn--ok">
+              <span>OK</span>
+              <span class="rating-btn__preview">14日後</span>
+            </button>
+            <button type="button" class="rating-btn rating-btn--learned">
+              <span>覚えた</span>
+              <span class="rating-btn__preview">完了</span>
+            </button>
+            <button type="button" class="rating-btn rating-btn--again">
+              <span>もう一度</span>
+              <span class="rating-btn__preview">1日後</span>
+            </button>
+          </div>
+          <div class="study-card__tags">
+            <span class="tag-badge">アルゴリズム</span>
+          </div>
+        </div>
+        <div class="study-card__front">
+          <p class="study-card__question">二分探索の計算量は？</p>
+          <div class="study-card__actions">
+            <button type="button" class="btn btn--ghost btn--icon" title="編集">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+            </button>
+            <button type="button" class="btn btn--ghost btn--icon" title="削除">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+            </button>
+          </div>
+        </div>
+        <button type="button" class="study-card__toggle">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
+          <span>答えを見る</span>
+        </button>
+        <div class="study-card__back">
+          <p class="study-card__answer">O(log n) - 探索範囲が比較ごとに半分になる</p>
+        </div>
+      </div>
+
+    </div>
+    <!-- [/Component: CardList] -->
+
+    <!-- ================================================================
+         @component: EmptyState
+         @description: カードが0件の場合の空状態表示
+         @file: components/ui/empty-state.tsx
+         @condition: {activeCards.length === 0 && <EmptyState />}
+
+         @props:
+           - icon: ReactNode - アイコン
+           - title: string - タイトル
+           - description: string - 説明文
+         ================================================================ -->
+    <div class="empty-state" data-component="EmptyState" data-show-if="activeCards.length === 0" style="display: none;">
+      <!-- @icon: lucide-react FileQuestion -->
+      <svg class="empty-state__icon" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M15 18a3 3 0 1 0-6 0"/><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M12 12v-2"/></svg>
+      <h3 class="empty-state__title">カードなし</h3>
+      <!-- @condition: description varies by activeTab -->
+      <p class="empty-state__description" data-prop="description">新しいカードを追加して学習を始めましょう</p>
+    </div>
+    <!-- [/Component: EmptyState] -->
+
+    <!-- ================================================================
+         @component: EditCardDialog
+         @description: カード編集ダイアログ
+         @file: components/cards/edit-card-dialog.tsx
+         @condition: {isEditDialogOpen && <EditCardDialog />}
+
+         @props:
+           - card: CardWithTags | null
+           - open: boolean
+           - onOpenChange: (open: boolean) => void
+         ================================================================ -->
+    <!-- Modal is rendered conditionally, not shown in static mock -->
+
+  </div>
+  <!-- [/Component: DashboardPage] -->
+
+</body>
+</html>

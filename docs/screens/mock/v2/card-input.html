@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body style="background: hsl(210 40% 98%);">
+  <!--
+    @screen: カード詳細入力画面 (編集ダイアログ)
+    @path: /cards/:id/edit or Dialog
+    @description: カードの詳細編集画面/ダイアログ
+    @file: components/cards/edit-card-dialog.tsx
+    @feature: F-013 (カード作成), F-014 (カード編集)
+
+    @props:
+      - card: CardWithTags | null
+      - open: boolean
+      - onOpenChange: (open: boolean) => void
+
+    @state-management:
+      - form state via react-hook-form
+
+    @form-validation:
+      - front: required, maxLength 500
+      - back: optional, maxLength 2000
+      - tagIds: optional, array of tag IDs
+
+    @hooks:
+      - useUpdateCard() - カード更新mutation
+      - useTags() - タグ一覧取得
+
+    @api-dependencies:
+      - PATCH /api/cards/:id - カード更新
+      - GET /api/tags - タグ一覧
+  -->
+
+  <!-- ================================================================
+       @component: EditCardDialog (as standalone page example)
+       @description: カード編集フォーム
+       @file: components/cards/edit-card-dialog.tsx
+       ================================================================ -->
+  <div data-component="EditCardDialog">
+
+    <!-- @component: PageHeader (for standalone page view) -->
+    <div class="page-header" data-component="PageHeader">
+      <div class="page-header__content">
+        <h1>カード編集</h1>
+        <p class="text-sm text-muted">カードの内容を編集</p>
+      </div>
+      <div class="page-header__action">
+        <!-- @event: onClick={handleClose} or router.back() -->
+        <button type="button" class="btn btn--ghost" data-action="onClick:handleClose">
+          キャンセル
+        </button>
+      </div>
+    </div>
+
+    <div class="content-wrapper p-4" style="max-width: 42rem;">
+
+      <!-- ================================================================
+           @component: CardForm
+           @description: カード編集フォーム
+           @file: components/cards/card-form.tsx
+
+           @uses: react-hook-form, @hookform/resolvers/zod
+
+           @form:
+             - useForm<CardFormInput>
+             - resolver: zodResolver(cardFormSchema)
+             - defaultValues: { front: card?.front, back: card?.back, tagIds: card?.tags.map(t => t.id) }
+           ================================================================ -->
+      <form class="card" data-component="CardForm" data-action="onSubmit:handleSubmit">
+        <div class="card-content space-y-4">
+
+          <!-- ================================================================
+               @component: FormField - front (問題)
+               @validation: required, maxLength 500
+               ================================================================ -->
+          <div class="form-group" data-component="FormField" data-field="front">
+            <label class="form-label" for="front">問題 <span class="text-destructive">*</span></label>
+            <!-- @component: Textarea (shadcn/ui) -->
+            <!-- @props: value={field.value}, onChange={field.onChange} -->
+            <textarea
+              id="front"
+              name="front"
+              class="form-textarea"
+              placeholder="覚えたい内容を入力"
+              maxlength="500"
+              rows="3"
+              data-prop="front"
+              data-action="onChange:field.onChange"
+            >日本の首都は？</textarea>
+            <p class="form-hint">最大500文字</p>
+            <p class="form-error" data-show-if="errors.front" style="display: none;">問題を入力してください</p>
+          </div>
+
+          <!-- ================================================================
+               @component: FormField - back (答え)
+               @validation: optional, maxLength 2000
+               ================================================================ -->
+          <div class="form-group" data-component="FormField" data-field="back">
+            <label class="form-label" for="back">答え</label>
+            <textarea
+              id="back"
+              name="back"
+              class="form-textarea"
+              placeholder="答えを入力（任意）"
+              maxlength="2000"
+              rows="4"
+              data-prop="back"
+              data-action="onChange:field.onChange"
+            >東京</textarea>
+            <p class="form-hint">最大2000文字</p>
+          </div>
+
+          <!-- ================================================================
+               @component: FormField - tags
+               @description: タグ選択
+               @implementation: Multi-select or Checkbox group
+               ================================================================ -->
+          <div class="form-group" data-component="FormField" data-field="tagIds">
+            <label class="form-label">タグ</label>
+            <!-- @component: TagSelect (custom) -->
+            <!-- @props: value={field.value}, onChange={field.onChange}, options={tags} -->
+            <div class="flex gap-2" style="flex-wrap: wrap;" data-component="TagSelect" data-list="tags">
+              <!-- @loop: tags.map(tag => <TagCheckbox key={tag.id} {...tag} />) -->
+              <!-- @condition: className={selected ? 'selected' : ''} -->
+              <label
+                class="tag-checkbox"
+                style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.375rem 0.75rem; border: 1px solid hsl(var(--border)); border-radius: var(--radius); cursor: pointer; font-size: 0.875rem;"
+                data-list-item
+                data-key="tag.id"
+              >
+                <input type="checkbox" name="tagIds" value="1" checked style="accent-color: hsl(var(--primary));">
+                <span class="tag-item__color" style="width: 0.75rem; height: 0.75rem; border-radius: 50%; background: #ef4444;"></span>
+                <span>React</span>
+              </label>
+              <label
+                class="tag-checkbox"
+                style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.375rem 0.75rem; border: 1px solid hsl(var(--border)); border-radius: var(--radius); cursor: pointer; font-size: 0.875rem;"
+                data-list-item
+              >
+                <input type="checkbox" name="tagIds" value="2" style="accent-color: hsl(var(--primary));">
+                <span class="tag-item__color" style="width: 0.75rem; height: 0.75rem; border-radius: 50%; background: #3b82f6;"></span>
+                <span>JavaScript</span>
+              </label>
+              <label
+                class="tag-checkbox"
+                style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.375rem 0.75rem; border: 1px solid hsl(var(--border)); border-radius: var(--radius); cursor: pointer; font-size: 0.875rem;"
+                data-list-item
+              >
+                <input type="checkbox" name="tagIds" value="3" style="accent-color: hsl(var(--primary));">
+                <span class="tag-item__color" style="width: 0.75rem; height: 0.75rem; border-radius: 50%; background: #10b981;"></span>
+                <span>アルゴリズム</span>
+              </label>
+              <label
+                class="tag-checkbox"
+                style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.375rem 0.75rem; border: 1px solid hsl(var(--border)); border-radius: var(--radius); cursor: pointer; font-size: 0.875rem;"
+                data-list-item
+              >
+                <input type="checkbox" name="tagIds" value="4" checked style="accent-color: hsl(var(--primary));">
+                <span class="tag-item__color" style="width: 0.75rem; height: 0.75rem; border-radius: 50%; background: #f59e0b;"></span>
+                <span>地理</span>
+              </label>
+            </div>
+            <p class="form-hint">複数選択可能</p>
+          </div>
+
+          <!-- @section: フォームアクション -->
+          <div class="flex gap-2" style="justify-content: flex-end; padding-top: 1rem; border-top: 1px solid hsl(var(--border));">
+            <!-- @event: onClick={handleClose} -->
+            <button
+              type="button"
+              class="btn btn--outline"
+              data-action="onClick:handleClose"
+            >キャンセル</button>
+            <!-- @event: type="submit" -->
+            <!-- @condition: disabled={isSubmitting || !form.formState.isValid} -->
+            <button
+              type="submit"
+              class="btn btn--primary"
+              data-prop="disabled:isSubmitting"
+            >
+              <!-- @condition: {isSubmitting ? '保存中...' : '保存'} -->
+              <span data-prop="buttonText">保存</span>
+            </button>
+          </div>
+
+        </div>
+      </form>
+      <!-- [/Component: CardForm] -->
+
+    </div>
+  </div>
+  <!-- [/Component: EditCardDialog] -->
+
+  <!-- ================================================================
+       @section: Dialog version (Modal)
+       @description: ダイアログとして表示する場合の参考
+       @component: Dialog (shadcn/ui)
+       ================================================================ -->
+  <!--
+  <div class="modal-overlay" data-component="Dialog" data-show-if="open">
+    <div class="modal">
+      <div class="modal__header">
+        <h2 class="modal__title">カード編集</h2>
+        <p class="modal__description">カードの内容を編集します</p>
+      </div>
+      <div class="modal__content">
+        [CardForm component here]
+      </div>
+      <div class="modal__footer">
+        <button type="button" class="btn btn--outline">キャンセル</button>
+        <button type="submit" class="btn btn--primary">保存</button>
+      </div>
+    </div>
+  </div>
+  -->
+
+</body>
+</html>
