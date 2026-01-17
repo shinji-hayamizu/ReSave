@@ -171,14 +171,14 @@ export const StudyCard = memo(function StudyCard({
               <button
                 type="button"
                 onClick={saveEdit}
-                className="h-10 w-10 rounded-lg bg-emerald-100 text-emerald-600 inline-flex items-center justify-center hover:bg-emerald-200 transition-colors"
+                className="h-10 w-10 rounded-lg bg-success/10 text-success inline-flex items-center justify-center hover:bg-success/20 transition-colors"
               >
                 <Check className="h-5 w-5" />
               </button>
               <button
                 type="button"
                 onClick={cancelEdit}
-                className="h-10 w-10 rounded-lg bg-rose-100 text-rose-500 inline-flex items-center justify-center hover:bg-rose-200 transition-colors"
+                className="h-10 w-10 rounded-lg bg-destructive/10 text-destructive inline-flex items-center justify-center hover:bg-destructive/20 transition-colors"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -247,7 +247,7 @@ export const StudyCard = memo(function StudyCard({
 
           <div
             className={cn(
-              'grid transition-[grid-template-rows] duration-100 ease-out',
+              'grid transition-[grid-template-rows] duration-200 ease-out',
               isOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
             )}
           >
@@ -266,14 +266,14 @@ export const StudyCard = memo(function StudyCard({
                       <button
                         type="button"
                         onClick={saveEdit}
-                        className="h-10 w-10 rounded-lg bg-emerald-100 text-emerald-600 inline-flex items-center justify-center hover:bg-emerald-200 transition-colors"
+                        className="h-10 w-10 rounded-lg bg-success/10 text-success inline-flex items-center justify-center hover:bg-success/20 transition-colors"
                       >
                         <Check className="h-5 w-5" />
                       </button>
                       <button
                         type="button"
                         onClick={cancelEdit}
-                        className="h-10 w-10 rounded-lg bg-rose-100 text-rose-500 inline-flex items-center justify-center hover:bg-rose-200 transition-colors"
+                        className="h-10 w-10 rounded-lg bg-destructive/10 text-destructive inline-flex items-center justify-center hover:bg-destructive/20 transition-colors"
                       >
                         <X className="h-5 w-5" />
                       </button>
@@ -312,14 +312,14 @@ export const StudyCard = memo(function StudyCard({
                 <button
                   type="button"
                   onClick={saveWriteAnswer}
-                  className="h-10 w-10 rounded-lg bg-emerald-100 text-emerald-600 inline-flex items-center justify-center hover:bg-emerald-200 transition-colors"
+                  className="h-10 w-10 rounded-lg bg-success/10 text-success inline-flex items-center justify-center hover:bg-success/20 transition-colors"
                 >
                   <Check className="h-5 w-5" />
                 </button>
                 <button
                   type="button"
                   onClick={cancelWriteAnswer}
-                  className="h-10 w-10 rounded-lg bg-rose-100 text-rose-500 inline-flex items-center justify-center hover:bg-rose-200 transition-colors"
+                  className="h-10 w-10 rounded-lg bg-destructive/10 text-destructive inline-flex items-center justify-center hover:bg-destructive/20 transition-colors"
                 >
                   <X className="h-5 w-5" />
                 </button>

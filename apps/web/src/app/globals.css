@@ -15,7 +15,7 @@
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 84% 4.9%;
     --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted-foreground: 215.4 16.3% 40%;
     --accent: 198.6 88.7% 48.4%;
     --accent-foreground: 210 40% 98%;
     --destructive: 0 84.2% 60.2%;
@@ -95,6 +95,23 @@
   }
   body {
     @apply bg-background text-foreground;
+    background-image: linear-gradient(to bottom, hsl(var(--background)), hsl(210 40% 96%));
+    background-attachment: fixed;
+    min-height: 100vh;
+  }
+  .dark body {
+    background-image: linear-gradient(to bottom, hsl(var(--background)), hsl(222 84% 3%));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
 

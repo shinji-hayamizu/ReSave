@@ -20,12 +20,13 @@ interface TabConfig {
   label: string;
   badgeBg: string;
   badgeText: string;
+  activeBg: string;
 }
 
 const tabs: TabConfig[] = [
-  { value: 'due', label: '未学習', badgeBg: 'bg-amber-100', badgeText: 'text-amber-600' },
-  { value: 'learning', label: '復習中', badgeBg: 'bg-blue-100', badgeText: 'text-blue-600' },
-  { value: 'completed', label: '完了', badgeBg: 'bg-emerald-100', badgeText: 'text-emerald-600' },
+  { value: 'due', label: '未学習', badgeBg: 'bg-warning/10', badgeText: 'text-warning', activeBg: 'bg-warning/5' },
+  { value: 'learning', label: '復習中', badgeBg: 'bg-primary/10', badgeText: 'text-primary', activeBg: 'bg-primary/5' },
+  { value: 'completed', label: '完了', badgeBg: 'bg-success/10', badgeText: 'text-success', activeBg: 'bg-success/5' },
 ];
 
 function formatCount(count: number): string {
@@ -38,35 +39,38 @@ function formatCount(count: number): string {
 export function CardTabs({ value, onChange, counts, className }: CardTabsProps) {
   return (
     <div className={cn('flex border-b border-border', className)}>
-      {tabs.map((tab) => (
-        <button
-          key={tab.value}
-          type="button"
-          className={cn(
-            'flex-1 transition-all -mb-px',
-            'flex flex-col items-center gap-0.5 py-1 px-2 border-b-2 border-transparent',
-            'md:flex-row md:justify-center md:gap-2 md:py-1.5 md:px-4',
-            value === tab.value
-              ? 'text-primary border-b-primary'
-              : 'text-muted-foreground hover:text-foreground'
-          )}
-          onClick={() => onChange(tab.value)}
-        >
-          <span className="text-xs md:text-sm font-medium">{tab.label}</span>
-          {counts && (
-            <span
-              className={cn(
-                'text-base md:text-xs font-bold md:font-semibold',
-                'md:px-1.5 md:py-0.5 md:rounded',
-                tab.badgeBg,
-                tab.badgeText
-              )}
-            >
-              {formatCount(counts[tab.value])}
-            </span>
-          )}
-        </button>
-      ))}
+      {tabs.map((tab) => {
+        const isActive = value === tab.value;
+        return (
+          <button
+            key={tab.value}
+            type="button"
+            className={cn(
+              'flex-1 transition-all -mb-px rounded-t-lg',
+              'flex flex-col items-center gap-0.5 py-2 px-2 border-b-2 border-transparent',
+              'md:flex-row md:justify-center md:gap-2 md:py-2 md:px-4',
+              isActive
+                ? `${tab.activeBg} border-b-current ${tab.badgeText}`
+                : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+            )}
+            onClick={() => onChange(tab.value)}
+          >
+            <span className="text-xs md:text-sm font-medium">{tab.label}</span>
+            {counts && (
+              <span
+                className={cn(
+                  'text-base md:text-xs font-bold md:font-semibold',
+                  'md:px-1.5 md:py-0.5 md:rounded',
+                  tab.badgeBg,
+                  tab.badgeText
+                )}
+              >
+                {formatCount(counts[tab.value])}
+              </span>
+            )}
+          </button>
+        );
+      })}
     </div>
   );
 }

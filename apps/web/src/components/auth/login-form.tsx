@@ -1,6 +1,7 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import { BookOpen } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
@@ -66,9 +67,17 @@ export function LoginForm() {
 
   return (
     <Card>
-      <CardHeader className="text-center">
-        <CardTitle className="text-2xl">ログイン</CardTitle>
-        <CardDescription>アカウントにログインしてください</CardDescription>
+      <CardHeader className="text-center space-y-4">
+        <div className="flex justify-center">
+          <div className="flex items-center gap-2">
+            <BookOpen className="h-8 w-8 text-primary" />
+            <span className="text-2xl font-bold text-foreground">ReSave</span>
+          </div>
+        </div>
+        <div>
+          <CardTitle className="text-xl">ログイン</CardTitle>
+          <CardDescription className="mt-1">記憶を科学する - 間隔反復学習</CardDescription>
+        </div>
       </CardHeader>
       <CardContent>
         <Form {...form}>

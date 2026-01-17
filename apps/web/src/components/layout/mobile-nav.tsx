@@ -1,11 +1,10 @@
 'use client';
 
 import {
-  BarChart,
-  GraduationCap,
   Home,
-  Library,
+  Info,
   Settings,
+  Tag,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -14,10 +13,9 @@ import { cn } from '@/lib/utils';
 
 const navItems = [
   { title: 'ホーム', href: '/', icon: Home },
-  { title: 'カード', href: '/cards', icon: Library },
-  { title: '学習', href: '/study', icon: GraduationCap },
-  { title: '統計', href: '/stats', icon: BarChart },
+  { title: 'タグ', href: '/tags', icon: Tag },
   { title: '設定', href: '/settings', icon: Settings },
+  { title: 'About', href: '/about', icon: Info },
 ];
 
 export function MobileNav() {

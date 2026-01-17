@@ -1,6 +1,6 @@
 'use client';
 
-import { BookOpen, Home, Settings, Tag } from 'lucide-react';
+import { BookOpen, Home, Info, Settings, Tag } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -19,6 +19,7 @@ const navItems = [
   { title: 'ホーム', href: '/', icon: Home },
   { title: 'タグ', href: '/tags', icon: Tag },
   { title: '設定', href: '/settings', icon: Settings },
+  { title: 'ReSaveについて', href: '/about', icon: Info },
 ];
 
 export function AppSidebar() {
@@ -27,8 +28,9 @@ export function AppSidebar() {
   return (
     <Sidebar>
       <SidebarHeader className="border-b p-4">
-        <Link className="flex items-center" href="/">
+        <Link className="flex items-center gap-2" href="/">
           <BookOpen className="h-6 w-6 text-primary" />
+          <span className="font-semibold text-foreground">ReSave</span>
         </Link>
       </SidebarHeader>
       <SidebarContent>
