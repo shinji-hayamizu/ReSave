@@ -7,28 +7,29 @@ import { Button } from '@/components/ui/button';
 import { useSidebar } from '@/components/ui/sidebar';
 
 export function AppHeader() {
-  const { toggleSidebar } = useSidebar();
+  const { toggleSidebar, isMobile } = useSidebar();
 
   return (
     <header className="sticky top-0 z-40 bg-background">
-      <div className="mx-auto flex h-12 max-w-3xl items-center justify-between px-4">
-        <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="lg:hidden"
-            onClick={toggleSidebar}
-            aria-label="Toggle menu"
-          >
-            <Menu className="h-5 w-5" />
-          </Button>
-          <h1 className="text-lg font-bold">ReSave</h1>
-          <span className="hidden text-sm text-muted-foreground sm:inline">
-            - 記憶を科学する -
-          </span>
-        </div>
-        <div className="flex items-center gap-2">
-          <CreateCardDialog />
+      <div className="mx-auto max-w-3xl w-full px-4">
+        <div className="flex h-14 items-center justify-between">
+          <div className="flex items-center gap-4">
+            {isMobile && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={toggleSidebar}
+                aria-label="Toggle menu"
+                className="h-10 w-10"
+              >
+                <Menu className="h-6 w-6" />
+              </Button>
+            )}
+            <h1 className="text-xl font-bold">ReSave</h1>
+          </div>
+          <div className="flex items-center gap-2">
+            <CreateCardDialog />
+          </div>
         </div>
       </div>
     </header>

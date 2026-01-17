@@ -1,7 +1,6 @@
 import { PageHeader } from '@/components/layout/page-header';
 import {
   AccountSettings,
-  AppInfo,
   NotificationSettings,
 } from '@/components/settings';
 
@@ -15,7 +14,6 @@ export default function SettingsPage() {
       <div className="p-4 md:p-6 max-w-2xl space-y-6">
         <NotificationSettings />
         <AccountSettings />
-        <AppInfo />
       </div>
     </div>
   );

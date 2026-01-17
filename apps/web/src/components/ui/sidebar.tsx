@@ -5,7 +5,7 @@ import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
 import { PanelLeft } from "lucide-react"
 
-import { useIsMobile } from "@/hooks/use-mobile"
+import { useIsMobile, useIsTablet } from "@/hooks/use-mobile"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -39,6 +39,7 @@ type SidebarContextProps = {
   openMobile: boolean
   setOpenMobile: (open: boolean) => void
   isMobile: boolean
+  isTablet: boolean
   toggleSidebar: () => void
 }
 
@@ -74,12 +75,25 @@ const SidebarProvider = React.forwardRef<
     ref
   ) => {
     const isMobile = useIsMobile()
+    const isTablet = useIsTablet()
     const [openMobile, setOpenMobile] = React.useState(false)
 
     // This is the internal state of the sidebar.
     // We use openProp and setOpenProp for control from outside the component.
+    // Tablet starts collapsed (mini), PC starts expanded (full)
     const [_open, _setOpen] = React.useState(defaultOpen)
     const open = openProp ?? _open
+
+    // Set state based on device type (tablet = collapsed, PC = expanded)
+    React.useEffect(() => {
+      if (openProp === undefined) {
+        if (isTablet) {
+          _setOpen(false) // Tablet: collapsed (mini)
+        } else if (!isMobile) {
+          _setOpen(true) // PC: expanded (full)
+        }
+      }
+    }, [isTablet, isMobile, openProp])
     const setOpen = React.useCallback(
       (value: boolean | ((value: boolean) => boolean)) => {
         const openState = typeof value === "function" ? value(open) : value
@@ -97,10 +111,13 @@ const SidebarProvider = React.forwardRef<
 
     // Helper to toggle the sidebar.
     const toggleSidebar = React.useCallback(() => {
-      return isMobile
-        ? setOpenMobile((open) => !open)
-        : setOpen((open) => !open)
-    }, [isMobile, setOpen, setOpenMobile])
+      // Mobile & Tablet: toggle Sheet overlay
+      // PC: toggle expanded/collapsed state (animation)
+      if (isMobile || isTablet) {
+        return setOpenMobile((open) => !open)
+      }
+      return setOpen((open) => !open)
+    }, [isMobile, isTablet, setOpen, setOpenMobile])
 
     // Adds a keyboard shortcut to toggle the sidebar.
     React.useEffect(() => {
@@ -128,11 +145,12 @@ const SidebarProvider = React.forwardRef<
         open,
         setOpen,
         isMobile,
+        isTablet,
         openMobile,
         setOpenMobile,
         toggleSidebar,
       }),
-      [state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar]
+      [state, open, setOpen, isMobile, isTablet, openMobile, setOpenMobile, toggleSidebar]
     )
 
     return (
@@ -181,7 +199,7 @@ const Sidebar = React.forwardRef<
     },
     ref
   ) => {
-    const { isMobile, state, openMobile, setOpenMobile } = useSidebar()
+    const { isMobile, isTablet, state, openMobile, setOpenMobile } = useSidebar()
 
     if (collapsible === "none") {
       return (
@@ -198,6 +216,7 @@ const Sidebar = React.forwardRef<
       )
     }
 
+    // Mobile: Sheet only (no sidebar visible)
     if (isMobile) {
       return (
         <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
@@ -222,10 +241,65 @@ const Sidebar = React.forwardRef<
       )
     }
 
+    // Tablet: Mini sidebar always visible + Sheet overlay for full sidebar
+    if (isTablet) {
+      return (
+        <>
+          {/* Mini sidebar - always visible */}
+          <div
+            ref={ref}
+            className="group peer text-sidebar-foreground"
+            data-state="collapsed"
+            data-collapsible="icon"
+            data-variant={variant}
+            data-side={side}
+          >
+            <div className="relative w-[--sidebar-width-icon] bg-transparent" />
+            <div
+              className={cn(
+                "fixed inset-y-0 z-10 flex h-svh w-[--sidebar-width-icon]",
+                side === "left" ? "left-0" : "right-0",
+                className
+              )}
+              {...props}
+            >
+              <div
+                data-sidebar="sidebar"
+                className="flex h-full w-full flex-col bg-sidebar"
+              >
+                {children}
+              </div>
+            </div>
+          </div>
+          {/* Full sidebar Sheet overlay */}
+          <Sheet open={openMobile} onOpenChange={setOpenMobile}>
+            <SheetContent
+              data-sidebar="sidebar"
+              data-mobile="true"
+              className="w-[--sidebar-width] bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden"
+              style={
+                {
+                  "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
+                } as React.CSSProperties
+              }
+              side={side}
+            >
+              <SheetHeader className="sr-only">
+                <SheetTitle>Sidebar</SheetTitle>
+                <SheetDescription>Displays the full sidebar.</SheetDescription>
+              </SheetHeader>
+              <div className="flex h-full w-full flex-col">{children}</div>
+            </SheetContent>
+          </Sheet>
+        </>
+      )
+    }
+
+    // PC: Full sidebar by default, collapses to mini on toggle (animation)
     return (
       <div
         ref={ref}
-        className="group peer hidden text-sidebar-foreground md:block"
+        className="group peer hidden text-sidebar-foreground lg:block"
         data-state={state}
         data-collapsible={state === "collapsed" ? collapsible : ""}
         data-variant={variant}
@@ -244,7 +318,7 @@ const Sidebar = React.forwardRef<
         />
         <div
           className={cn(
-            "fixed inset-y-0 z-10 hidden h-svh w-[--sidebar-width] transition-[left,right,width] duration-200 ease-linear md:flex",
+            "fixed inset-y-0 z-10 hidden h-svh w-[--sidebar-width] transition-[left,right,width] duration-200 ease-linear lg:flex",
             side === "left"
               ? "left-0 group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)]"
               : "right-0 group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)]",
