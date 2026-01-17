@@ -37,7 +37,7 @@ export const StudyCard = memo(function StudyCard({
   const [editingField, setEditingField] = useState<'front' | 'back' | null>(null)
   const [editValue, setEditValue] = useState('')
   const [isWritingAnswer, setIsWritingAnswer] = useState(false)
-  const answerRef = useRef<HTMLDivElement>(null)
+  const cardRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement | null>(null)
   const writeAnswerRef = useRef<HTMLTextAreaElement | null>(null)
 
@@ -47,7 +47,11 @@ export const StudyCard = memo(function StudyCard({
 
     if (willOpen) {
       setTimeout(() => {
-        answerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+        if (cardRef.current) {
+          const rect = cardRef.current.getBoundingClientRect()
+          const scrollTop = window.scrollY + rect.top - 60
+          window.scrollTo({ top: scrollTop, behavior: 'smooth' })
+        }
       }, 100)
     } else {
       if (editingField === 'back') {
@@ -138,6 +142,7 @@ export const StudyCard = memo(function StudyCard({
 
   return (
     <div
+      ref={cardRef}
       className={cn(
         'bg-card',
         className
@@ -252,7 +257,7 @@ export const StudyCard = memo(function StudyCard({
             )}
           >
             <div className="overflow-hidden">
-              <div ref={answerRef} className="px-5 py-4 bg-card">
+              <div className="px-5 py-4 bg-card">
                 {editingField === 'back' ? (
                   <div className="flex gap-3 items-start">
                     <TextareaAutosize

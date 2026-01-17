@@ -156,6 +156,37 @@ Kiro系の開発では、各コマンド完了時に `/clear` を実行するこ
 
 ---
 
+## オーケストレーターコマンド
+
+### `/kiro:workflow-runner`
+
+ワークフロー全体をガイドするオーケストレーター。各ステップ完了時に次のコマンドを提示し、`/clear`を促す。
+
+```bash
+# 新規開始（フルフロー）
+/kiro:workflow-runner my-feature --mode=full
+
+# 新規開始（クイックフロー: design, validate-designをスキップ）
+/kiro:workflow-runner my-feature --mode=quick
+
+# 途中から再開
+/kiro:workflow-runner my-feature --from=design
+```
+
+### `/kiro:next`
+
+現在の進捗を確認し、次に実行すべきコマンドを1行で提示する軽量コマンド。
+
+```bash
+# 指定したfeatureの次ステップ
+/kiro:next my-feature
+
+# 最新のspecを自動検出
+/kiro:next
+```
+
+---
+
 ## 関連コマンド
 
 - `/dev/cc-sdd` - SDD タスク一気通貫実行
