@@ -4,6 +4,7 @@ import { Home, Info, Menu, Settings, Tag } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
+import { ReSaveIcon } from '@/components/icons/resave-icon';
 import { Button } from '@/components/ui/button';
 import {
   Sidebar,
@@ -41,7 +42,10 @@ export function AppSidebar() {
           >
             <Menu className="h-6 w-6" />
           </Button>
-          <span className="text-xl font-bold group-data-[collapsible=icon]:hidden">ReSave</span>
+          <div className="flex items-end gap-0.5 group-data-[collapsible=icon]:hidden">
+            <ReSaveIcon size={28} className="mb-[2px]" />
+            <span className="text-xl font-bold">ReSave</span>
+          </div>
         </div>
       </SidebarHeader>
       <SidebarContent>

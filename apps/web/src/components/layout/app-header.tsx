@@ -3,6 +3,7 @@
 import { Menu } from 'lucide-react';
 
 import { CreateCardDialog } from '@/components/cards/create-card-dialog';
+import { ReSaveIcon } from '@/components/icons/resave-icon';
 import { Button } from '@/components/ui/button';
 import { useSidebar } from '@/components/ui/sidebar';
 
@@ -27,7 +28,10 @@ export function AppHeader() {
               </Button>
             )}
             {showMobileHeader && (
-              <h1 className="text-xl font-bold">ReSave</h1>
+              <div className="flex items-end gap-0.5">
+                <ReSaveIcon size={28} className="mb-[2px]" />
+                <h1 className="text-xl font-bold">ReSave</h1>
+              </div>
             )}
           </div>
           <div className="flex items-center gap-2">
