@@ -20,14 +20,16 @@ export default async function MainLayout({
   }
 
   return (
-    <SidebarProvider defaultOpen={true}>
-      <AppSidebar />
-      <SidebarInset>
-        <AppHeader />
-        <main className="flex-1 bg-background">
-          <div className="mx-auto max-w-3xl w-full px-4">{children}</div>
-        </main>
-      </SidebarInset>
-    </SidebarProvider>
+    <div className="max-w-[960px] mx-auto relative">
+      <SidebarProvider defaultOpen={true}>
+        <AppSidebar />
+        <SidebarInset>
+          <AppHeader />
+          <main className="flex-1">
+            <div className="w-full px-4">{children}</div>
+          </main>
+        </SidebarInset>
+      </SidebarProvider>
+    </div>
   );
 }
