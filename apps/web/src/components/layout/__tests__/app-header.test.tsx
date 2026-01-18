@@ -8,6 +8,8 @@ const mockToggleSidebar = vi.fn();
 vi.mock('@/components/ui/sidebar', () => ({
   useSidebar: () => ({
     toggleSidebar: mockToggleSidebar,
+    isMobile: true,
+    isTablet: false,
   }),
 }));
 
