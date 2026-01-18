@@ -1,11 +1,13 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { BookOpen } from 'lucide-react';
+import { BookOpen, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
+
+import { GoogleIcon } from '@/components/icons/google-icon';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -36,6 +38,14 @@ export function LoginForm() {
   const redirectTo = searchParams.get('redirect') || '/';
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
+
+  useEffect(() => {
+    const errorParam = searchParams.get('error');
+    if (errorParam === 'oauth_failed') {
+      setError('Googleログインに失敗しました。もう一度お試しください。');
+    }
+  }, [searchParams]);
 
   const form = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
@@ -63,6 +73,24 @@ export function LoginForm() {
 
     router.push(redirectTo);
     router.refresh();
+  };
+
+  const handleGoogleLogin = async () => {
+    setError(null);
+    setGoogleLoading(true);
+
+    const supabase = createClient();
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirectTo)}`,
+      },
+    });
+
+    if (error) {
+      setError('Googleログインの開始に失敗しました');
+      setGoogleLoading(false);
+    }
   };
 
   return (
@@ -114,7 +142,7 @@ export function LoginForm() {
               )}
             />
             {error && <p className="text-sm text-destructive">{error}</p>}
-            <Button className="w-full" disabled={loading} type="submit">
+            <Button className="w-full" disabled={loading || googleLoading} type="submit">
               {loading ? 'ログイン中...' : 'ログイン'}
             </Button>
             <div className="space-y-2 text-center text-sm">
@@ -135,6 +163,30 @@ export function LoginForm() {
             </div>
           </form>
         </Form>
+
+        <div className="relative my-4">
+          <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-card px-2 text-muted-foreground">または</span>
+          </div>
+        </div>
+
+        <Button
+          className="w-full"
+          disabled={loading || googleLoading}
+          onClick={handleGoogleLogin}
+          type="button"
+          variant="outline"
+        >
+          {googleLoading ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <GoogleIcon size={18} />
+          )}
+          Googleでログイン
+        </Button>
       </CardContent>
     </Card>
   );

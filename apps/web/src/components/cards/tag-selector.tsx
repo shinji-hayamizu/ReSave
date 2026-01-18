@@ -1,9 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { X, ChevronsUpDown, Check } from 'lucide-react';
+import { X, Plus } from 'lucide-react';
 
-import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useTags } from '@/hooks/useTags';
 import { cn } from '@/lib/utils';
@@ -14,15 +13,15 @@ interface TagSelectorProps {
   maxTags?: number;
 }
 
-const TAG_COLORS: Record<string, { bg: string; text: string; border: string }> = {
-  blue: { bg: 'bg-blue-100', text: 'text-blue-700', border: 'border-blue-200' },
-  green: { bg: 'bg-green-100', text: 'text-green-700', border: 'border-green-200' },
-  purple: { bg: 'bg-purple-100', text: 'text-purple-700', border: 'border-purple-200' },
-  orange: { bg: 'bg-orange-100', text: 'text-orange-700', border: 'border-orange-200' },
-  pink: { bg: 'bg-pink-100', text: 'text-pink-700', border: 'border-pink-200' },
-  cyan: { bg: 'bg-cyan-100', text: 'text-cyan-700', border: 'border-cyan-200' },
-  yellow: { bg: 'bg-yellow-100', text: 'text-yellow-700', border: 'border-yellow-200' },
-  gray: { bg: 'bg-gray-100', text: 'text-gray-700', border: 'border-gray-200' },
+const TAG_COLORS: Record<string, { bg: string; text: string; hoverBg: string }> = {
+  blue: { bg: 'bg-primary', text: 'text-primary-foreground', hoverBg: 'hover:bg-primary/90' },
+  green: { bg: 'bg-emerald-500', text: 'text-white', hoverBg: 'hover:bg-emerald-600' },
+  purple: { bg: 'bg-violet-500', text: 'text-white', hoverBg: 'hover:bg-violet-600' },
+  orange: { bg: 'bg-orange-500', text: 'text-white', hoverBg: 'hover:bg-orange-600' },
+  pink: { bg: 'bg-pink-500', text: 'text-white', hoverBg: 'hover:bg-pink-600' },
+  cyan: { bg: 'bg-cyan-500', text: 'text-white', hoverBg: 'hover:bg-cyan-600' },
+  yellow: { bg: 'bg-amber-500', text: 'text-white', hoverBg: 'hover:bg-amber-600' },
+  gray: { bg: 'bg-slate-500', text: 'text-white', hoverBg: 'hover:bg-slate-600' },
 };
 
 function getTagColorClasses(color: string) {
@@ -47,103 +46,121 @@ export function TagSelector({ selectedTagIds, onChange, maxTags = 10 }: TagSelec
   }
 
   return (
-    <div className="space-y-2">
-      <div
-        className={cn(
-          'flex flex-wrap gap-2 min-h-[48px] p-3 rounded-md border bg-background',
-          'focus-within:ring-1 focus-within:ring-ring'
-        )}
-      >
-        {selectedTags.length === 0 ? (
-          <span className="text-sm text-muted-foreground">タグを選択</span>
-        ) : (
-          selectedTags.map((tag) => {
-            const colorClasses = getTagColorClasses(tag.color);
-            return (
-              <span
-                key={tag.id}
-                className={cn(
-                  'inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-full border',
-                  colorClasses.bg,
-                  colorClasses.text,
-                  colorClasses.border
-                )}
-              >
-                {tag.name}
-                <button
-                  type="button"
-                  onClick={() => handleRemove(tag.id)}
-                  className="flex items-center justify-center w-3.5 h-3.5 rounded-full bg-white/50 hover:bg-white/80 transition-colors"
-                  aria-label={`${tag.name}を削除`}
-                >
-                  <X className="h-2.5 w-2.5" />
-                </button>
-              </span>
-            );
-          })
-        )}
-      </div>
-
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            role="combobox"
-            aria-expanded={open}
-            className="w-full justify-between"
-            disabled={!canAddMore && availableTags.length > 0}
-          >
-            {canAddMore ? 'タグを追加...' : 'タグ上限に達しました'}
-            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-[300px] p-0" align="start">
-          <div className="max-h-[200px] overflow-y-auto p-1">
-            {isLoading ? (
-              <div className="p-4 text-center text-sm text-muted-foreground">読み込み中...</div>
-            ) : availableTags.length === 0 ? (
-              <div className="p-4 text-center text-sm text-muted-foreground">
-                {tags.length === 0 ? 'タグがありません' : '全てのタグが選択されています'}
-              </div>
-            ) : (
-              availableTags.map((tag) => {
-                const colorClasses = getTagColorClasses(tag.color);
-                return (
-                  <button
-                    key={tag.id}
-                    type="button"
-                    onClick={() => {
-                      handleSelect(tag.id);
-                      if (selectedTagIds.length + 1 >= maxTags) {
-                        setOpen(false);
-                      }
-                    }}
-                    className={cn(
-                      'flex items-center gap-2 w-full px-3 py-2 text-sm rounded-sm',
-                      'hover:bg-accent hover:text-accent-foreground',
-                      'focus:bg-accent focus:text-accent-foreground focus:outline-none'
-                    )}
-                  >
-                    <span
-                      className={cn(
-                        'inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full border',
-                        colorClasses.bg,
-                        colorClasses.text,
-                        colorClasses.border
-                      )}
-                    >
-                      {tag.name}
-                    </span>
-                    {selectedTagIds.includes(tag.id) && (
-                      <Check className="ml-auto h-4 w-4" />
-                    )}
-                  </button>
-                );
-              })
+    <div
+      className={cn(
+        'flex flex-wrap items-center gap-2 min-h-[52px] p-3',
+        'rounded-lg border border-input bg-background',
+        'transition-all duration-150',
+        'hover:border-muted-foreground/50',
+        'focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary'
+      )}
+    >
+      {/* Selected Tags */}
+      {selectedTags.map((tag) => {
+        const colorClasses = getTagColorClasses(tag.color);
+        return (
+          <span
+            key={tag.id}
+            className={cn(
+              'inline-flex items-center gap-1.5 h-8 px-3',
+              'text-[13px] font-medium rounded-full',
+              'transition-colors',
+              colorClasses.bg,
+              colorClasses.text,
+              colorClasses.hoverBg
             )}
-          </div>
-        </PopoverContent>
-      </Popover>
+          >
+            <span>{tag.name}</span>
+            <button
+              type="button"
+              onClick={() => handleRemove(tag.id)}
+              className={cn(
+                'flex items-center justify-center w-[18px] h-[18px] -mr-1',
+                'rounded-full bg-white/25 hover:bg-white/40',
+                'transition-colors'
+              )}
+              aria-label={`${tag.name}を削除`}
+            >
+              <X className="h-2.5 w-2.5" />
+            </button>
+          </span>
+        );
+      })}
+
+      {/* Placeholder when no tags */}
+      {selectedTags.length === 0 && !open && (
+        <span className="text-sm text-muted-foreground leading-7">タグを選択</span>
+      )}
+
+      {/* Add Tag Button */}
+      {canAddMore && (
+        <Popover open={open} onOpenChange={setOpen}>
+          <PopoverTrigger asChild>
+            <button
+              type="button"
+              className={cn(
+                'inline-flex items-center gap-1 h-8 px-3',
+                'text-[13px] font-medium rounded-full',
+                'bg-muted/60 text-muted-foreground',
+                'border border-dashed border-border',
+                'transition-all duration-150',
+                'hover:bg-primary/10 hover:text-primary hover:border-primary'
+              )}
+            >
+              <Plus className="h-3.5 w-3.5" />
+              <span>追加</span>
+            </button>
+          </PopoverTrigger>
+          <PopoverContent className="w-[280px] p-2" align="start">
+            <div className="max-h-[200px] overflow-y-auto">
+              {isLoading ? (
+                <div className="py-6 text-center text-sm text-muted-foreground">
+                  読み込み中...
+                </div>
+              ) : availableTags.length === 0 ? (
+                <div className="py-6 text-center text-sm text-muted-foreground">
+                  {tags.length === 0 ? 'タグがありません' : '全てのタグが選択されています'}
+                </div>
+              ) : (
+                <div className="space-y-0.5">
+                  {availableTags.map((tag) => {
+                    const colorClasses = getTagColorClasses(tag.color);
+                    return (
+                      <button
+                        key={tag.id}
+                        type="button"
+                        onClick={() => {
+                          handleSelect(tag.id);
+                          if (selectedTagIds.length + 1 >= maxTags) {
+                            setOpen(false);
+                          }
+                        }}
+                        className={cn(
+                          'flex items-center gap-2 w-full px-3 py-2 rounded-md',
+                          'text-sm text-left',
+                          'transition-colors',
+                          'hover:bg-accent focus:bg-accent focus:outline-none'
+                        )}
+                      >
+                        <span
+                          className={cn(
+                            'inline-flex items-center px-2.5 py-0.5',
+                            'text-xs font-medium rounded-full',
+                            colorClasses.bg,
+                            colorClasses.text
+                          )}
+                        >
+                          {tag.name}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </PopoverContent>
+        </Popover>
+      )}
     </div>
   );
 }

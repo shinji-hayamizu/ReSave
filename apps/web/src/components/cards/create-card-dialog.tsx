@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Plus } from 'lucide-react';
+import { useState } from 'react';
+import { Plus, Check, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/dialog';
 import { CardInputForm, type CardInputFormValues } from '@/components/cards/card-input-form';
 import { useCreateCard } from '@/hooks/useCards';
+import { cn } from '@/lib/utils';
 
 interface CreateCardDialogProps {
   trigger?: React.ReactNode;
@@ -63,17 +64,82 @@ export function CreateCardDialog({
   );
 
   const dialogContent = (
-    <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
-      <DialogHeader>
-        <DialogTitle>新規カード作成</DialogTitle>
+    <DialogContent
+      className={cn(
+        'flex flex-col gap-0 p-0',
+        'max-h-[90vh] sm:max-h-[85vh]',
+        'sm:max-w-lg'
+      )}
+    >
+      {/* Sticky Header */}
+      <DialogHeader className="sticky top-0 z-10 flex-shrink-0 px-4 py-3 sm:px-6 sm:py-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+        <div className="flex items-center justify-between gap-3">
+          <DialogTitle className="text-lg font-semibold">
+            カード作成
+          </DialogTitle>
+          {/* Desktop Save Button in Header */}
+          <Button
+            type="submit"
+            form="create-card-form"
+            size="sm"
+            className="hidden sm:inline-flex gap-1.5"
+            disabled={createCard.isPending}
+          >
+            {createCard.isPending ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span>保存中...</span>
+              </>
+            ) : (
+              <>
+                <Check className="h-4 w-4" />
+                <span>保存</span>
+              </>
+            )}
+          </Button>
+        </div>
       </DialogHeader>
-      <CardInputForm
-        mode="create"
-        onSubmit={handleSubmit}
-        isSubmitting={createCard.isPending}
-        defaultValues={defaultValues}
-        key={open ? 'open' : 'closed'}
-      />
+
+      {/* Scrollable Content */}
+      <div className="flex-1 overflow-y-auto px-4 py-4 sm:px-6 sm:py-5">
+        <CardInputForm
+          mode="create"
+          formId="create-card-form"
+          onSubmit={handleSubmit}
+          isSubmitting={createCard.isPending}
+          defaultValues={defaultValues}
+          key={open ? 'open' : 'closed'}
+        />
+      </div>
+
+      {/* Mobile Sticky Footer */}
+      <div className="sm:hidden sticky bottom-0 flex-shrink-0 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 p-3 pb-[max(12px,env(safe-area-inset-bottom))]">
+        <div className="flex gap-3">
+          <Button
+            type="button"
+            variant="ghost"
+            className="flex-1"
+            onClick={() => setOpen(false)}
+          >
+            キャンセル
+          </Button>
+          <Button
+            type="submit"
+            form="create-card-form"
+            className="flex-1"
+            disabled={createCard.isPending}
+          >
+            {createCard.isPending ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin mr-1.5" />
+                保存中...
+              </>
+            ) : (
+              '保存'
+            )}
+          </Button>
+        </div>
+      </div>
     </DialogContent>
   );
 

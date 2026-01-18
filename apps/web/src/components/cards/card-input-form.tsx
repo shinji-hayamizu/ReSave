@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Info } from 'lucide-react';
+import { Info, Settings, ChevronDown } from 'lucide-react';
 import TextareaAutosize from 'react-textarea-autosize';
 
 import { Button } from '@/components/ui/button';
@@ -18,6 +18,11 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
 import { TagSelector } from '@/components/cards/tag-selector';
 import { RepeatSelector } from '@/components/cards/repeat-selector';
 import { cn } from '@/lib/utils';
@@ -53,6 +58,7 @@ interface CardInputFormProps {
   defaultValues?: Partial<CardInputFormValues>;
   onSubmit: (data: CardInputFormValues) => Promise<void>;
   isSubmitting?: boolean;
+  formId?: string;
 }
 
 function CharacterCounter({
@@ -70,9 +76,10 @@ function CharacterCounter({
   return (
     <span
       className={cn(
-        'text-xs text-muted-foreground',
-        isWarning && 'text-yellow-600',
-        isDanger && 'text-destructive',
+        'text-xs tabular-nums transition-colors',
+        !isWarning && !isDanger && 'text-muted-foreground',
+        isWarning && 'text-amber-500',
+        isDanger && 'text-destructive font-medium',
         className
       )}
     >
@@ -86,7 +93,9 @@ export function CardInputForm({
   defaultValues,
   onSubmit,
   isSubmitting = false,
+  formId,
 }: CardInputFormProps) {
+  const [optionsOpen, setOptionsOpen] = useState(false);
   const form = useForm<CardInputFormValues>({
     resolver: zodResolver(cardInputSchema),
     defaultValues: {
@@ -113,16 +122,18 @@ export function CardInputForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-0">
-        <div className="rounded-lg border bg-card shadow-sm overflow-hidden">
-          {/* Required Section */}
-          <div className="p-5 space-y-4">
+      <form id={formId} onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+        {/* Main Card */}
+        <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
+          {/* Required Fields */}
+          <div className="p-5 space-y-5">
+            {/* Text Field (Required) */}
             <FormField
               control={form.control}
               name="front"
               render={({ field }) => (
                 <FormItem>
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between mb-2">
                     <FormLabel className="text-sm font-medium">
                       テキスト <span className="text-destructive">*</span>
                     </FormLabel>
@@ -133,25 +144,36 @@ export function CardInputForm({
                   </div>
                   <FormControl>
                     <TextareaAutosize
-                      placeholder="覚えたいことを入力"
-                      minRows={3}
+                      placeholder="覚えたいことを入力してください"
+                      minRows={4}
                       maxLength={TEXT_MAX_LENGTH}
-                      className="flex w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm resize-none"
+                      className={cn(
+                        'flex w-full rounded-lg border border-input bg-background px-3.5 py-3',
+                        'text-base leading-relaxed placeholder:text-muted-foreground',
+                        'transition-all duration-150',
+                        'hover:border-muted-foreground/50',
+                        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary',
+                        'disabled:cursor-not-allowed disabled:opacity-50',
+                        'resize-none'
+                      )}
                       {...field}
                     />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="flex items-center gap-1.5 mt-2 text-[13px]" />
                 </FormItem>
               )}
             />
 
+            {/* Hidden Text Field (Optional but in main area) */}
             <FormField
               control={form.control}
               name="back"
               render={({ field }) => (
                 <FormItem>
-                  <div className="flex items-center justify-between">
-                    <FormLabel className="text-sm font-medium">隠しテキスト</FormLabel>
+                  <div className="flex items-center justify-between mb-2">
+                    <FormLabel className="text-sm font-medium">
+                      隠しテキスト（答え）
+                    </FormLabel>
                     <CharacterCounter
                       current={field.value?.length ?? 0}
                       max={HIDDEN_TEXT_MAX_LENGTH}
@@ -159,10 +181,18 @@ export function CardInputForm({
                   </div>
                   <FormControl>
                     <TextareaAutosize
-                      placeholder="答え（任意）"
+                      placeholder="タップで表示される答えを入力（任意）"
                       minRows={3}
                       maxLength={HIDDEN_TEXT_MAX_LENGTH}
-                      className="flex w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm resize-none"
+                      className={cn(
+                        'flex w-full rounded-lg border border-input bg-background px-3.5 py-3',
+                        'text-base leading-relaxed placeholder:text-muted-foreground',
+                        'transition-all duration-150',
+                        'hover:border-muted-foreground/50',
+                        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary',
+                        'disabled:cursor-not-allowed disabled:opacity-50',
+                        'resize-none'
+                      )}
                       {...field}
                     />
                   </FormControl>
@@ -171,25 +201,13 @@ export function CardInputForm({
               )}
             />
 
-            <div className="flex flex-col items-center gap-2 pt-2">
-              <Button type="submit" disabled={isSaveDisabled} className="w-full sm:w-auto">
-                {isSubmitting ? '保存中...' : '保存'}
-              </Button>
-              <p className="text-xs text-muted-foreground flex items-center gap-1">
-                <span className="inline-block w-1.5 h-1.5 rounded-full bg-primary" />
-                必須項目
-              </p>
-            </div>
-          </div>
-
-          {/* Optional Section */}
-          <div className="p-5 space-y-4 border-t bg-muted/30">
+            {/* Tags */}
             <FormField
               control={form.control}
               name="tagIds"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-sm font-medium">タグ</FormLabel>
+                  <FormLabel className="text-sm font-medium mb-2 block">タグ</FormLabel>
                   <FormControl>
                     <TagSelector
                       selectedTagIds={field.value}
@@ -197,59 +215,109 @@ export function CardInputForm({
                       maxTags={10}
                     />
                   </FormControl>
-                  <FormDescription>タグは最大10個まで</FormDescription>
+                  <FormDescription className="text-[13px] mt-2">
+                    タグは最大10個まで設定できます
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
-
-            <FormField
-              control={form.control}
-              name="sourceUrl"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm font-medium">ソース</FormLabel>
-                  <FormControl>
-                    <Input type="url" placeholder="https://..." {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="repeatMode"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm font-medium">リピート</FormLabel>
-                  <FormControl>
-                    <RepeatSelector value={field.value} onChange={field.onChange} />
-                  </FormControl>
-                  <a
-                    href="#"
-                    className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors mt-1"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      alert(
-                        '間隔反復（Spaced Repetition）とは:\n\n記憶の定着を最大化するため、復習間隔を徐々に延ばしていく学習法です。\n\nデフォルト間隔: 1日 -> 3日 -> 7日 -> 14日 -> 30日 -> 180日'
-                      );
-                    }}
-                  >
-                    <Info className="h-3.5 w-3.5" />
-                    <span>間隔反復について</span>
-                  </a>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="flex justify-center pt-2">
-              <Button type="submit" disabled={isSaveDisabled} className="w-full sm:w-auto">
-                {isSubmitting ? '保存中...' : '保存'}
-              </Button>
-            </div>
           </div>
+
+          {/* Optional Settings (Collapsible) */}
+          <Collapsible open={optionsOpen} onOpenChange={setOptionsOpen}>
+            <CollapsibleTrigger asChild>
+              <button
+                type="button"
+                className={cn(
+                  'w-full flex items-center justify-between px-5 py-4',
+                  'bg-muted/40 border-t',
+                  'transition-colors hover:bg-muted/60',
+                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:ring-inset'
+                )}
+              >
+                <span className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                  <Settings className="h-4 w-4" />
+                  詳細設定
+                </span>
+                <ChevronDown
+                  className={cn(
+                    'h-5 w-5 text-muted-foreground transition-transform duration-200',
+                    optionsOpen && 'rotate-180'
+                  )}
+                />
+              </button>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <div className="px-5 py-5 space-y-5 bg-muted/40 border-t">
+                {/* Source URL */}
+                <FormField
+                  control={form.control}
+                  name="sourceUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium mb-2 block">
+                        ソースURL
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          type="url"
+                          placeholder="https://example.com"
+                          className="h-11"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormDescription className="text-[13px] mt-2">
+                        参照元のURLを記録できます
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Repeat Mode */}
+                <FormField
+                  control={form.control}
+                  name="repeatMode"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium mb-2 block">
+                        リピートモード
+                      </FormLabel>
+                      <FormControl>
+                        <RepeatSelector value={field.value} onChange={field.onChange} />
+                      </FormControl>
+                      <button
+                        type="button"
+                        className="inline-flex items-center gap-1 text-[13px] text-muted-foreground hover:text-primary transition-colors mt-2"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          alert(
+                            '間隔反復（Spaced Repetition）とは:\n\n記憶の定着を最大化するため、復習間隔を徐々に延ばしていく学習法です。\n\nReSaveの間隔: 1日 → 3日 → 7日 → 14日 → 30日 → 180日\n\n「覚えた」を押すと次の間隔へ、「もう一度」を押すと最初からやり直しになります。'
+                          );
+                        }}
+                      >
+                        <Info className="h-3.5 w-3.5" />
+                        <span>間隔反復について詳しく</span>
+                      </button>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
+        </div>
+
+        {/* Submit Button - Desktop only, mobile uses sticky footer in parent */}
+        <div className="hidden sm:flex justify-end">
+          <Button
+            type="submit"
+            disabled={isSaveDisabled}
+            className="min-w-[120px] h-11"
+          >
+            {isSubmitting ? '保存中...' : '保存'}
+          </Button>
         </div>
       </form>
     </Form>

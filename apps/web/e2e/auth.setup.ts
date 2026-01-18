@@ -17,7 +17,7 @@ setup('authenticate', async ({ page }) => {
 
   await page.getByLabel('メールアドレス').fill(email);
   await page.getByLabel('パスワード').fill(password);
-  await page.getByRole('button', { name: 'ログイン' }).click();
+  await page.getByRole('button', { name: 'ログイン', exact: true }).click();
 
   await expect(page).toHaveURL('/', { timeout: 10000 });
 
