@@ -94,6 +94,13 @@ const SidebarProvider = React.forwardRef<
         }
       }
     }, [isTablet, isMobile, openProp])
+
+    // Close mobile sheet when switching from mobile to tablet/PC
+    React.useEffect(() => {
+      if (!isMobile && openMobile) {
+        setOpenMobile(false)
+      }
+    }, [isMobile, openMobile])
     const setOpen = React.useCallback(
       (value: boolean | ((value: boolean) => boolean)) => {
         const openState = typeof value === "function" ? value(open) : value
