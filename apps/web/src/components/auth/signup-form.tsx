@@ -1,11 +1,12 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 
+import { GoogleIcon } from '@/components/icons/google-icon';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -31,9 +32,9 @@ import { signupSchema } from '@/validations/user';
 import type { SignupInput } from '@/validations/user';
 
 export function SignupForm() {
-  const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
 
   const form = useForm<SignupInput>({
@@ -68,6 +69,24 @@ export function SignupForm() {
     setLoading(false);
   };
 
+  const handleGoogleSignup = async () => {
+    setError(null);
+    setGoogleLoading(true);
+
+    const supabase = createClient();
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
+
+    if (error) {
+      setError('Googleでの登録に失敗しました');
+      setGoogleLoading(false);
+    }
+  };
+
   if (emailSent) {
     return (
       <Card>
@@ -94,6 +113,30 @@ export function SignupForm() {
         <CardDescription>アカウントを作成してください</CardDescription>
       </CardHeader>
       <CardContent>
+        <Button
+          className="w-full"
+          disabled={loading || googleLoading}
+          onClick={handleGoogleSignup}
+          type="button"
+          variant="outline"
+        >
+          {googleLoading ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <GoogleIcon size={18} />
+          )}
+          Googleで登録
+        </Button>
+
+        <div className="relative my-4">
+          <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-card px-2 text-muted-foreground">または</span>
+          </div>
+        </div>
+
         <Form {...form}>
           <form className="space-y-4" noValidate onSubmit={form.handleSubmit(onSubmit)}>
             <FormField
@@ -142,7 +185,7 @@ export function SignupForm() {
               )}
             />
             {error && <p className="text-sm text-destructive">{error}</p>}
-            <Button className="w-full" disabled={loading} type="submit">
+            <Button className="w-full" disabled={loading || googleLoading} type="submit">
               {loading ? '登録中...' : '新規登録'}
             </Button>
             <p className="text-center text-sm text-muted-foreground">

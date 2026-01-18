@@ -56,6 +56,10 @@ EXPO_PUBLIC_SUPABASE_URL=
 EXPO_PUBLIC_SUPABASE_ANON_KEY=
 ```
 
+## スキル
+
+フロントエンド（UI/UXコンポーネント、画面実装）の修正・作成時は `/frontend-design` スキルを使用すること。
+
 ## ドキュメント
 
 - [ビジネス要件](docs/requirements/business-requirements.md)

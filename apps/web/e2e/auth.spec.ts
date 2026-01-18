@@ -31,14 +31,14 @@ test.describe('認証フロー', () => {
 
     await expect(page.getByLabel('メールアドレス')).toBeVisible();
     await expect(page.getByLabel('パスワード')).toBeVisible();
-    await expect(page.getByRole('button', { name: 'ログイン' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'ログイン', exact: true })).toBeVisible();
     await expect(page.getByRole('link', { name: '新規登録' })).toBeVisible();
   });
 
   test('ログイン画面: 空フォーム送信時にバリデーションエラー', async ({ page }) => {
     await page.goto('/login');
 
-    await page.getByRole('button', { name: 'ログイン' }).click();
+    await page.getByRole('button', { name: 'ログイン', exact: true }).click();
 
     await expect(page.getByText('メールアドレスを入力してください')).toBeVisible();
     await expect(page.getByText('パスワードを入力してください')).toBeVisible();
@@ -49,7 +49,7 @@ test.describe('認証フロー', () => {
 
     await page.getByLabel('メールアドレス').fill('invalid-email');
     await page.getByLabel('パスワード').fill('password123');
-    await page.getByRole('button', { name: 'ログイン' }).click();
+    await page.getByRole('button', { name: 'ログイン', exact: true }).click();
 
     await expect(page.getByText('有効なメールアドレスを入力してください')).toBeVisible();
   });

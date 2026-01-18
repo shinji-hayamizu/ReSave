@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 
 import { Edit, Plus, X } from 'lucide-react';
 import type { TextareaAutosizeProps } from 'react-textarea-autosize';
@@ -25,12 +25,13 @@ export function QuickInputForm({ className, onCardCreated }: QuickInputFormProps
   const [back, setBack] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
   const createCard = useCreateCard();
-  const backTextareaRef = useRef<HTMLTextAreaElement>(null);
 
   const handleFrontKeyDown: TextareaAutosizeProps['onKeyDown'] = (e) => {
     if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
       e.preventDefault();
-      backTextareaRef.current?.focus();
+      if (!isSubmitDisabled) {
+        e.currentTarget.form?.requestSubmit();
+      }
     }
   };
 
@@ -90,6 +91,7 @@ export function QuickInputForm({ className, onCardCreated }: QuickInputFormProps
               minRows={1}
               value={front}
               onChange={(e) => setFront(e.target.value)}
+              onKeyDown={handleFrontKeyDown}
               disabled={createCard.isPending}
             />
             {front && (
@@ -123,6 +125,7 @@ export function QuickInputForm({ className, onCardCreated }: QuickInputFormProps
               minRows={1}
               value={back}
               onChange={(e) => setBack(e.target.value)}
+              onKeyDown={handleBackKeyDown}
               disabled={createCard.isPending}
             />
             {back && (
