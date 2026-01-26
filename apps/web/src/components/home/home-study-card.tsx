@@ -119,6 +119,7 @@ export const HomeStudyCard = memo(function HomeStudyCard({
 
   return (
     <div
+      data-testid="study-card"
       className={cn(
         'grid transition-all ease-out',
         isRemoving

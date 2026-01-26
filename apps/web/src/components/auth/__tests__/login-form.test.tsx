@@ -8,6 +8,7 @@ import { createClient } from '@/lib/supabase/client';
 import { LoginForm } from '../login-form';
 
 const mockSignInWithPassword = vi.fn();
+const mockSignInWithOAuth = vi.fn();
 const mockPush = vi.fn();
 const mockRefresh = vi.fn();
 
@@ -27,6 +28,7 @@ describe('LoginForm', () => {
     vi.mocked(createClient).mockReturnValue({
       auth: {
         signInWithPassword: mockSignInWithPassword,
+        signInWithOAuth: mockSignInWithOAuth,
         getUser: vi.fn(),
         signUp: vi.fn(),
         signOut: vi.fn(),
@@ -52,6 +54,15 @@ describe('LoginForm', () => {
       expect(screen.getByRole('button', { name: 'ログイン' })).toBeInTheDocument();
       expect(screen.getByText('パスワードを忘れた方')).toBeInTheDocument();
       expect(screen.getByText('新規登録')).toBeInTheDocument();
+    });
+
+    it('Googleログインボタンが表示される', () => {
+      // Given: LoginFormコンポーネント
+      // When: レンダリング
+      render(<LoginForm />);
+
+      // Then: Googleログインボタンが表示される
+      expect(screen.getByRole('button', { name: /Googleでログイン/i })).toBeInTheDocument();
     });
   });
 
@@ -150,6 +161,45 @@ describe('LoginForm', () => {
 
       // Then: ボタンが無効化される
       expect(screen.getByRole('button', { name: 'ログイン中...' })).toBeDisabled();
+    });
+  });
+
+  describe('Googleログイン', () => {
+    it('GoogleログインボタンクリックでsignInWithOAuthが呼ばれる', async () => {
+      // Given: signInWithOAuthが成功する状態
+      mockSignInWithOAuth.mockResolvedValue({ error: null });
+      const user = userEvent.setup();
+      render(<LoginForm />);
+
+      // When: Googleログインボタンをクリック
+      await user.click(screen.getByRole('button', { name: /Googleでログイン/i }));
+
+      // Then: signInWithOAuthがgoogleプロバイダーで呼ばれる
+      await waitFor(() => {
+        expect(mockSignInWithOAuth).toHaveBeenCalledWith({
+          provider: 'google',
+          options: expect.objectContaining({
+            redirectTo: expect.stringContaining('/auth/callback'),
+          }),
+        });
+      });
+    });
+
+    it('Googleログイン開始失敗時にエラーメッセージが表示される', async () => {
+      // Given: signInWithOAuthが失敗する状態
+      mockSignInWithOAuth.mockResolvedValue({
+        error: { message: 'OAuth error' },
+      });
+      const user = userEvent.setup();
+      render(<LoginForm />);
+
+      // When: Googleログインボタンをクリック
+      await user.click(screen.getByRole('button', { name: /Googleでログイン/i }));
+
+      // Then: エラーメッセージが表示される
+      await waitFor(() => {
+        expect(screen.getByText('Googleログインの開始に失敗しました')).toBeInTheDocument();
+      });
     });
   });
 });

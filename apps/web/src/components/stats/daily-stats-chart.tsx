@@ -53,7 +53,7 @@ export function DailyStatsChart({ days = 7 }: DailyStatsChartProps) {
   ) ?? 0;
 
   return (
-    <Card className="p-6 shadow-sm">
+    <Card className="p-6 shadow-sm" data-testid="daily-stats-chart">
       <h3 className="mb-5 text-base font-semibold">日別学習カード数（過去{days}日）</h3>
       <div className="flex h-40 items-end justify-between gap-2 px-2">
         {isLoading ? (

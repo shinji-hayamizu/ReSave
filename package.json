@@ -27,10 +27,10 @@
   "packageManager": "pnpm@9.15.1",
   "lint-staged": {
     "apps/web/**/*.{js,jsx,ts,tsx}": [
-      "eslint --fix"
+      "pnpm --filter web exec eslint --fix"
     ],
     "apps/admin/**/*.{js,jsx,ts,tsx}": [
-      "eslint --fix"
+      "pnpm --filter admin exec eslint --fix"
     ]
   }
 }

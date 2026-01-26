@@ -144,7 +144,7 @@ function VirtualizedCardList({
   });
 
   return (
-    <div className={className}>
+    <div className={className} data-testid="card-list">
       <div
         ref={parentRef}
         className="h-[600px] overflow-auto"
@@ -260,7 +260,7 @@ export const CardList = memo(function CardList({
 
   return (
     <>
-      <div className={className}>
+      <div className={className} data-testid="card-list">
         <div className="space-y-4">
           {cards.map((card) => (
             <CardItem

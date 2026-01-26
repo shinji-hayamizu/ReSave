@@ -25,7 +25,7 @@ export function TagItem({
   onDelete,
 }: TagItemProps) {
   return (
-    <div className="flex items-center gap-3 rounded-lg bg-background p-4 shadow-sm transition-shadow hover:shadow-md">
+    <div data-testid="tag-item" className="flex items-center gap-3 rounded-lg bg-background p-4 shadow-sm transition-shadow hover:shadow-md">
       <span
         className={cn(
           'inline-flex items-center whitespace-nowrap rounded-full border px-3.5 py-1.5 text-sm font-medium',

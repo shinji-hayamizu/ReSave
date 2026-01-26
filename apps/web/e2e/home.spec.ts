@@ -3,8 +3,6 @@ import { test, expect } from '@playwright/test';
 test.describe('ホーム画面', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
-    // 認証済みの場合はホーム画面、未認証の場合はログイン画面にリダイレクト
-    // ログイン画面にリダイレクトされた場合はテストをスキップ
     const url = page.url();
     if (url.includes('/login')) {
       test.skip(true, '認証が必要です（auth.setupが成功している必要があります）');
@@ -13,11 +11,9 @@ test.describe('ホーム画面', () => {
 
   test.describe('ページ構造', () => {
     test('必須要素が表示される', async ({ page }) => {
-      // クイック入力フォーム
       await expect(page.getByPlaceholder('覚えたいこと')).toBeVisible();
       await expect(page.getByPlaceholder('答え（任意）')).toBeVisible();
 
-      // タブ
       await expect(page.getByText('未学習')).toBeVisible();
       await expect(page.getByText('復習中')).toBeVisible();
       await expect(page.getByText('完了')).toBeVisible();
@@ -26,7 +22,6 @@ test.describe('ホーム画面', () => {
     test('デフォルトで未学習タブがアクティブ', async ({ page }) => {
       const dueTab = page.getByText('未学習').first();
       await expect(dueTab).toBeVisible();
-      // アクティブタブはprimary色のボーダーを持つ
       await expect(dueTab.locator('..')).toHaveClass(/border-b-primary/);
     });
   });
@@ -36,13 +31,10 @@ test.describe('ホーム画面', () => {
       const frontInput = page.getByPlaceholder('覚えたいこと');
       const submitButton = page.locator('button[type="submit"]');
 
-      // 初期状態ではボタンが無効
       await expect(submitButton).toBeDisabled();
 
-      // 問題を入力
       await frontInput.fill('テスト問題');
 
-      // ボタンが有効化される
       await expect(submitButton).toBeEnabled();
     });
 
@@ -71,7 +63,6 @@ test.describe('ホーム画面', () => {
 
       await frontInput.fill('テスト問題');
 
-      // クリアボタンをクリック
       const clearButton = page.locator('button[title="クリア"]').first();
       await clearButton.click();
 
@@ -83,7 +74,6 @@ test.describe('ホーム画面', () => {
 
       await detailButton.click();
 
-      // ダイアログが開く
       await expect(page.getByRole('dialog')).toBeVisible();
     });
 
@@ -94,10 +84,8 @@ test.describe('ホーム画面', () => {
       await frontInput.fill('新しいカード');
       await submitButton.click();
 
-      // 成功トーストを確認
       await expect(page.getByText('カードを追加しました')).toBeVisible();
 
-      // 入力がクリアされる
       await expect(frontInput).toHaveValue('');
     });
   });
@@ -137,10 +125,7 @@ test.describe('ホーム画面', () => {
 
   test.describe('空状態', () => {
     test('カードがない場合に空状態メッセージが表示される', async ({ page }) => {
-      // 空状態の場合のメッセージを確認
       const emptyMessage = page.getByText('新しいカードを追加して学習を始めましょう');
-
-      // 空状態メッセージが表示されるか、カードが表示されるかのいずれか
       const hasCards = await page.locator('[data-testid="study-card"]').count() > 0;
 
       if (!hasCards) {
@@ -151,7 +136,6 @@ test.describe('ホーム画面', () => {
 
   test.describe('カード操作', () => {
     test('カードが存在する場合、評価ボタンが表示される', async ({ page }) => {
-      // カードが存在する場合のみテスト
       const cardCount = await page.locator('[data-testid="study-card"]').count();
 
       if (cardCount > 0) {
@@ -166,7 +150,6 @@ test.describe('ホーム画面', () => {
       if (cardCount > 0) {
         const showAnswerButton = page.getByRole('button', { name: '答えを見る' }).first();
 
-        // 答えが存在するカードの場合
         const hasShowAnswerButton = await showAnswerButton.count() > 0;
         if (hasShowAnswerButton) {
           await showAnswerButton.click();
@@ -211,10 +194,8 @@ test.describe('カード追加フロー', () => {
     await backInput.fill(uniqueAnswer);
     await submitButton.click();
 
-    // 成功トースト
     await expect(page.getByText('カードを追加しました')).toBeVisible();
 
-    // 未学習タブに追加されたカードが表示される
     await expect(page.getByText(uniqueQuestion)).toBeVisible();
   });
 });
@@ -228,41 +209,30 @@ test.describe('詳細入力ダイアログ', () => {
   });
 
   test('ダイアログでカードを作成', async ({ page }) => {
-
-    // 詳細入力ボタンをクリック
     await page.locator('button[title="詳細入力"]').click();
 
-    // ダイアログが開く
     const dialog = page.getByRole('dialog');
     await expect(dialog).toBeVisible();
 
-    // ダイアログ内のフォームに入力
     await dialog.getByLabel('テキスト').fill('詳細入力テスト問題');
     await dialog.getByLabel('隠しテキスト').fill('詳細入力テスト答え');
 
-    // 保存
     await dialog.getByRole('button', { name: '保存' }).click();
 
-    // 成功トースト
     await expect(page.getByText('カードを追加しました')).toBeVisible();
   });
 
   test('ダイアログをキャンセル', async ({ page }) => {
-    // 問題を入力してから詳細入力を開く
     await page.getByPlaceholder('覚えたいこと').fill('テスト');
     await page.locator('button[title="詳細入力"]').click();
 
-    // ダイアログが開く
     const dialog = page.getByRole('dialog');
     await expect(dialog).toBeVisible();
 
-    // キャンセル
     await dialog.getByRole('button', { name: 'キャンセル' }).click();
 
-    // ダイアログが閉じる
     await expect(dialog).not.toBeVisible();
 
-    // 入力がクリアされる
     await expect(page.getByPlaceholder('覚えたいこと')).toHaveValue('');
   });
 });

@@ -82,6 +82,8 @@ export function ColorPalette({ value, onChange }: ColorPaletteProps) {
           <button
             key={colorName}
             type="button"
+            data-testid="color-button"
+            data-selected={isSelected}
             onClick={() => onChange(colorName)}
             className={cn(
               'h-8 w-8 rounded-full transition-transform hover:scale-110',
