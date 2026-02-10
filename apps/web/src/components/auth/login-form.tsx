@@ -70,6 +70,7 @@ export function LoginForm() {
       return;
     }
 
+    // eslint-disable-next-line react-hooks/immutability -- full page navigation to ensure auth cookies are sent
     window.location.href = redirectTo;
   };
 
