@@ -6,14 +6,7 @@ import { createClient } from '@/lib/supabase/client';
 
 vi.mock('@/lib/supabase/client');
 
-const mockPush = vi.fn();
-const mockRefresh = vi.fn();
-
 vi.mock('next/navigation', () => ({
-  useRouter: () => ({
-    push: mockPush,
-    refresh: mockRefresh,
-  }),
   useSearchParams: () => ({
     get: vi.fn().mockReturnValue(null),
   }),
@@ -24,6 +17,11 @@ describe('LoginForm', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+
+    Object.defineProperty(window, 'location', {
+      writable: true,
+      value: { href: '', origin: 'http://localhost:3000' },
+    });
 
     (createClient as ReturnType<typeof vi.fn>).mockReturnValue({
       auth: {
@@ -136,10 +134,9 @@ describe('LoginForm', () => {
     await user.type(screen.getByLabelText('パスワード'), 'password123');
     await user.click(screen.getByRole('button', { name: 'ログイン' }));
 
-    // Then: リダイレクトされる
+    // Then: フルページナビゲーションでリダイレクトされる
     await waitFor(() => {
-      expect(mockPush).toHaveBeenCalledWith('/');
-      expect(mockRefresh).toHaveBeenCalled();
+      expect(window.location.href).toBe('/');
     });
   });
 

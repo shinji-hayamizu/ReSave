@@ -3,7 +3,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { BookOpen, Loader2 } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
@@ -33,7 +33,6 @@ import { loginSchema } from '@/validations/user';
 import type { LoginInput } from '@/validations/user';
 
 export function LoginForm() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get('redirect') || '/';
   const [error, setError] = useState<string | null>(null);
@@ -71,8 +70,7 @@ export function LoginForm() {
       return;
     }
 
-    router.push(redirectTo);
-    router.refresh();
+    window.location.href = redirectTo;
   };
 
   const handleGoogleLogin = async () => {

@@ -1,6 +1,5 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { useRouter } from 'next/navigation';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createClient } from '@/lib/supabase/client';
@@ -9,21 +8,15 @@ import { LoginForm } from '../login-form';
 
 const mockSignInWithPassword = vi.fn();
 const mockSignInWithOAuth = vi.fn();
-const mockPush = vi.fn();
-const mockRefresh = vi.fn();
 
 describe('LoginForm', () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    vi.mocked(useRouter).mockReturnValue({
-      push: mockPush,
-      replace: vi.fn(),
-      back: vi.fn(),
-      forward: vi.fn(),
-      refresh: mockRefresh,
-      prefetch: vi.fn(),
-    } as unknown as ReturnType<typeof useRouter>);
+    Object.defineProperty(window, 'location', {
+      writable: true,
+      value: { href: '', origin: 'http://localhost:3000' },
+    });
 
     vi.mocked(createClient).mockReturnValue({
       auth: {
@@ -120,8 +113,7 @@ describe('LoginForm', () => {
           email: 'test@example.com',
           password: 'password123',
         });
-        expect(mockPush).toHaveBeenCalledWith('/');
-        expect(mockRefresh).toHaveBeenCalled();
+        expect(window.location.href).toBe('/');
       });
     });
 
