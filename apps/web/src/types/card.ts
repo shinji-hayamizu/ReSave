@@ -62,3 +62,8 @@ export type CardFilters = {
   limit?: number;
   offset?: number;
 };
+
+export type HomeCardsData = {
+  cards: CardWithTags[];
+  todayStudiedCardIds: string[];
+};

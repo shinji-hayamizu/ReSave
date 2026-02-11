@@ -1,16 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import type { CardWithTags } from '@/types/card';
+import type { CardWithTags, HomeCardsData } from '@/types/card';
 
-const mockUseNewCards = vi.fn();
-const mockUseTodayCards = vi.fn();
-const mockUseTodayCompletedCards = vi.fn();
+const mockUseHomeCards = vi.fn();
 
-vi.mock('@/hooks/useCards', () => ({
-  useNewCards: () => mockUseNewCards(),
-  useTodayCards: () => mockUseTodayCards(),
-  useTodayCompletedCards: () => mockUseTodayCompletedCards(),
+vi.mock('@/hooks/useHomeCards', () => ({
+  useHomeCards: () => mockUseHomeCards(),
 }));
 
 vi.mock('@/components/home', () => ({
@@ -78,6 +74,10 @@ function createCard(overrides: Partial<CardWithTags> = {}): CardWithTags {
   };
 }
 
+function createHomeCardsData(cards: CardWithTags[], todayStudiedCardIds: string[] = []): HomeCardsData {
+  return { cards, todayStudiedCardIds };
+}
+
 function createQueryClient() {
   return new QueryClient({
     defaultOptions: { queries: { retry: false } },
@@ -101,11 +101,17 @@ describe('DashboardPage 初期タブ選択', () => {
   });
 
   it('復習中カードがある場合: learningタブが初期表示される', async () => {
-    // Given: 復習中カードが1件、未学習カードが0件
-    const todayCard = createCard({ id: 'today-1', status: 'active', front: 'review card' });
-    mockUseNewCards.mockReturnValue({ data: [], isLoading: false });
-    mockUseTodayCards.mockReturnValue({ data: [todayCard], isLoading: false });
-    mockUseTodayCompletedCards.mockReturnValue({ data: [], isLoading: false });
+    // Given: 復習中カードが1件（active + nextReviewAt <= now）
+    const todayCard = createCard({
+      id: 'today-1',
+      status: 'active',
+      front: 'review card',
+      nextReviewAt: new Date(Date.now() - 60000).toISOString(),
+    });
+    mockUseHomeCards.mockReturnValue({
+      data: createHomeCardsData([todayCard]),
+      isLoading: false,
+    });
 
     // When: ページをレンダリング
     await renderPage();
@@ -118,11 +124,12 @@ describe('DashboardPage 初期タブ選択', () => {
   });
 
   it('復習中カードがない場合: dueタブが初期表示される', async () => {
-    // Given: 復習中カードが0件、未学習カードが1件
+    // Given: 未学習カードが1件、復習中カードが0件
     const newCard = createCard({ id: 'new-1', status: 'new', front: 'new card' });
-    mockUseNewCards.mockReturnValue({ data: [newCard], isLoading: false });
-    mockUseTodayCards.mockReturnValue({ data: [], isLoading: false });
-    mockUseTodayCompletedCards.mockReturnValue({ data: [], isLoading: false });
+    mockUseHomeCards.mockReturnValue({
+      data: createHomeCardsData([newCard]),
+      isLoading: false,
+    });
 
     // When: ページをレンダリング
     await renderPage();
@@ -136,9 +143,10 @@ describe('DashboardPage 初期タブ選択', () => {
 
   it('全カードが0件の場合: dueタブが初期表示される', async () => {
     // Given: すべてのカードが0件
-    mockUseNewCards.mockReturnValue({ data: [], isLoading: false });
-    mockUseTodayCards.mockReturnValue({ data: [], isLoading: false });
-    mockUseTodayCompletedCards.mockReturnValue({ data: [], isLoading: false });
+    mockUseHomeCards.mockReturnValue({
+      data: createHomeCardsData([]),
+      isLoading: false,
+    });
 
     // When: ページをレンダリング
     await renderPage();
@@ -152,9 +160,10 @@ describe('DashboardPage 初期タブ選択', () => {
 
   it('データ読み込み中: スケルトンが表示される', async () => {
     // Given: データがまだ読み込み中
-    mockUseNewCards.mockReturnValue({ data: undefined, isLoading: true });
-    mockUseTodayCards.mockReturnValue({ data: undefined, isLoading: true });
-    mockUseTodayCompletedCards.mockReturnValue({ data: undefined, isLoading: true });
+    mockUseHomeCards.mockReturnValue({
+      data: undefined,
+      isLoading: true,
+    });
 
     // When: ページをレンダリング
     await renderPage();
@@ -165,10 +174,15 @@ describe('DashboardPage 初期タブ選択', () => {
 
   it('復習中タブ表示中に復習中カードが0枚になった場合: dueタブに自動切替される', async () => {
     // Given: 復習中カードが1件ある状態で初期表示
-    const todayCard = createCard({ id: 'today-1', status: 'active' });
-    mockUseNewCards.mockReturnValue({ data: [], isLoading: false });
-    mockUseTodayCards.mockReturnValue({ data: [todayCard], isLoading: false });
-    mockUseTodayCompletedCards.mockReturnValue({ data: [], isLoading: false });
+    const todayCard = createCard({
+      id: 'today-1',
+      status: 'active',
+      nextReviewAt: new Date(Date.now() - 60000).toISOString(),
+    });
+    mockUseHomeCards.mockReturnValue({
+      data: createHomeCardsData([todayCard]),
+      isLoading: false,
+    });
 
     const { rerender } = await renderPage();
 
@@ -177,7 +191,10 @@ describe('DashboardPage 初期タブ選択', () => {
     });
 
     // When: 復習中カードが0枚になった（全て復習完了）
-    mockUseTodayCards.mockReturnValue({ data: [], isLoading: false });
+    mockUseHomeCards.mockReturnValue({
+      data: createHomeCardsData([]),
+      isLoading: false,
+    });
 
     const DashboardPage = (await import('../page')).default;
     const queryClient = createQueryClient();

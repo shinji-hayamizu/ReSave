@@ -2,10 +2,58 @@
 
 import { revalidatePath } from 'next/cache';
 
-import type { Card, CardWithTags, CreateCardInput, UpdateCardInput, CardFilters, CardListResponse } from '@/types/card';
+import type { Card, CardWithTags, CreateCardInput, UpdateCardInput, CardFilters, CardListResponse, HomeCardsData } from '@/types/card';
 import { DEFAULT_INTERVALS } from '@/types/review-schedule';
 import { createCardSchema, updateCardSchema } from '@/validations/card';
 import { createClient } from '@/lib/supabase/server';
+
+interface SupabaseCardTag {
+  tag: {
+    id: string;
+    user_id: string;
+    name: string;
+    color: string;
+    created_at: string;
+  };
+}
+
+interface SupabaseCardRow {
+  id: string;
+  user_id: string;
+  front: string;
+  back: string;
+  schedule: number[];
+  current_step: number;
+  next_review_at: string | null;
+  status: string;
+  completed_at: string | null;
+  created_at: string;
+  updated_at: string;
+  card_tags: SupabaseCardTag[];
+}
+
+function mapCardRow(card: SupabaseCardRow): CardWithTags {
+  return {
+    id: card.id,
+    userId: card.user_id,
+    front: card.front,
+    back: card.back,
+    schedule: card.schedule,
+    currentStep: card.current_step,
+    nextReviewAt: card.next_review_at,
+    status: card.status as CardWithTags['status'],
+    completedAt: card.completed_at,
+    createdAt: card.created_at,
+    updatedAt: card.updated_at,
+    tags: card.card_tags.map((ct) => ({
+      id: ct.tag.id,
+      userId: ct.tag.user_id,
+      name: ct.tag.name,
+      color: ct.tag.color,
+      createdAt: ct.tag.created_at,
+    })),
+  };
+}
 
 /**
  * カードを新規作成（タグ関連付けオプション付き）
@@ -195,28 +243,7 @@ export async function getCard(id: string): Promise<CardWithTags> {
     throw new Error(`Failed to fetch card: ${error.message}`);
   }
 
-  const tags = card.card_tags.map((ct: any) => ({
-    id: ct.tag.id,
-    userId: ct.tag.user_id,
-    name: ct.tag.name,
-    color: ct.tag.color,
-    createdAt: ct.tag.created_at,
-  }));
-
-  return {
-    id: card.id,
-    userId: card.user_id,
-    front: card.front,
-    back: card.back,
-    schedule: card.schedule,
-    currentStep: card.current_step,
-    nextReviewAt: card.next_review_at,
-    status: card.status,
-    completedAt: card.completed_at,
-    createdAt: card.created_at,
-    updatedAt: card.updated_at,
-    tags,
-  };
+  return mapCardRow(card as unknown as SupabaseCardRow);
 }
 
 /**
@@ -281,26 +308,7 @@ export async function getCards(filters?: CardFilters): Promise<CardListResponse>
     throw new Error(`Failed to fetch cards: ${error.message}`);
   }
 
-  const cardsWithTags: CardWithTags[] = cards.map((card: any) => ({
-    id: card.id,
-    userId: card.user_id,
-    front: card.front,
-    back: card.back,
-    schedule: card.schedule,
-    currentStep: card.current_step,
-    nextReviewAt: card.next_review_at,
-    status: card.status,
-    completedAt: card.completed_at,
-    createdAt: card.created_at,
-    updatedAt: card.updated_at,
-    tags: card.card_tags.map((ct: any) => ({
-      id: ct.tag.id,
-      userId: ct.tag.user_id,
-      name: ct.tag.name,
-      color: ct.tag.color,
-      createdAt: ct.tag.created_at,
-    })),
-  }));
+  const cardsWithTags: CardWithTags[] = (cards as unknown as SupabaseCardRow[]).map(mapCardRow);
 
   return {
     data: cardsWithTags,
@@ -431,7 +439,7 @@ export async function getTodayCompletedCards(): Promise<CardWithTags[]> {
   // 今日復習したがstatus='completed'ではないカードを取得
   const additionalCardIds = todayStudiedCardIds.filter(id => !completedCardIds.has(id));
 
-  let additionalCards: any[] = [];
+  let additionalCards: SupabaseCardRow[] = [];
   if (additionalCardIds.length > 0) {
     const { data, error } = await supabase
       .from('cards')
@@ -447,32 +455,12 @@ export async function getTodayCompletedCards(): Promise<CardWithTags[]> {
     if (error) {
       throw new Error(`Failed to fetch additional cards: ${error.message}`);
     }
-    additionalCards = data || [];
+    additionalCards = (data || []) as unknown as SupabaseCardRow[];
   }
 
-  // 両方のカードを結合
   const allCards = [...completedCards, ...additionalCards];
 
-  return allCards.map((card: any) => ({
-    id: card.id,
-    userId: card.user_id,
-    front: card.front,
-    back: card.back,
-    schedule: card.schedule,
-    currentStep: card.current_step,
-    nextReviewAt: card.next_review_at,
-    status: card.status,
-    completedAt: card.completed_at,
-    createdAt: card.created_at,
-    updatedAt: card.updated_at,
-    tags: card.card_tags.map((ct: any) => ({
-      id: ct.tag.id,
-      userId: ct.tag.user_id,
-      name: ct.tag.name,
-      color: ct.tag.color,
-      createdAt: ct.tag.created_at,
-    })),
-  }));
+  return (allCards as unknown as SupabaseCardRow[]).map(mapCardRow);
 }
 
 /**
@@ -502,26 +490,57 @@ export async function getNewCards(): Promise<CardWithTags[]> {
     throw new Error(`Failed to fetch new cards: ${error.message}`);
   }
 
-  return cards.map((card: any) => ({
-    id: card.id,
-    userId: card.user_id,
-    front: card.front,
-    back: card.back,
-    schedule: card.schedule,
-    currentStep: card.current_step,
-    nextReviewAt: card.next_review_at,
-    status: card.status,
-    completedAt: card.completed_at,
-    createdAt: card.created_at,
-    updatedAt: card.updated_at,
-    tags: card.card_tags.map((ct: any) => ({
-      id: ct.tag.id,
-      userId: ct.tag.user_id,
-      name: ct.tag.name,
-      color: ct.tag.color,
-      createdAt: ct.tag.created_at,
-    })),
-  }));
+  return (cards as unknown as SupabaseCardRow[]).map(mapCardRow);
+}
+
+/**
+ * ホーム画面用: 全カード + 今日の学習済みカードIDを1回で取得
+ */
+export async function getHomeCards(): Promise<HomeCardsData> {
+  const supabase = await createClient();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    throw new Error('Unauthorized');
+  }
+
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+
+  const [cardsResult, studyLogsResult] = await Promise.all([
+    supabase
+      .from('cards')
+      .select(`
+        *,
+        card_tags (
+          tag:tags (*)
+        )
+      `)
+      .eq('user_id', user.id)
+      .in('status', ['new', 'active', 'completed'])
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('study_logs')
+      .select('card_id')
+      .eq('user_id', user.id)
+      .gte('studied_at', todayStart.toISOString()),
+  ]);
+
+  if (cardsResult.error) {
+    throw new Error(`Failed to fetch home cards: ${cardsResult.error.message}`);
+  }
+
+  if (studyLogsResult.error) {
+    throw new Error(`Failed to fetch study logs: ${studyLogsResult.error.message}`);
+  }
+
+  const cards: CardWithTags[] = ((cardsResult.data || []) as unknown as SupabaseCardRow[]).map(mapCardRow);
+
+  const todayStudiedCardIds = [...new Set(
+    (studyLogsResult.data || []).map(log => log.card_id)
+  )];
+
+  return { cards, todayStudiedCardIds };
 }
 
 /**
@@ -554,24 +573,5 @@ export async function getTodayCards(): Promise<CardWithTags[]> {
     throw new Error(`Failed to fetch today's cards: ${error.message}`);
   }
 
-  return cards.map((card: any) => ({
-    id: card.id,
-    userId: card.user_id,
-    front: card.front,
-    back: card.back,
-    schedule: card.schedule,
-    currentStep: card.current_step,
-    nextReviewAt: card.next_review_at,
-    status: card.status,
-    completedAt: card.completed_at,
-    createdAt: card.created_at,
-    updatedAt: card.updated_at,
-    tags: card.card_tags.map((ct: any) => ({
-      id: ct.tag.id,
-      userId: ct.tag.user_id,
-      name: ct.tag.name,
-      color: ct.tag.color,
-      createdAt: ct.tag.created_at,
-    })),
-  }));
+  return (cards as unknown as SupabaseCardRow[]).map(mapCardRow);
 }

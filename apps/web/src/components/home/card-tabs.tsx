@@ -1,5 +1,7 @@
 'use client';
 
+import { memo } from 'react';
+
 import { cn } from '@/lib/utils';
 
 export type CardTabValue = 'due' | 'learning' | 'completed';
@@ -36,7 +38,7 @@ function formatCount(count: number): string {
   return String(count);
 }
 
-export function CardTabs({ value, onChange, counts, className }: CardTabsProps) {
+export const CardTabs = memo(function CardTabs({ value, onChange, counts, className }: CardTabsProps) {
   return (
     <div className={cn('flex border-b border-border', className)}>
       {tabs.map((tab) => {
@@ -73,4 +75,4 @@ export function CardTabs({ value, onChange, counts, className }: CardTabsProps) 
       })}
     </div>
   );
-}
+});

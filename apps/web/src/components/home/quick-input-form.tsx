@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { memo, useCallback, useState } from 'react';
 
 import { Edit, Plus, X } from 'lucide-react';
 import type { TextareaAutosizeProps } from 'react-textarea-autosize';
@@ -9,7 +9,7 @@ import { toast } from 'sonner';
 
 import { CreateCardDialog } from '@/components/cards/create-card-dialog';
 import { Button } from '@/components/ui/button';
-import { useCreateCard } from '@/hooks/useCards';
+import { useHomeCreateCard } from '@/hooks/useHomeCards';
 import { cn } from '@/lib/utils';
 
 interface QuickInputFormProps {
@@ -20,11 +20,11 @@ interface QuickInputFormProps {
 const MAX_FRONT_LENGTH = 500;
 const MAX_BACK_LENGTH = 2000;
 
-export function QuickInputForm({ className, onCardCreated }: QuickInputFormProps) {
+export const QuickInputForm = memo(function QuickInputForm({ className, onCardCreated }: QuickInputFormProps) {
   const [front, setFront] = useState('');
   const [back, setBack] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
-  const createCard = useCreateCard();
+  const createCard = useHomeCreateCard();
 
   const handleFrontKeyDown: TextareaAutosizeProps['onKeyDown'] = (e) => {
     if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
@@ -44,7 +44,7 @@ export function QuickInputForm({ className, onCardCreated }: QuickInputFormProps
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!front.trim()) {
@@ -63,21 +63,21 @@ export function QuickInputForm({ className, onCardCreated }: QuickInputFormProps
     } catch {
       toast.error('カードの追加に失敗しました');
     }
-  };
+  }, [front, back, createCard, onCardCreated]);
 
   const isSubmitDisabled = createCard.isPending || !front.trim();
 
-  const handleOpenDialog = () => {
+  const handleOpenDialog = useCallback(() => {
     setDialogOpen(true);
-  };
+  }, []);
 
-  const handleDialogOpenChange = (open: boolean) => {
+  const handleDialogOpenChange = useCallback((open: boolean) => {
     setDialogOpen(open);
     if (!open) {
       setFront('');
       setBack('');
     }
-  };
+  }, []);
 
   return (
     <>
@@ -162,4 +162,4 @@ export function QuickInputForm({ className, onCardCreated }: QuickInputFormProps
       />
     </>
   );
-}
+});

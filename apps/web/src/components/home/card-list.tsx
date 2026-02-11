@@ -10,7 +10,7 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { Skeleton } from '@/components/ui/skeleton';
 import { StudyCard } from '@/components/ui/study-card';
 import { TagBadge } from '@/components/ui/tag-badge';
-import { useResetCard, useUpdateCard } from '@/hooks/useCards';
+import { useHomeResetCard, useHomeUpdateCard } from '@/hooks/useHomeCards';
 import { cn } from '@/lib/utils';
 import type { CardWithTags } from '@/types/card';
 
@@ -119,7 +119,7 @@ const CardItem = memo(function CardItem({
   );
 });
 
-function VirtualizedCardList({
+const VirtualizedCardList = memo(function VirtualizedCardList({
   cards,
   className,
   onReset,
@@ -173,7 +173,7 @@ function VirtualizedCardList({
       </div>
     </div>
   );
-}
+});
 
 export const CardList = memo(function CardList({
   cards,
@@ -181,8 +181,8 @@ export const CardList = memo(function CardList({
   emptyMessage = 'カードがありません',
   className,
 }: CardListProps) {
-  const resetCard = useResetCard();
-  const updateCard = useUpdateCard();
+  const resetCard = useHomeResetCard();
+  const updateCard = useHomeUpdateCard();
   const shouldVirtualize = (cards?.length ?? 0) > VIRTUALIZATION_THRESHOLD;
   const [editingCard, setEditingCard] = useState<CardWithTags | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);

@@ -13,7 +13,7 @@ import {
 } from '@/components/home';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useNewCards, useTodayCards, useTodayCompletedCards } from '@/hooks/useCards';
+import { useHomeCards } from '@/hooks/useHomeCards';
 import type { CardWithTags } from '@/types/card';
 
 /**
@@ -54,13 +54,39 @@ export default function DashboardPage() {
   const [userSelectedTab, setUserSelectedTab] = useState<CardTabValue | null>(null);
   const [editingCard, setEditingCard] = useState<CardWithTags | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const { data: newCards, isLoading: isLoadingNew } = useNewCards();
-  const { data: todayCards, isLoading: isLoadingToday } = useTodayCards();
-  const { data: completedCards, isLoading: isLoadingCompleted } = useTodayCompletedCards();
+  const { data, isLoading } = useHomeCards();
 
-  const isLoading = isLoadingNew || isLoadingToday || isLoadingCompleted;
-  const todayCardCount = (todayCards ?? []).length;
-  const dataReady = !isLoadingToday && !isLoadingNew;
+  const categorizedCards = useMemo(() => {
+    if (!data) return { due: [], learning: [], completed: [] };
+
+    const now = new Date().toISOString();
+    const studiedSet = new Set(data.todayStudiedCardIds);
+
+    const due: CardWithTags[] = [];
+    const learning: CardWithTags[] = [];
+    const completed: CardWithTags[] = [];
+
+    for (const card of data.cards) {
+      if (card.status === 'new') {
+        due.push(card);
+      } else if (card.status === 'active' && card.nextReviewAt && card.nextReviewAt <= now) {
+        learning.push(card);
+      } else if (card.status === 'completed' || studiedSet.has(card.id)) {
+        completed.push(card);
+      }
+    }
+
+    return { due, learning, completed };
+  }, [data]);
+
+  const counts = useMemo(() => ({
+    due: categorizedCards.due.length,
+    learning: categorizedCards.learning.length,
+    completed: categorizedCards.completed.length,
+  }), [categorizedCards]);
+
+  const dataReady = !isLoading;
+  const todayCardCount = categorizedCards.learning.length;
 
   const activeTab = useMemo<CardTabValue | null>(() => {
     if (!dataReady) return null;
@@ -75,6 +101,10 @@ export default function DashboardPage() {
 
     return userSelectedTab;
   }, [dataReady, userSelectedTab, todayCardCount]);
+
+  const handleTabChange = useCallback((value: CardTabValue) => {
+    setUserSelectedTab(value);
+  }, []);
 
   const handleEdit = useCallback((card: CardWithTags) => {
     setEditingCard(card);
@@ -92,23 +122,6 @@ export default function DashboardPage() {
     setUserSelectedTab('due');
   }, []);
 
-  const categorizedCards = useMemo(() => {
-    // due: status='new'のカード（未学習）
-    const due = newCards ?? [];
-    // learning: status='active'で今日復習予定のカード（復習中）
-    const learning = todayCards ?? [];
-    // completed: status='completed'または今日学習したカード
-    const completed = completedCards ?? [];
-
-    return { due, learning, completed };
-  }, [newCards, todayCards, completedCards]);
-
-  const counts = {
-    due: categorizedCards.due.length,
-    learning: categorizedCards.learning.length,
-    completed: categorizedCards.completed.length,
-  };
-
   const resolvedTab: CardTabValue = activeTab ?? 'due';
   const activeCards = categorizedCards[resolvedTab];
 
@@ -118,7 +131,7 @@ export default function DashboardPage() {
           <QuickInputForm onCardCreated={handleCardCreated} />
         </div>
 
-        <CardTabs counts={counts} value={resolvedTab} onChange={setUserSelectedTab} />
+        <CardTabs counts={counts} value={resolvedTab} onChange={handleTabChange} />
 
         {isLoading || activeTab === null ? (
           <StudyCardsSkeleton />

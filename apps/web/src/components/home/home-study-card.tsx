@@ -18,8 +18,7 @@ import { RatingButtons } from '@/components/ui/rating-buttons';
 import { StudyCard } from '@/components/ui/study-card';
 import { TagBadge } from '@/components/ui/tag-badge';
 import { cn } from '@/lib/utils';
-import { useDeleteCard, useUpdateCard } from '@/hooks/useCards';
-import { useSubmitAssessment } from '@/hooks/useStudy';
+import { useHomeDeleteCard, useHomeUpdateCard, useHomeSubmitAssessment } from '@/hooks/useHomeCards';
 import type { Assessment } from '@/types/study-log';
 import type { Tag } from '@/types/tag';
 
@@ -60,9 +59,9 @@ export const HomeStudyCard = memo(function HomeStudyCard({
 }: HomeStudyCardProps) {
   const [isRemoving, setIsRemoving] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const submitAssessment = useSubmitAssessment();
-  const updateCard = useUpdateCard();
-  const deleteCard = useDeleteCard();
+  const submitAssessment = useHomeSubmitAssessment();
+  const updateCard = useHomeUpdateCard();
+  const deleteCard = useHomeDeleteCard();
 
   const handleRate = useCallback(
     async (rating: Rating) => {
