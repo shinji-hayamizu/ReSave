@@ -51,7 +51,7 @@ function StudyCardsSkeleton() {
 }
 
 export default function DashboardPage() {
-  const [activeTab, setActiveTab] = useState<CardTabValue>('due');
+  const [userSelectedTab, setUserSelectedTab] = useState<CardTabValue | null>(null);
   const [editingCard, setEditingCard] = useState<CardWithTags | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const { data: newCards, isLoading: isLoadingNew } = useNewCards();
@@ -59,6 +59,22 @@ export default function DashboardPage() {
   const { data: completedCards, isLoading: isLoadingCompleted } = useTodayCompletedCards();
 
   const isLoading = isLoadingNew || isLoadingToday || isLoadingCompleted;
+  const todayCardCount = (todayCards ?? []).length;
+  const dataReady = !isLoadingToday && !isLoadingNew;
+
+  const activeTab = useMemo<CardTabValue | null>(() => {
+    if (!dataReady) return null;
+
+    if (userSelectedTab === null) {
+      return todayCardCount > 0 ? 'learning' : 'due';
+    }
+
+    if (userSelectedTab === 'learning' && todayCardCount === 0) {
+      return 'due';
+    }
+
+    return userSelectedTab;
+  }, [dataReady, userSelectedTab, todayCardCount]);
 
   const handleEdit = useCallback((card: CardWithTags) => {
     setEditingCard(card);
@@ -73,7 +89,7 @@ export default function DashboardPage() {
   }, []);
 
   const handleCardCreated = useCallback(() => {
-    setActiveTab('due');
+    setUserSelectedTab('due');
   }, []);
 
   const categorizedCards = useMemo(() => {
@@ -93,7 +109,8 @@ export default function DashboardPage() {
     completed: categorizedCards.completed.length,
   };
 
-  const activeCards = categorizedCards[activeTab];
+  const resolvedTab: CardTabValue = activeTab ?? 'due';
+  const activeCards = categorizedCards[resolvedTab];
 
   return (
     <div className="pt-1 pb-2 md:pt-2 md:pb-4">
@@ -101,9 +118,9 @@ export default function DashboardPage() {
           <QuickInputForm onCardCreated={handleCardCreated} />
         </div>
 
-        <CardTabs counts={counts} value={activeTab} onChange={setActiveTab} />
+        <CardTabs counts={counts} value={resolvedTab} onChange={setUserSelectedTab} />
 
-        {isLoading ? (
+        {isLoading || activeTab === null ? (
           <StudyCardsSkeleton />
         ) : activeCards.length === 0 ? (
           <EmptyState
