@@ -59,7 +59,10 @@ enable_confirmations = false
 enabled = false
 
 [auth.external.google]
-enabled = false
+enabled = true
+client_id = "env(GOOGLE_CLIENT_ID)"
+secret = "env(GOOGLE_CLIENT_SECRET)"
+redirect_uri = "http://localhost:54321/auth/v1/callback"
 
 [analytics]
 enabled = false

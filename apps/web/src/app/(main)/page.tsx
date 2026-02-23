@@ -95,10 +95,6 @@ export default function DashboardPage() {
       return todayCardCount > 0 ? 'learning' : 'due';
     }
 
-    if (userSelectedTab === 'learning' && todayCardCount === 0) {
-      return 'due';
-    }
-
     return userSelectedTab;
   }, [dataReady, userSelectedTab, todayCardCount]);
 
