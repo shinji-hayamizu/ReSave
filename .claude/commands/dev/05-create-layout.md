@@ -6,7 +6,7 @@ argument-hint: [出力先ディレクトリ (例: web)]
 
 # 共通レイアウト作成
 
-Sidebar、MobileNav、Providersなど共通レイアウトコンポーネントを作成する。
+Sidebar、MobileNav、Providersなど共通レイアウトコンポーネントを作成するよ。
 
 ## 前提
 
