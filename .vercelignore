@@ -1,0 +1,17 @@
+node_modules
+.pnpm-store
+dist
+.next
+.turbo
+out
+.expo/
+web-build/
+coverage
+.nyc_output
+test-results/
+playwright-report/
+playwright/.cache/
+e2e/.auth/
+*.tsbuildinfo
+*.log
+.DS_Store

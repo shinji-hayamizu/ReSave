@@ -1,6 +1,6 @@
 'use client';
 
-import { memo, useCallback, useState } from 'react';
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 import {
@@ -62,12 +62,21 @@ export const HomeStudyCard = memo(function HomeStudyCard({
   const submitAssessment = useHomeSubmitAssessment();
   const updateCard = useHomeUpdateCard();
   const deleteCard = useHomeDeleteCard();
+  const rateTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  const deleteTimerRef = useRef<ReturnType<typeof setTimeout>>();
+
+  useEffect(() => {
+    return () => {
+      if (rateTimerRef.current) clearTimeout(rateTimerRef.current);
+      if (deleteTimerRef.current) clearTimeout(deleteTimerRef.current);
+    };
+  }, []);
 
   const handleRate = useCallback(
     async (rating: Rating) => {
       setIsRemoving(true);
 
-      setTimeout(async () => {
+      rateTimerRef.current = setTimeout(async () => {
         try {
           await submitAssessment.mutateAsync({
             cardId: id,
@@ -105,7 +114,7 @@ export const HomeStudyCard = memo(function HomeStudyCard({
   const handleDeleteConfirm = useCallback(async () => {
     setIsRemoving(true);
 
-    setTimeout(async () => {
+    deleteTimerRef.current = setTimeout(async () => {
       try {
         await deleteCard.mutateAsync(id);
         toast.success('カードを削除しました');

@@ -13,6 +13,8 @@ export function useAuth() {
   useEffect(() => {
     const supabase = createClient();
 
+    supabase.auth.startAutoRefresh();
+
     supabase.auth.getUser().then(({ data: { user } }) => {
       setUser(user);
       setLoading(false);
@@ -25,7 +27,10 @@ export function useAuth() {
       setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      subscription.unsubscribe();
+      supabase.auth.stopAutoRefresh();
+    };
   }, []);
 
   return { user, loading };

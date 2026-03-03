@@ -40,13 +40,20 @@ export const StudyCard = memo(function StudyCard({
   const cardRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement | null>(null)
   const writeAnswerRef = useRef<HTMLTextAreaElement | null>(null)
+  const scrollTimerRef = useRef<ReturnType<typeof setTimeout>>()
+
+  useEffect(() => {
+    return () => {
+      if (scrollTimerRef.current) clearTimeout(scrollTimerRef.current)
+    }
+  }, [])
 
   const handleToggle = () => {
     const willOpen = !isOpen
     setIsOpen(willOpen)
 
     if (willOpen) {
-      setTimeout(() => {
+      scrollTimerRef.current = setTimeout(() => {
         if (cardRef.current) {
           const rect = cardRef.current.getBoundingClientRect()
           const scrollTop = window.scrollY + rect.top - 60

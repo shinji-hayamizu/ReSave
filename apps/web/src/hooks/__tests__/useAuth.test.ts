@@ -6,12 +6,16 @@ import { useAuth } from '../useAuth';
 const mockGetUser = vi.fn();
 const mockOnAuthStateChange = vi.fn();
 const mockUnsubscribe = vi.fn();
+const mockStartAutoRefresh = vi.fn();
+const mockStopAutoRefresh = vi.fn();
 
 vi.mock('@/lib/supabase/client', () => ({
   createClient: () => ({
     auth: {
       getUser: mockGetUser,
       onAuthStateChange: mockOnAuthStateChange,
+      startAutoRefresh: mockStartAutoRefresh,
+      stopAutoRefresh: mockStopAutoRefresh,
     },
   }),
 }));
@@ -129,6 +133,15 @@ describe('useAuth', () => {
       unmount();
 
       expect(mockUnsubscribe).toHaveBeenCalled();
+      expect(mockStopAutoRefresh).toHaveBeenCalled();
+    });
+
+    it('マウント時にautoRefreshが開始される', async () => {
+      mockGetUser.mockResolvedValue({ data: { user: null } });
+
+      renderHook(() => useAuth());
+
+      expect(mockStartAutoRefresh).toHaveBeenCalled();
     });
   });
 });
