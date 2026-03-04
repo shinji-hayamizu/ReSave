@@ -40,7 +40,7 @@ export const StudyCard = memo(function StudyCard({
   const cardRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement | null>(null)
   const writeAnswerRef = useRef<HTMLTextAreaElement | null>(null)
-  const scrollTimerRef = useRef<ReturnType<typeof setTimeout>>()
+  const scrollTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
   useEffect(() => {
     return () => {

@@ -62,8 +62,8 @@ export const HomeStudyCard = memo(function HomeStudyCard({
   const submitAssessment = useHomeSubmitAssessment();
   const updateCard = useHomeUpdateCard();
   const deleteCard = useHomeDeleteCard();
-  const rateTimerRef = useRef<ReturnType<typeof setTimeout>>();
-  const deleteTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  const rateTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const deleteTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   useEffect(() => {
     return () => {
