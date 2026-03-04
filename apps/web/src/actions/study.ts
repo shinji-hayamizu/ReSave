@@ -53,20 +53,22 @@ export async function submitAssessment(
   let completedAt: string | null = card.completed_at;
 
   if (assessment === 'ok') {
-    newCurrentStep = card.current_step + 1;
     if (isNewCard) {
       newStatus = 'active';
     }
 
-    if (newCurrentStep >= schedule.length) {
+    const nextStep = card.current_step + 1;
+    if (nextStep >= schedule.length) {
+      newCurrentStep = nextStep;
       newStatus = 'completed';
       completedAt = new Date().toISOString();
       nextReviewAt = null;
     } else {
-      const daysToAdd = schedule[newCurrentStep];
+      const daysToAdd = schedule[card.current_step];
       const nextDate = new Date();
       nextDate.setDate(nextDate.getDate() + daysToAdd);
       nextReviewAt = nextDate.toISOString();
+      newCurrentStep = nextStep;
     }
   } else if (assessment === 'again') {
     newCurrentStep = 0;
@@ -235,7 +237,7 @@ async function calculateStreak(
 ): Promise<number> {
   const today = new Date();
   let streak = 0;
-  let checkDate = new Date(today);
+  const checkDate = new Date(today);
 
   for (let i = 0; i < 365; i++) {
     checkDate.setHours(0, 0, 0, 0);
