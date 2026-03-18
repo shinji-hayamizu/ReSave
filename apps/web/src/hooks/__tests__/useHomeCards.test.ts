@@ -112,7 +112,7 @@ describe('useHomeCards', () => {
     expect(mockGetHomeCards).toHaveBeenCalledTimes(1);
   });
 
-  it('staleTimeが30秒に設定されている', () => {
+  it('staleTimeが5分に設定されている', () => {
     mockGetHomeCards.mockResolvedValue(createHomeData());
 
     renderHook(() => useHomeCards(), {
@@ -120,7 +120,7 @@ describe('useHomeCards', () => {
     });
 
     const queryState = queryClient.getQueryCache().find({ queryKey: homeCardKeys.all });
-    expect(queryState?.options.staleTime).toBe(30 * 1000);
+    expect(queryState?.options.staleTime).toBe(5 * 60 * 1000);
   });
 
   it('キャッシュキーが正しい', async () => {

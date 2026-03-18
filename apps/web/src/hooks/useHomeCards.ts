@@ -11,6 +11,7 @@ import {
   updateCard,
 } from '@/actions/cards';
 import { submitAssessment } from '@/actions/study';
+import { homeCardKeys } from '@/lib/query-keys';
 import { DEFAULT_INTERVALS } from '@/types/review-schedule';
 import type {
   Card,
@@ -21,9 +22,7 @@ import type {
 } from '@/types/card';
 import type { SubmitAssessmentInput } from '@/types/study-log';
 
-export const homeCardKeys = {
-  all: ['cards', 'home'] as const,
-};
+export { homeCardKeys };
 
 export type HomeCardMutationContext = {
   previousData: HomeCardsData | undefined;
@@ -33,7 +32,7 @@ export function useHomeCards() {
   return useQuery<HomeCardsData>({
     queryKey: homeCardKeys.all,
     queryFn: () => getHomeCards(),
-    staleTime: 30 * 1000,
+    staleTime: 5 * 60 * 1000,
   });
 }
 

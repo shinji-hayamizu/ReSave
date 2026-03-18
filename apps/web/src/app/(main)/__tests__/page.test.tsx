@@ -85,11 +85,11 @@ function createQueryClient() {
 }
 
 async function renderPage() {
-  const DashboardPage = (await import('../page')).default;
+  const { DashboardContent } = await import('../_components/dashboard-content');
   const queryClient = createQueryClient();
   return render(
     <QueryClientProvider client={queryClient}>
-      <DashboardPage />
+      <DashboardContent />
     </QueryClientProvider>
   );
 }
@@ -196,11 +196,11 @@ describe('DashboardPage 初期タブ選択', () => {
       isLoading: false,
     });
 
-    const DashboardPage = (await import('../page')).default;
+    const { DashboardContent } = await import('../_components/dashboard-content');
     const queryClient = createQueryClient();
     rerender(
       <QueryClientProvider client={queryClient}>
-        <DashboardPage />
+        <DashboardContent />
       </QueryClientProvider>
     );
 
