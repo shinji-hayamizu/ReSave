@@ -5,7 +5,6 @@ import { FileQuestion } from 'lucide-react';
 
 import { EditCardDialog } from '@/components/cards/edit-card-dialog';
 import {
-  CardList,
   CardTabs,
   type CardTabValue,
   HomeStudyCard,
@@ -57,32 +56,27 @@ export default function DashboardPage() {
   const { data, isLoading } = useHomeCards();
 
   const categorizedCards = useMemo(() => {
-    if (!data) return { due: [], learning: [], completed: [] };
+    if (!data) return { due: [], learning: [] };
 
     const now = new Date().toISOString();
-    const studiedSet = new Set(data.todayStudiedCardIds);
 
     const due: CardWithTags[] = [];
     const learning: CardWithTags[] = [];
-    const completed: CardWithTags[] = [];
 
     for (const card of data.cards) {
       if (card.status === 'new') {
         due.push(card);
       } else if (card.status === 'active' && card.nextReviewAt && card.nextReviewAt <= now) {
         learning.push(card);
-      } else if (card.status === 'completed' || studiedSet.has(card.id)) {
-        completed.push(card);
       }
     }
 
-    return { due, learning, completed };
+    return { due, learning };
   }, [data]);
 
   const counts = useMemo(() => ({
     due: categorizedCards.due.length,
     learning: categorizedCards.learning.length,
-    completed: categorizedCards.completed.length,
   }), [categorizedCards]);
 
   const dataReady = !isLoading;
@@ -136,15 +130,11 @@ export default function DashboardPage() {
             description={
               activeTab === 'due'
                 ? '新しいカードを追加して学習を始めましょう'
-                : activeTab === 'learning'
-                  ? '復習予定のカードはありません'
-                  : '今日復習したカードはありません'
+                : '復習予定のカードはありません'
             }
             icon={<FileQuestion />}
             title="カードなし"
           />
-        ) : activeTab === 'completed' ? (
-          <CardList cards={activeCards} />
         ) : (
           <div className="bg-card shadow-sm divide-y divide-border">
             {activeCards.map((card) => (

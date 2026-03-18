@@ -1,5 +1,7 @@
 'use client';
 
+import { useMemo } from 'react';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
@@ -35,6 +37,14 @@ export function useHomeCards() {
     queryFn: () => getHomeCards(),
     staleTime: 30 * 1000,
   });
+}
+
+export function useCompletedCount(): number {
+  const { data } = useHomeCards();
+  return useMemo(() => {
+    if (!data) return 0;
+    return data.cards.filter((card) => card.status === 'completed').length;
+  }, [data]);
 }
 
 export function useHomeCreateCard() {

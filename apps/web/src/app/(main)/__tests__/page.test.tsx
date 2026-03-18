@@ -20,7 +20,7 @@ vi.mock('@/components/home', () => ({
   }: {
     value: string;
     onChange: (v: string) => void;
-    counts: { due: number; learning: number; completed: number };
+    counts: { due: number; learning: number };
   }) => (
     <div data-testid="card-tabs" data-value={value}>
       <button data-testid="tab-due" type="button" onClick={() => onChange('due')}>
@@ -28,9 +28,6 @@ vi.mock('@/components/home', () => ({
       </button>
       <button data-testid="tab-learning" type="button" onClick={() => onChange('learning')}>
         learning({counts.learning})
-      </button>
-      <button data-testid="tab-completed" type="button" onClick={() => onChange('completed')}>
-        completed({counts.completed})
       </button>
     </div>
   ),
