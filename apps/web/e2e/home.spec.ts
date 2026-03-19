@@ -16,7 +16,11 @@ test.describe('ホーム画面', () => {
 
       await expect(page.getByText('未学習')).toBeVisible();
       await expect(page.getByText('復習中')).toBeVisible();
-      await expect(page.getByText('完了')).toBeVisible();
+    });
+
+    test('完了タブが表示されない', async ({ page }) => {
+      const tabs = page.locator('button', { hasText: '完了' });
+      await expect(tabs).toHaveCount(0);
     });
 
     test('デフォルトで未学習タブがアクティブ', async ({ page }) => {
@@ -99,24 +103,12 @@ test.describe('ホーム画面', () => {
       await expect(learningTab.locator('..')).toHaveClass(/border-b-primary/);
     });
 
-    test('完了タブに切り替え', async ({ page }) => {
-      const completedTab = page.getByText('完了').first();
-
-      await completedTab.click();
-
-      await expect(completedTab.locator('..')).toHaveClass(/border-b-primary/);
-    });
-
     test('タブ間を往復', async ({ page }) => {
       const dueTab = page.getByText('未学習').first();
       const learningTab = page.getByText('復習中').first();
-      const completedTab = page.getByText('完了').first();
 
       await learningTab.click();
       await expect(learningTab.locator('..')).toHaveClass(/border-b-primary/);
-
-      await completedTab.click();
-      await expect(completedTab.locator('..')).toHaveClass(/border-b-primary/);
 
       await dueTab.click();
       await expect(dueTab.locator('..')).toHaveClass(/border-b-primary/);

@@ -1,6 +1,6 @@
 'use client';
 
-import { Home, Info, Menu, Settings, Tag } from 'lucide-react';
+import { CheckCheck, Home, Info, Menu, Settings, Tag } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -17,17 +17,20 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/sidebar';
-
-const navItems = [
-  { title: 'ホーム', href: '/', icon: Home },
-  { title: 'タグ', href: '/tags', icon: Tag },
-  { title: '設定', href: '/settings', icon: Settings },
-  { title: 'About', href: '/about', icon: Info },
-];
+import { useCompletedCount } from '@/hooks/useHomeCards';
 
 export function AppSidebar() {
   const pathname = usePathname();
   const { toggleSidebar } = useSidebar();
+  const completedCount = useCompletedCount();
+
+  const navItems = [
+    { title: 'ホーム', href: '/', icon: Home, badge: 0 },
+    { title: '完了', href: '/cards/completed', icon: CheckCheck, badge: completedCount },
+    { title: 'タグ', href: '/tags', icon: Tag, badge: 0 },
+    { title: '設定', href: '/settings', icon: Settings, badge: 0 },
+    { title: 'About', href: '/about', icon: Info, badge: 0 },
+  ];
 
   return (
     <Sidebar collapsible="icon" className="border-none bg-background">
@@ -63,6 +66,11 @@ export function AppSidebar() {
                     <Link href={item.href}>
                       <item.icon className="h-5 w-5 group-data-[collapsible=icon]:h-6 group-data-[collapsible=icon]:w-6" />
                       <span className="text-sm group-data-[collapsible=icon]:text-[10px]">{item.title}</span>
+                      {item.badge > 0 && (
+                        <span className="ml-auto group-data-[collapsible=icon]:hidden rounded-full bg-primary/10 px-1.5 py-0.5 text-xs font-semibold text-primary">
+                          {item.badge}
+                        </span>
+                      )}
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
