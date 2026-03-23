@@ -51,7 +51,7 @@ export function DashboardContent() {
   const categorizedCards = useMemo(() => {
     if (!data) return { due: [], learning: [] };
 
-    const now = new Date().toISOString();
+    const now = data.fetchedAt;
 
     const due: CardWithTags[] = [];
     const learning: CardWithTags[] = [];

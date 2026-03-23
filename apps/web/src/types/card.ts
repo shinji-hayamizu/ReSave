@@ -66,4 +66,5 @@ export type CardFilters = {
 export type HomeCardsData = {
   cards: CardWithTags[];
   todayStudiedCardIds: string[];
+  fetchedAt: string;
 };

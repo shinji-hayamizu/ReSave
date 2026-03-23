@@ -7,7 +7,6 @@ import { createElement } from 'react';
 import type { Card, CardWithTags, HomeCardsData } from '@/types/card';
 import {
   homeCardKeys,
-  useCompletedCount,
   useHomeCards,
   useHomeCreateCard,
   useHomeUpdateCard,
@@ -64,7 +63,7 @@ function createHomeData(
   cards: CardWithTags[] = [],
   todayStudiedCardIds: string[] = []
 ): HomeCardsData {
-  return { cards, todayStudiedCardIds };
+  return { cards, todayStudiedCardIds, fetchedAt: new Date().toISOString() };
 }
 
 function createWrapper(queryClient: QueryClient) {
@@ -85,56 +84,6 @@ function createQueryClient() {
 describe('homeCardKeys', () => {
   it('キャッシュキーが正しく定義されている', () => {
     expect(homeCardKeys.all).toEqual(['cards', 'home']);
-  });
-});
-
-describe('useCompletedCount', () => {
-  let queryClient: QueryClient;
-
-  beforeEach(() => {
-    vi.clearAllMocks();
-    queryClient = createQueryClient();
-  });
-
-  it('データなし: 0を返す', async () => {
-    mockGetHomeCards.mockResolvedValue(createHomeData());
-
-    const { result } = renderHook(() => useCompletedCount(), {
-      wrapper: createWrapper(queryClient),
-    });
-
-    expect(result.current).toBe(0);
-  });
-
-  it('status === completed のカードのみカウントする', async () => {
-    const completedCard1 = createTestCard({ id: 'c1', status: 'completed' });
-    const completedCard2 = createTestCard({ id: 'c2', status: 'completed' });
-    const activeCard = createTestCard({ id: 'c3', status: 'active' });
-    const newCard = createTestCard({ id: 'c4', status: 'new' });
-    const data = createHomeData([completedCard1, completedCard2, activeCard, newCard]);
-    mockGetHomeCards.mockResolvedValue(data);
-
-    const { result } = renderHook(() => useCompletedCount(), {
-      wrapper: createWrapper(queryClient),
-    });
-
-    await waitFor(() => {
-      expect(result.current).toBe(2);
-    });
-  });
-
-  it('todayStudiedCardIds は含めない', async () => {
-    const activeCard = createTestCard({ id: 'c1', status: 'active' });
-    const data = createHomeData([activeCard], ['c1']);
-    mockGetHomeCards.mockResolvedValue(data);
-
-    const { result } = renderHook(() => useCompletedCount(), {
-      wrapper: createWrapper(queryClient),
-    });
-
-    await waitFor(() => {
-      expect(result.current).toBe(0);
-    });
   });
 });
 

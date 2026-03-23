@@ -1,7 +1,5 @@
 'use client';
 
-import { useMemo } from 'react';
-
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
@@ -38,14 +36,6 @@ export function useHomeCards() {
   });
 }
 
-export function useCompletedCount(): number {
-  const { data } = useHomeCards();
-  return useMemo(() => {
-    if (!data) return 0;
-    return data.cards.filter((card) => card.status === 'completed').length;
-  }, [data]);
-}
-
 export function useHomeCreateCard() {
   const qc = useQueryClient();
   return useMutation<Card, Error, CreateCardInput, HomeCardMutationContext>({
@@ -72,7 +62,7 @@ export function useHomeCreateCard() {
       qc.setQueryData<HomeCardsData>(homeCardKeys.all, (old) =>
         old
           ? { ...old, cards: [optimisticCard, ...old.cards] }
-          : { cards: [optimisticCard], todayStudiedCardIds: [] }
+          : { cards: [optimisticCard], todayStudiedCardIds: [], fetchedAt: new Date().toISOString() }
       );
 
       return { previousData };
@@ -252,7 +242,7 @@ export function useHomeSubmitAssessment() {
           ? old.todayStudiedCardIds
           : [...old.todayStudiedCardIds, input.cardId];
 
-        return { cards, todayStudiedCardIds };
+        return { ...old, cards, todayStudiedCardIds };
       });
 
       return { previousData };

@@ -72,7 +72,7 @@ function createCard(overrides: Partial<CardWithTags> = {}): CardWithTags {
 }
 
 function createHomeCardsData(cards: CardWithTags[], todayStudiedCardIds: string[] = []): HomeCardsData {
-  return { cards, todayStudiedCardIds };
+  return { cards, todayStudiedCardIds, fetchedAt: new Date().toISOString() };
 }
 
 function createQueryClient() {
