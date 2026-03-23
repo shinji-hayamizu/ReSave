@@ -1,7 +1,5 @@
 'use client';
 
-import { useMemo } from 'react';
-
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
@@ -13,6 +11,7 @@ import {
   updateCard,
 } from '@/actions/cards';
 import { submitAssessment } from '@/actions/study';
+import { homeCardKeys } from '@/lib/query-keys';
 import { DEFAULT_INTERVALS } from '@/types/review-schedule';
 import type {
   Card,
@@ -23,9 +22,7 @@ import type {
 } from '@/types/card';
 import type { SubmitAssessmentInput } from '@/types/study-log';
 
-export const homeCardKeys = {
-  all: ['cards', 'home'] as const,
-};
+export { homeCardKeys };
 
 export type HomeCardMutationContext = {
   previousData: HomeCardsData | undefined;
@@ -35,16 +32,8 @@ export function useHomeCards() {
   return useQuery<HomeCardsData>({
     queryKey: homeCardKeys.all,
     queryFn: () => getHomeCards(),
-    staleTime: 30 * 1000,
+    staleTime: 5 * 60 * 1000,
   });
-}
-
-export function useCompletedCount(): number {
-  const { data } = useHomeCards();
-  return useMemo(() => {
-    if (!data) return 0;
-    return data.cards.filter((card) => card.status === 'completed').length;
-  }, [data]);
 }
 
 export function useHomeCreateCard() {
@@ -73,7 +62,7 @@ export function useHomeCreateCard() {
       qc.setQueryData<HomeCardsData>(homeCardKeys.all, (old) =>
         old
           ? { ...old, cards: [optimisticCard, ...old.cards] }
-          : { cards: [optimisticCard], todayStudiedCardIds: [] }
+          : { cards: [optimisticCard], todayStudiedCardIds: [], fetchedAt: new Date().toISOString() }
       );
 
       return { previousData };
@@ -253,7 +242,7 @@ export function useHomeSubmitAssessment() {
           ? old.todayStudiedCardIds
           : [...old.todayStudiedCardIds, input.cardId];
 
-        return { cards, todayStudiedCardIds };
+        return { ...old, cards, todayStudiedCardIds };
       });
 
       return { previousData };

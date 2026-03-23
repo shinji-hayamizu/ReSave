@@ -540,7 +540,7 @@ export async function getHomeCards(): Promise<HomeCardsData> {
     (studyLogsResult.data || []).map(log => log.card_id)
   )];
 
-  return { cards, todayStudiedCardIds };
+  return { cards, todayStudiedCardIds, fetchedAt: new Date().toISOString() };
 }
 
 /**

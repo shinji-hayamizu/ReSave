@@ -7,7 +7,6 @@ import { createElement } from 'react';
 import type { Card, CardWithTags, HomeCardsData } from '@/types/card';
 import {
   homeCardKeys,
-  useCompletedCount,
   useHomeCards,
   useHomeCreateCard,
   useHomeUpdateCard,
@@ -64,7 +63,7 @@ function createHomeData(
   cards: CardWithTags[] = [],
   todayStudiedCardIds: string[] = []
 ): HomeCardsData {
-  return { cards, todayStudiedCardIds };
+  return { cards, todayStudiedCardIds, fetchedAt: new Date().toISOString() };
 }
 
 function createWrapper(queryClient: QueryClient) {
@@ -85,56 +84,6 @@ function createQueryClient() {
 describe('homeCardKeys', () => {
   it('キャッシュキーが正しく定義されている', () => {
     expect(homeCardKeys.all).toEqual(['cards', 'home']);
-  });
-});
-
-describe('useCompletedCount', () => {
-  let queryClient: QueryClient;
-
-  beforeEach(() => {
-    vi.clearAllMocks();
-    queryClient = createQueryClient();
-  });
-
-  it('データなし: 0を返す', async () => {
-    mockGetHomeCards.mockResolvedValue(createHomeData());
-
-    const { result } = renderHook(() => useCompletedCount(), {
-      wrapper: createWrapper(queryClient),
-    });
-
-    expect(result.current).toBe(0);
-  });
-
-  it('status === completed のカードのみカウントする', async () => {
-    const completedCard1 = createTestCard({ id: 'c1', status: 'completed' });
-    const completedCard2 = createTestCard({ id: 'c2', status: 'completed' });
-    const activeCard = createTestCard({ id: 'c3', status: 'active' });
-    const newCard = createTestCard({ id: 'c4', status: 'new' });
-    const data = createHomeData([completedCard1, completedCard2, activeCard, newCard]);
-    mockGetHomeCards.mockResolvedValue(data);
-
-    const { result } = renderHook(() => useCompletedCount(), {
-      wrapper: createWrapper(queryClient),
-    });
-
-    await waitFor(() => {
-      expect(result.current).toBe(2);
-    });
-  });
-
-  it('todayStudiedCardIds は含めない', async () => {
-    const activeCard = createTestCard({ id: 'c1', status: 'active' });
-    const data = createHomeData([activeCard], ['c1']);
-    mockGetHomeCards.mockResolvedValue(data);
-
-    const { result } = renderHook(() => useCompletedCount(), {
-      wrapper: createWrapper(queryClient),
-    });
-
-    await waitFor(() => {
-      expect(result.current).toBe(0);
-    });
   });
 });
 
@@ -163,7 +112,7 @@ describe('useHomeCards', () => {
     expect(mockGetHomeCards).toHaveBeenCalledTimes(1);
   });
 
-  it('staleTimeが30秒に設定されている', () => {
+  it('staleTimeが5分に設定されている', () => {
     mockGetHomeCards.mockResolvedValue(createHomeData());
 
     renderHook(() => useHomeCards(), {
@@ -171,7 +120,8 @@ describe('useHomeCards', () => {
     });
 
     const queryState = queryClient.getQueryCache().find({ queryKey: homeCardKeys.all });
-    expect(queryState?.options.staleTime).toBe(30 * 1000);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    expect((queryState?.options as any).staleTime).toBe(5 * 60 * 1000);
   });
 
   it('キャッシュキーが正しい', async () => {
@@ -270,9 +220,17 @@ describe('useHomeUpdateCard', () => {
     queryClient.setQueryData(homeCardKeys.all, createHomeData([card]));
 
     const updatedFromServer: Card = {
-      ...card,
+      id: card.id,
+      userId: card.userId,
       front: 'new front',
-      tags: undefined as never,
+      back: card.back,
+      schedule: card.schedule,
+      currentStep: card.currentStep,
+      nextReviewAt: card.nextReviewAt,
+      status: card.status,
+      completedAt: card.completedAt,
+      createdAt: card.createdAt,
+      updatedAt: card.updatedAt,
     };
     mockUpdateCard.mockResolvedValue(updatedFromServer);
 
@@ -392,12 +350,17 @@ describe('useHomeResetCard', () => {
     queryClient.setQueryData(homeCardKeys.all, createHomeData([card]));
 
     const resetFromServer: Card = {
-      ...card,
-      status: 'active',
+      id: card.id,
+      userId: card.userId,
+      front: card.front,
+      back: card.back,
+      schedule: card.schedule,
       currentStep: 0,
-      completedAt: null,
       nextReviewAt: new Date().toISOString(),
-      tags: undefined as never,
+      status: 'active',
+      completedAt: null,
+      createdAt: card.createdAt,
+      updatedAt: card.updatedAt,
     };
     mockResetCardToUnlearned.mockResolvedValue(resetFromServer);
 
@@ -464,11 +427,17 @@ describe('useHomeSubmitAssessment', () => {
     queryClient.setQueryData(homeCardKeys.all, createHomeData([card]));
 
     const updatedCard: Card = {
-      ...card,
+      id: card.id,
+      userId: card.userId,
+      front: card.front,
+      back: card.back,
+      schedule: card.schedule,
       currentStep: 2,
-      status: 'active',
       nextReviewAt: new Date().toISOString(),
-      tags: undefined as never,
+      status: 'active',
+      completedAt: card.completedAt,
+      createdAt: card.createdAt,
+      updatedAt: card.updatedAt,
     };
     mockSubmitAssessment.mockResolvedValue({ ok: true, data: { card: updatedCard } });
 
@@ -497,10 +466,17 @@ describe('useHomeSubmitAssessment', () => {
     queryClient.setQueryData(homeCardKeys.all, createHomeData([card]));
 
     const updatedCard: Card = {
-      ...card,
+      id: card.id,
+      userId: card.userId,
+      front: card.front,
+      back: card.back,
+      schedule: card.schedule,
       currentStep: 0,
+      nextReviewAt: card.nextReviewAt,
       status: 'active',
-      tags: undefined as never,
+      completedAt: card.completedAt,
+      createdAt: card.createdAt,
+      updatedAt: card.updatedAt,
     };
     mockSubmitAssessment.mockResolvedValue({ ok: true, data: { card: updatedCard } });
 
@@ -529,12 +505,19 @@ describe('useHomeSubmitAssessment', () => {
     });
     queryClient.setQueryData(homeCardKeys.all, createHomeData([card]));
 
+    const completedAt = new Date().toISOString();
     const updatedCard: Card = {
-      ...card,
-      status: 'completed',
-      completedAt: new Date().toISOString(),
+      id: card.id,
+      userId: card.userId,
+      front: card.front,
+      back: card.back,
+      schedule: card.schedule,
+      currentStep: card.currentStep,
       nextReviewAt: null,
-      tags: undefined as never,
+      status: 'completed',
+      completedAt,
+      createdAt: card.createdAt,
+      updatedAt: card.updatedAt,
     };
     mockSubmitAssessment.mockResolvedValue({ ok: true, data: { card: updatedCard } });
 
@@ -590,9 +573,17 @@ describe('useHomeSubmitAssessment', () => {
     );
 
     const updatedCard: Card = {
-      ...card,
+      id: card.id,
+      userId: card.userId,
+      front: card.front,
+      back: card.back,
+      schedule: card.schedule,
       currentStep: 2,
-      tags: undefined as never,
+      nextReviewAt: card.nextReviewAt,
+      status: card.status,
+      completedAt: card.completedAt,
+      createdAt: card.createdAt,
+      updatedAt: card.updatedAt,
     };
     mockSubmitAssessment.mockResolvedValue({ ok: true, data: { card: updatedCard } });
 
