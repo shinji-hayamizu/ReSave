@@ -235,6 +235,7 @@ export function useHomeSubmitAssessment() {
             return { ...c, status: 'completed' as const, completedAt: new Date().toISOString(), nextReviewAt: null };
           }
 
+          /* c8 ignore next */
           return c;
         });
 

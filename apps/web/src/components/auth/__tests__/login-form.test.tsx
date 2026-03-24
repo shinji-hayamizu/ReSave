@@ -1,5 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { useSearchParams } from 'next/navigation';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createClient } from '@/lib/supabase/client';
@@ -12,6 +13,10 @@ const mockSignInWithOAuth = vi.fn();
 describe('LoginForm', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+
+    vi.mocked(useSearchParams).mockReturnValue(
+      new URLSearchParams() as unknown as ReturnType<typeof useSearchParams>
+    );
 
     Object.defineProperty(window, 'location', {
       writable: true,
@@ -32,6 +37,60 @@ describe('LoginForm', () => {
         })),
       },
     } as unknown as ReturnType<typeof createClient>);
+  });
+
+  describe('OAuth エラーパラメータ', () => {
+    it('error=oauth_failedパラメータがある場合エラーメッセージが表示される', async () => {
+      // Given: error=oauth_failed クエリパラメータがある状態
+      vi.mocked(useSearchParams).mockReturnValue(
+        new URLSearchParams('error=oauth_failed') as unknown as ReturnType<typeof useSearchParams>
+      );
+
+      // When: レンダリング
+      render(<LoginForm />);
+
+      // Then: Googleログイン失敗メッセージが表示される
+      await waitFor(() => {
+        expect(
+          screen.getByText('Googleログインに失敗しました。もう一度お試しください。')
+        ).toBeInTheDocument();
+      });
+    });
+
+    it('error=oauth_failed以外のパラメータではエラーメッセージが表示されない', () => {
+      // Given: 異なるerrorパラメータがある状態
+      vi.mocked(useSearchParams).mockReturnValue(
+        new URLSearchParams('error=other') as unknown as ReturnType<typeof useSearchParams>
+      );
+
+      // When: レンダリング
+      render(<LoginForm />);
+
+      // Then: エラーメッセージが表示されない
+      expect(
+        screen.queryByText('Googleログインに失敗しました。もう一度お試しください。')
+      ).not.toBeInTheDocument();
+    });
+
+    it('redirectパラメータがある場合ログイン後にリダイレクトされる', async () => {
+      // Given: redirect=/dashboard クエリパラメータがある状態
+      vi.mocked(useSearchParams).mockReturnValue(
+        new URLSearchParams('redirect=/dashboard') as unknown as ReturnType<typeof useSearchParams>
+      );
+      mockSignInWithPassword.mockResolvedValue({ error: null });
+      const user = userEvent.setup();
+      render(<LoginForm />);
+
+      // When: ログイン
+      await user.type(screen.getByLabelText('メールアドレス'), 'test@example.com');
+      await user.type(screen.getByLabelText('パスワード'), 'password123');
+      await user.click(screen.getByRole('button', { name: 'ログイン' }));
+
+      // Then: redirectパラメータのURLにリダイレクトされる
+      await waitFor(() => {
+        expect(window.location.href).toBe('/dashboard');
+      });
+    });
   });
 
   describe('レンダリング', () => {
