@@ -12,7 +12,6 @@ allowed-tools: Bash, Skill
 
 ## 引数
 
-- `--skip-tests`: テストをスキップ（実施済みの場合）
 - `--no-merge`: PR作成のみ、マージはしない
 
 ## フロー
@@ -28,19 +27,7 @@ git branch --show-current
 
 現在のブランチ名から worktree 名（`feature/` を除いた部分）を取得する。
 
-### Step 2: テスト実行
-
-`--skip-tests` 引数がない場合:
-
-```
-Skill(dev:test) --all
-```
-
-テストが失敗した場合は中断し、失敗内容を表示する。
-
-`--skip-tests` の場合はスキップして次へ進む。
-
-### Step 3: 未コミット変更をコミット
+### Step 2: 未コミット変更をコミット
 
 ```bash
 git status --porcelain
@@ -75,18 +62,11 @@ Skill(convenience:create-pr)
 
 PR URLを表示する。
 
-### Step 6: マージ確認
+### Step 6: マージ or 終了
 
 `--no-merge` 引数がある場合はここで終了し、PRのURLを表示する。
 
-`--no-merge` がない場合:
-
-```
-PR をマージしますか？
-ブランチとworktreeも削除されます。
-```
-
-ユーザーの確認を待つ。
+`--no-merge` がない場合はそのまま Step 7 へ進む（確認不要）。
 
 ### Step 7: PRをマージ
 
