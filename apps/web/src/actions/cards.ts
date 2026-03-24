@@ -517,7 +517,7 @@ export async function getHomeCards(): Promise<HomeCardsData> {
         )
       `)
       .eq('user_id', user.id)
-      .in('status', ['new', 'active', 'completed'])
+      .in('status', ['new', 'active'])
       .order('created_at', { ascending: false }),
     supabase
       .from('study_logs')

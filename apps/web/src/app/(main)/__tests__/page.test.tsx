@@ -3,6 +3,20 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { CardWithTags, HomeCardsData } from '@/types/card';
 
+vi.mock('@/actions/cards', () => ({
+  getHomeCards: vi.fn().mockResolvedValue({
+    cards: [],
+    todayStudiedCardIds: [],
+    fetchedAt: new Date().toISOString(),
+  }),
+}));
+
+vi.mock('@/lib/query-client', () => {
+  const { QueryClient: QC } = require('@tanstack/react-query');
+  const mockQueryClient = new QC({ defaultOptions: { queries: { retry: false } } });
+  return { getQueryClient: vi.fn(() => mockQueryClient) };
+});
+
 const mockUseHomeCards = vi.fn();
 
 vi.mock('@/hooks/useHomeCards', () => ({
@@ -169,6 +183,22 @@ describe('DashboardPage 初期タブ選択', () => {
     expect(screen.getAllByTestId('skeleton').length).toBeGreaterThan(0);
   });
 
+  it('データ読み込み中: スケルトンが表示される（activeTabはdue）', async () => {
+    // Given: データがまだ読み込み中、activeTabはnullではなく'due'を返す
+    mockUseHomeCards.mockReturnValue({
+      data: undefined,
+      isLoading: true,
+    });
+
+    // When: ページをレンダリング
+    await renderPage();
+
+    // Then: スケルトンが表示され、card-tabsのvalueはdueになる
+    expect(screen.getAllByTestId('skeleton').length).toBeGreaterThan(0);
+    const tabs = screen.getByTestId('card-tabs');
+    expect(tabs.getAttribute('data-value')).toBe('due');
+  });
+
   it('復習中タブ表示中に復習中カードが0枚になった場合: dueタブに自動切替される', async () => {
     // Given: 復習中カードが1件ある状態で初期表示
     const todayCard = createCard({
@@ -205,5 +235,24 @@ describe('DashboardPage 初期タブ選択', () => {
     await waitFor(() => {
       expect(screen.getByTestId('card-tabs').getAttribute('data-value')).toBe('due');
     });
+  });
+});
+
+describe('DashboardPage prefetch', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.resetModules();
+  });
+
+  it('getHomeCards を prefetch する', async () => {
+    // Given: getHomeCards と getQueryClient がモック済み
+    const { getHomeCards } = await import('@/actions/cards');
+    const { default: DashboardPage } = await import('../page');
+
+    // When: DashboardPage を実行
+    await DashboardPage();
+
+    // Then: getHomeCards が呼ばれる
+    expect(getHomeCards).toHaveBeenCalled();
   });
 });

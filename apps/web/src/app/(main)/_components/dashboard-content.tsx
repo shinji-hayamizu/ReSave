@@ -75,8 +75,8 @@ export function DashboardContent() {
   const dataReady = !isLoading;
   const todayCardCount = categorizedCards.learning.length;
 
-  const activeTab = useMemo<CardTabValue | null>(() => {
-    if (!dataReady) return null;
+  const activeTab = useMemo<CardTabValue>(() => {
+    if (!dataReady) return 'due';
 
     if (userSelectedTab === null) {
       return todayCardCount > 0 ? 'learning' : 'due';
@@ -105,8 +105,7 @@ export function DashboardContent() {
     setUserSelectedTab('due');
   }, []);
 
-  const resolvedTab: CardTabValue = activeTab ?? 'due';
-  const activeCards = categorizedCards[resolvedTab];
+  const activeCards = categorizedCards[activeTab];
 
   return (
     <div className="pt-1 pb-2 md:pt-2 md:pb-4">
@@ -114,9 +113,9 @@ export function DashboardContent() {
           <QuickInputForm onCardCreated={handleCardCreated} />
         </div>
 
-        <CardTabs counts={counts} value={resolvedTab} onChange={handleTabChange} />
+        <CardTabs counts={counts} value={activeTab} onChange={handleTabChange} />
 
-        {isLoading || activeTab === null ? (
+        {isLoading ? (
           <StudyCardsSkeleton />
         ) : activeCards.length === 0 ? (
           <EmptyState
