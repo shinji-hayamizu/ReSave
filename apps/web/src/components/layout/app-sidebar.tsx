@@ -19,7 +19,7 @@ import {
 } from '@/components/ui/sidebar';
 export function AppSidebar() {
   const pathname = usePathname();
-  const { toggleSidebar } = useSidebar();
+  const { toggleSidebar, isMobile, isTablet, setOpenMobile } = useSidebar();
 
   const navItems = [
     { title: 'ホーム', href: '/', icon: Home },
@@ -28,6 +28,12 @@ export function AppSidebar() {
     { title: '設定', href: '/settings', icon: Settings },
     { title: 'About', href: '/about', icon: Info },
   ];
+
+  const handleNavClick = () => {
+    if (isMobile || isTablet) {
+      setOpenMobile(false);
+    }
+  };
 
   return (
     <Sidebar collapsible="icon" className="border-none bg-background">
@@ -60,7 +66,7 @@ export function AppSidebar() {
                     tooltip={item.title}
                     className="h-auto py-3 group-data-[collapsible=icon]:!h-auto group-data-[collapsible=icon]:!w-full group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:gap-1 group-data-[collapsible=icon]:py-4"
                   >
-                    <Link href={item.href}>
+                    <Link href={item.href} onClick={handleNavClick}>
                       <item.icon className="h-5 w-5 group-data-[collapsible=icon]:h-6 group-data-[collapsible=icon]:w-6" />
                       <span className="text-sm group-data-[collapsible=icon]:text-[10px]">{item.title}</span>
                     </Link>
