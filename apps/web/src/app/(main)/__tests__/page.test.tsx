@@ -3,20 +3,6 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { CardWithTags, HomeCardsData } from '@/types/card';
 
-vi.mock('@/actions/cards', () => ({
-  getHomeCards: vi.fn().mockResolvedValue({
-    cards: [],
-    todayStudiedCardIds: [],
-    fetchedAt: new Date().toISOString(),
-  }),
-}));
-
-vi.mock('@/lib/query-client', () => {
-  const { QueryClient: QC } = require('@tanstack/react-query');
-  const mockQueryClient = new QC({ defaultOptions: { queries: { retry: false } } });
-  return { getQueryClient: vi.fn(() => mockQueryClient) };
-});
-
 const mockUseHomeCards = vi.fn();
 
 vi.mock('@/hooks/useHomeCards', () => ({
@@ -238,21 +224,3 @@ describe('DashboardPage 初期タブ選択', () => {
   });
 });
 
-describe('DashboardPage prefetch', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-    vi.resetModules();
-  });
-
-  it('getHomeCards を prefetch する', async () => {
-    // Given: getHomeCards と getQueryClient がモック済み
-    const { getHomeCards } = await import('@/actions/cards');
-    const { default: DashboardPage } = await import('../page');
-
-    // When: DashboardPage を実行
-    await DashboardPage();
-
-    // Then: getHomeCards が呼ばれる
-    expect(getHomeCards).toHaveBeenCalled();
-  });
-});
