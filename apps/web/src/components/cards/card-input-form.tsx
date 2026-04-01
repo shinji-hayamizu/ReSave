@@ -89,7 +89,7 @@ function CharacterCounter({
 }
 
 export function CardInputForm({
-  mode,
+  mode: _mode,
   defaultValues,
   onSubmit,
   isSubmitting = false,

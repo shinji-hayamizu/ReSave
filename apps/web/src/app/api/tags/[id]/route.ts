@@ -61,7 +61,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       color: tag.color,
       createdAt: tag.created_at,
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       {
         error: {
@@ -162,7 +162,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       color: updatedTag.color,
       createdAt: updatedTag.created_at,
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       {
         error: {
@@ -239,7 +239,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     }
 
     return new NextResponse(null, { status: 204 });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       {
         error: {

@@ -2,7 +2,6 @@
 
 import { Layers, RotateCcw, Flame, Target } from 'lucide-react';
 
-import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useSummaryStats } from '@/hooks/useStats';
 

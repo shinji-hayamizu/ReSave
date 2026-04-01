@@ -59,7 +59,7 @@ export default function TagsPage() {
       await createTag.mutateAsync(data);
       toast.success('タグを作成しました');
       handleCloseModal();
-    } catch (err) {
+    } catch {
       toast.error('タグの作成に失敗しました');
     }
   };
@@ -74,7 +74,7 @@ export default function TagsPage() {
       });
       toast.success('タグを更新しました');
       handleCloseModal();
-    } catch (err) {
+    } catch {
       toast.error('タグの更新に失敗しました');
     }
   };
@@ -86,7 +86,7 @@ export default function TagsPage() {
       await deleteTag.mutateAsync(modalState.tag.id);
       toast.success('タグを削除しました');
       handleCloseModal();
-    } catch (err) {
+    } catch {
       toast.error('タグの削除に失敗しました');
     }
   };
@@ -146,6 +146,7 @@ export default function TagsPage() {
       </div>
 
       <TagFormModal
+        key={modalState.type === 'create' ? 'create' : 'create-closed'}
         isOpen={modalState.type === 'create'}
         mode="create"
         onSubmit={handleCreateTag}
@@ -154,6 +155,7 @@ export default function TagsPage() {
       />
 
       <TagFormModal
+        key={modalState.type === 'edit' ? `edit-${modalState.tag.id}` : 'edit-closed'}
         isOpen={modalState.type === 'edit'}
         mode="edit"
         defaultValues={

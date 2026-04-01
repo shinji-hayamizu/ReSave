@@ -347,7 +347,7 @@ export function useResetCard() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => resetCardToUnlearned(id),
-    onMutate: async (id): Promise<ResetCardContext> => {
+    onMutate: async (_id): Promise<ResetCardContext> => {
       await qc.cancelQueries({ queryKey: cardKeys.lists() });
       await qc.cancelQueries({ queryKey: cardKeys.new() });
       await qc.cancelQueries({ queryKey: cardKeys.today() });

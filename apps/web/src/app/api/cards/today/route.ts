@@ -188,7 +188,7 @@ export async function GET(request: NextRequest) {
         offset: 0,
       },
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       {
         error: {

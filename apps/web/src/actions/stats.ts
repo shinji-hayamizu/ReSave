@@ -159,7 +159,7 @@ async function calculateStreak(
   today.setHours(0, 0, 0, 0);
 
   let streak = 0;
-  let checkDate = new Date(today);
+  const checkDate = new Date(today);
 
   const hasStudiedToday = studyDates.has(checkDate.toISOString().split('T')[0]);
   if (hasStudiedToday) {

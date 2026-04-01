@@ -136,10 +136,12 @@ const VirtualizedCardList = memo(function VirtualizedCardList({
 }) {
   const parentRef = useRef<HTMLDivElement>(null);
 
+  const estimateSize = useCallback(() => ESTIMATED_CARD_HEIGHT, []);
+
   const virtualizer = useVirtualizer({
     count: cards.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: useCallback(() => ESTIMATED_CARD_HEIGHT, []),
+    estimateSize,
     overscan: 5,
   });
 

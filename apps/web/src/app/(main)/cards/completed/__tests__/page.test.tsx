@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-import type { CardWithTags, HomeCardsData } from '@/types/card';
+import type { CardWithTags } from '@/types/card';
 
 const mockUseHomeCards = vi.fn();
 

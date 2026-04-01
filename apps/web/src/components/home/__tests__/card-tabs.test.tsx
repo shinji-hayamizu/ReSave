@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import { CardTabs, type CardTabValue } from '../card-tabs';
+import { CardTabs } from '../card-tabs';
 
 describe('CardTabs', () => {
   it('未学習と復習中の2タブのみ表示される', () => {

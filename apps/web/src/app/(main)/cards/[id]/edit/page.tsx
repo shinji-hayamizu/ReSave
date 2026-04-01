@@ -38,7 +38,7 @@ export default function EditCardPage({ params }: EditCardPageProps) {
       });
       toast.success('カードを更新しました');
       router.push('/');
-    } catch (err) {
+    } catch {
       toast.error('カードの更新に失敗しました');
     }
   }
@@ -48,7 +48,7 @@ export default function EditCardPage({ params }: EditCardPageProps) {
       await deleteCard.mutateAsync(id);
       toast.success('カードを削除しました');
       router.push('/');
-    } catch (err) {
+    } catch {
       toast.error('カードの削除に失敗しました');
     }
   }
