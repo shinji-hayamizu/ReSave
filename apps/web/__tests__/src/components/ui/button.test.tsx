@@ -193,7 +193,7 @@ describe('Button', () => {
 
   it('refが転送される', () => {
     // Given: ref
-    const ref = { current: null } as React.RefObject<HTMLButtonElement>;
+    const ref = { current: null } as unknown as React.RefObject<HTMLButtonElement>;
 
     // When: ボタンをレンダリング
     render(<Button ref={ref}>クリック</Button>);
