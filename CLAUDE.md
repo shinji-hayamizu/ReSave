@@ -60,6 +60,8 @@ EXPO_PUBLIC_SUPABASE_ANON_KEY=
 
 フロントエンド（UI/UXコンポーネント、画面実装）の修正・作成時は `/frontend-design` スキルを使用すること。
 
+コード実装時は、各ステップの実装完了後に `/testing` スキルでテストを作成・実行すること。テストなしで次のステップに進むことは禁止。
+
 ## ドキュメント
 
 - [ビジネス要件](docs/requirements/business-requirements.md)

@@ -120,7 +120,7 @@ describe('Input', () => {
 
   it('refが転送される', () => {
     // Given: ref
-    const ref = { current: null } as React.RefObject<HTMLInputElement>;
+    const ref = { current: null } as unknown as React.RefObject<HTMLInputElement>;
 
     // When: レンダリング
     render(<Input ref={ref} />);

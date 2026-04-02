@@ -20,7 +20,7 @@ vi.mock('@/components/home', () => ({
   }: {
     value: string;
     onChange: (v: string) => void;
-    counts: { due: number; learning: number; completed: number };
+    counts: { due: number; learning: number };
   }) => (
     <div data-testid="card-tabs" data-value={value}>
       <button data-testid="tab-due" type="button" onClick={() => onChange('due')}>
@@ -28,9 +28,6 @@ vi.mock('@/components/home', () => ({
       </button>
       <button data-testid="tab-learning" type="button" onClick={() => onChange('learning')}>
         learning({counts.learning})
-      </button>
-      <button data-testid="tab-completed" type="button" onClick={() => onChange('completed')}>
-        completed({counts.completed})
       </button>
     </div>
   ),
@@ -75,7 +72,7 @@ function createCard(overrides: Partial<CardWithTags> = {}): CardWithTags {
 }
 
 function createHomeCardsData(cards: CardWithTags[], todayStudiedCardIds: string[] = []): HomeCardsData {
-  return { cards, todayStudiedCardIds };
+  return { cards, todayStudiedCardIds, fetchedAt: new Date().toISOString() };
 }
 
 function createQueryClient() {
@@ -85,11 +82,11 @@ function createQueryClient() {
 }
 
 async function renderPage() {
-  const DashboardPage = (await import('../page')).default;
+  const { DashboardContent } = await import('../_components/dashboard-content');
   const queryClient = createQueryClient();
   return render(
     <QueryClientProvider client={queryClient}>
-      <DashboardPage />
+      <DashboardContent />
     </QueryClientProvider>
   );
 }
@@ -172,6 +169,22 @@ describe('DashboardPage 初期タブ選択', () => {
     expect(screen.getAllByTestId('skeleton').length).toBeGreaterThan(0);
   });
 
+  it('データ読み込み中: スケルトンが表示される（activeTabはdue）', async () => {
+    // Given: データがまだ読み込み中、activeTabはnullではなく'due'を返す
+    mockUseHomeCards.mockReturnValue({
+      data: undefined,
+      isLoading: true,
+    });
+
+    // When: ページをレンダリング
+    await renderPage();
+
+    // Then: スケルトンが表示され、card-tabsのvalueはdueになる
+    expect(screen.getAllByTestId('skeleton').length).toBeGreaterThan(0);
+    const tabs = screen.getByTestId('card-tabs');
+    expect(tabs.getAttribute('data-value')).toBe('due');
+  });
+
   it('復習中タブ表示中に復習中カードが0枚になった場合: dueタブに自動切替される', async () => {
     // Given: 復習中カードが1件ある状態で初期表示
     const todayCard = createCard({
@@ -196,11 +209,11 @@ describe('DashboardPage 初期タブ選択', () => {
       isLoading: false,
     });
 
-    const DashboardPage = (await import('../page')).default;
+    const { DashboardContent } = await import('../_components/dashboard-content');
     const queryClient = createQueryClient();
     rerender(
       <QueryClientProvider client={queryClient}>
-        <DashboardPage />
+        <DashboardContent />
       </QueryClientProvider>
     );
 

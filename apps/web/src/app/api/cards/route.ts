@@ -8,7 +8,6 @@ import { cardQuerySchema, createCardSchema } from '@/validations/card';
 
 type CardRow = Database['public']['Tables']['cards']['Row'];
 type TagRow = Database['public']['Tables']['tags']['Row'];
-type CardTagRow = Database['public']['Tables']['card_tags']['Row'];
 
 function mapRowToCard(row: CardRow): CardWithTags {
   return {
@@ -235,7 +234,7 @@ export async function GET(request: NextRequest) {
         offset,
       },
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       {
         error: {
@@ -361,7 +360,7 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(card, { status: 201 });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       {
         error: {

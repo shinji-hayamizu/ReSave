@@ -8,6 +8,7 @@ import { createClient } from '@/lib/supabase/client';
 import { SignupForm } from '../signup-form';
 
 const mockSignUp = vi.fn();
+const mockSignInWithOAuth = vi.fn();
 const mockPush = vi.fn();
 const mockRefresh = vi.fn();
 
@@ -31,6 +32,7 @@ describe('SignupForm', () => {
     vi.mocked(createClient).mockReturnValue({
       auth: {
         signUp: mockSignUp,
+        signInWithOAuth: mockSignInWithOAuth,
         getUser: vi.fn(),
         signInWithPassword: vi.fn(),
         signOut: vi.fn(),
@@ -157,6 +159,43 @@ describe('SignupForm', () => {
         expect(
           screen.getByText('登録に失敗しました。しばらくしてから再度お試しください')
         ).toBeInTheDocument();
+      });
+    });
+
+    it('Googleで登録ボタンクリックでsignInWithOAuthが呼ばれる', async () => {
+      // Given: signInWithOAuthが成功する状態
+      mockSignInWithOAuth.mockResolvedValue({ error: null });
+      const user = userEvent.setup();
+      render(<SignupForm />);
+
+      // When: Googleで登録ボタンをクリック
+      await user.click(screen.getByRole('button', { name: /Googleで登録/i }));
+
+      // Then: signInWithOAuthがgoogleプロバイダーで呼ばれる
+      await waitFor(() => {
+        expect(mockSignInWithOAuth).toHaveBeenCalledWith({
+          provider: 'google',
+          options: expect.objectContaining({
+            redirectTo: expect.stringContaining('/auth/callback'),
+          }),
+        });
+      });
+    });
+
+    it('Google登録失敗時にエラーメッセージが表示される', async () => {
+      // Given: signInWithOAuthが失敗する状態
+      mockSignInWithOAuth.mockResolvedValue({
+        error: { message: 'OAuth error' },
+      });
+      const user = userEvent.setup();
+      render(<SignupForm />);
+
+      // When: Googleで登録ボタンをクリック
+      await user.click(screen.getByRole('button', { name: /Googleで登録/i }));
+
+      // Then: エラーメッセージが表示される
+      await waitFor(() => {
+        expect(screen.getByText('Googleでの登録に失敗しました')).toBeInTheDocument();
       });
     });
 

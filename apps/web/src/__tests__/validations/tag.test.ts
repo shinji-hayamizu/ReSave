@@ -11,7 +11,7 @@ describe('tagSchema', () => {
     id: '123e4567-e89b-12d3-a456-426614174000',
     userId: '123e4567-e89b-12d3-a456-426614174001',
     name: 'プログラミング',
-    color: '#6366f1',
+    color: 'blue',
     createdAt: '2024-01-01T00:00:00.000Z',
   };
 
@@ -56,56 +56,18 @@ describe('tagSchema', () => {
     }
   });
 
-  it('無効な色コードを拒否する: #なし', () => {
-    const invalidTag = {
-      ...validTag,
-      color: '6366f1',
-    };
-
-    const result = tagSchema.safeParse(invalidTag);
-    expect(result.success).toBe(false);
-    if (!result.success) {
-      expect(result.error.issues[0].message).toBe('有効な色コードを入力してください');
-    }
-  });
-
-  it('無効な色コードを拒否する: 3桁', () => {
-    const invalidTag = {
-      ...validTag,
-      color: '#fff',
-    };
-
-    const result = tagSchema.safeParse(invalidTag);
-    expect(result.success).toBe(false);
-  });
-
-  it('無効な色コードを拒否する: 無効な文字', () => {
-    const invalidTag = {
-      ...validTag,
-      color: '#gggggg',
-    };
-
-    const result = tagSchema.safeParse(invalidTag);
-    expect(result.success).toBe(false);
-  });
-
-  it('小文字の色コードを受け入れる', () => {
-    const validTagLower = {
-      ...validTag,
-      color: '#abcdef',
-    };
-
-    const result = tagSchema.safeParse(validTagLower);
+  it('有効な色名を受け入れる: blue', () => {
+    const result = tagSchema.safeParse({ ...validTag, color: 'blue' });
     expect(result.success).toBe(true);
   });
 
-  it('大文字の色コードを受け入れる', () => {
-    const validTagUpper = {
-      ...validTag,
-      color: '#ABCDEF',
-    };
+  it('有効な色名を受け入れる: green', () => {
+    const result = tagSchema.safeParse({ ...validTag, color: 'green' });
+    expect(result.success).toBe(true);
+  });
 
-    const result = tagSchema.safeParse(validTagUpper);
+  it('有効な色名を受け入れる: purple', () => {
+    const result = tagSchema.safeParse({ ...validTag, color: 'purple' });
     expect(result.success).toBe(true);
   });
 });
@@ -114,14 +76,14 @@ describe('createTagSchema', () => {
   it('有効な作成データを受け入れる', () => {
     const validCreate = {
       name: '新しいタグ',
-      color: '#ff5733',
+      color: 'green',
     };
 
     const result = createTagSchema.safeParse(validCreate);
     expect(result.success).toBe(true);
   });
 
-  it('colorを省略した場合デフォルト値を使用する', () => {
+  it('colorを省略した場合デフォルト値(blue)を使用する', () => {
     const createWithoutColor = {
       name: '新しいタグ',
     };
@@ -129,14 +91,14 @@ describe('createTagSchema', () => {
     const result = createTagSchema.safeParse(createWithoutColor);
     expect(result.success).toBe(true);
     if (result.success) {
-      expect(result.data.color).toBe('#6366f1');
+      expect(result.data.color).toBe('blue');
     }
   });
 
   it('空の名前を拒否する', () => {
     const invalidCreate = {
       name: '',
-      color: '#ff5733',
+      color: 'green',
     };
 
     const result = createTagSchema.safeParse(invalidCreate);
@@ -149,7 +111,7 @@ describe('createTagSchema', () => {
   it('50文字を超える名前を拒否する', () => {
     const invalidCreate = {
       name: 'a'.repeat(51),
-      color: '#ff5733',
+      color: 'green',
     };
 
     const result = createTagSchema.safeParse(invalidCreate);
@@ -159,7 +121,7 @@ describe('createTagSchema', () => {
     }
   });
 
-  it('無効な色コードを拒否する', () => {
+  it('無効な色名を拒否する', () => {
     const invalidCreate = {
       name: '新しいタグ',
       color: 'invalid',
@@ -167,9 +129,6 @@ describe('createTagSchema', () => {
 
     const result = createTagSchema.safeParse(invalidCreate);
     expect(result.success).toBe(false);
-    if (!result.success) {
-      expect(result.error.issues[0].message).toBe('有効な色コードを入力してください');
-    }
   });
 });
 
@@ -185,7 +144,7 @@ describe('updateTagSchema', () => {
 
   it('部分更新データを受け入れる: colorのみ', () => {
     const partialUpdate = {
-      color: '#00ff00',
+      color: 'cyan',
     };
 
     const result = updateTagSchema.safeParse(partialUpdate);
@@ -208,7 +167,7 @@ describe('updateTagSchema', () => {
     expect(result.success).toBe(false);
   });
 
-  it('無効な色コードを拒否する', () => {
+  it('無効な色名を拒否する', () => {
     const invalidUpdate = {
       color: 'not-a-color',
     };

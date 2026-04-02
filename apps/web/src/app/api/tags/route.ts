@@ -86,7 +86,7 @@ export async function GET(request: NextRequest) {
         offset,
       },
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       {
         error: {
@@ -173,7 +173,7 @@ export async function POST(request: NextRequest) {
       },
       { status: 201 }
     );
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       {
         error: {

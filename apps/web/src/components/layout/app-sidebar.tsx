@@ -1,6 +1,6 @@
 'use client';
 
-import { Home, Info, Menu, Settings, Tag } from 'lucide-react';
+import { CheckCheck, Home, Info, Menu, Settings, Tag } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -17,17 +17,23 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/sidebar';
-
-const navItems = [
-  { title: 'ホーム', href: '/', icon: Home },
-  { title: 'タグ', href: '/tags', icon: Tag },
-  { title: '設定', href: '/settings', icon: Settings },
-  { title: 'About', href: '/about', icon: Info },
-];
-
 export function AppSidebar() {
   const pathname = usePathname();
-  const { toggleSidebar } = useSidebar();
+  const { toggleSidebar, isMobile, isTablet, setOpenMobile } = useSidebar();
+
+  const navItems = [
+    { title: 'ホーム', href: '/', icon: Home },
+    { title: '完了', href: '/cards/completed', icon: CheckCheck },
+    { title: 'タグ', href: '/tags', icon: Tag },
+    { title: '設定', href: '/settings', icon: Settings },
+    { title: 'About', href: '/about', icon: Info },
+  ];
+
+  const handleNavClick = () => {
+    if (isMobile || isTablet) {
+      setOpenMobile(false);
+    }
+  };
 
   return (
     <Sidebar collapsible="icon" className="border-none bg-background">
@@ -42,10 +48,10 @@ export function AppSidebar() {
           >
             <Menu className="h-6 w-6" />
           </Button>
-          <div className="flex items-end gap-0.5 group-data-[collapsible=icon]:hidden">
+          <Link href="/" className="flex items-end gap-0.5 group-data-[collapsible=icon]:hidden">
             <ReSaveIcon size={28} className="mb-[2px]" />
             <span className="text-xl font-bold">ReSave</span>
-          </div>
+          </Link>
         </div>
       </SidebarHeader>
       <SidebarContent>
@@ -60,7 +66,7 @@ export function AppSidebar() {
                     tooltip={item.title}
                     className="h-auto py-3 group-data-[collapsible=icon]:!h-auto group-data-[collapsible=icon]:!w-full group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:gap-1 group-data-[collapsible=icon]:py-4"
                   >
-                    <Link href={item.href}>
+                    <Link href={item.href} onClick={handleNavClick}>
                       <item.icon className="h-5 w-5 group-data-[collapsible=icon]:h-6 group-data-[collapsible=icon]:w-6" />
                       <span className="text-sm group-data-[collapsible=icon]:text-[10px]">{item.title}</span>
                     </Link>

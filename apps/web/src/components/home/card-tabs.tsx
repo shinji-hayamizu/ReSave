@@ -4,7 +4,7 @@ import { memo } from 'react';
 
 import { cn } from '@/lib/utils';
 
-export type CardTabValue = 'due' | 'learning' | 'completed';
+export type CardTabValue = 'due' | 'learning';
 
 interface CardTabsProps {
   value: CardTabValue;
@@ -12,7 +12,6 @@ interface CardTabsProps {
   counts?: {
     due: number;
     learning: number;
-    completed: number;
   };
   className?: string;
 }
@@ -28,7 +27,6 @@ interface TabConfig {
 const tabs: TabConfig[] = [
   { value: 'due', label: '未学習', badgeBg: 'bg-warning/10', badgeText: 'text-warning', activeBg: 'bg-warning/5' },
   { value: 'learning', label: '復習中', badgeBg: 'bg-primary/10', badgeText: 'text-primary', activeBg: 'bg-primary/5' },
-  { value: 'completed', label: '完了', badgeBg: 'bg-success/10', badgeText: 'text-success', activeBg: 'bg-success/5' },
 ];
 
 function formatCount(count: number): string {

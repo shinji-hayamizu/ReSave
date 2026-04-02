@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  CheckCheck,
   Home,
   Info,
   Settings,
@@ -13,6 +14,7 @@ import { cn } from '@/lib/utils';
 
 const navItems = [
   { title: 'ホーム', href: '/', icon: Home },
+  { title: '完了', href: '/cards/completed', icon: CheckCheck },
   { title: 'タグ', href: '/tags', icon: Tag },
   { title: '設定', href: '/settings', icon: Settings },
   { title: 'About', href: '/about', icon: Info },

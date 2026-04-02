@@ -153,7 +153,7 @@ export async function GET(request: NextRequest, { params }: { params: Params }) 
     }
 
     return NextResponse.json(card);
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       {
         error: {
@@ -378,7 +378,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Params }
     }
 
     return NextResponse.json(card);
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       {
         error: {
@@ -447,7 +447,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Params 
     }
 
     return new NextResponse(null, { status: 204 });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       {
         error: {

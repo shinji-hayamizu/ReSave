@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -37,17 +37,9 @@ export function TagFormModal({
   onClose,
   isSubmitting = false,
 }: TagFormModalProps) {
-  const [name, setName] = useState('');
-  const [color, setColor] = useState<TagColorName>('blue');
+  const [name, setName] = useState(defaultValues?.name ?? '');
+  const [color, setColor] = useState<TagColorName>((defaultValues?.color as TagColorName) ?? 'blue');
   const [error, setError] = useState('');
-
-  useEffect(() => {
-    if (isOpen) {
-      setName(defaultValues?.name ?? '');
-      setColor((defaultValues?.color as TagColorName) ?? 'blue');
-      setError('');
-    }
-  }, [isOpen, defaultValues]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

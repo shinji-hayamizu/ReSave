@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { Menu } from 'lucide-react';
 
 import { CreateCardDialog } from '@/components/cards/create-card-dialog';
@@ -28,10 +29,10 @@ export function AppHeader() {
               </Button>
             )}
             {showMobileHeader && (
-              <div className="flex items-end gap-0.5">
+              <Link href="/" className="flex items-end gap-0.5">
                 <ReSaveIcon size={28} className="mb-[2px]" />
                 <h1 className="text-xl font-bold">ReSave</h1>
-              </div>
+              </Link>
             )}
           </div>
           <div className="flex items-center gap-2">
