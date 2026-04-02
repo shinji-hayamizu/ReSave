@@ -2,7 +2,7 @@
 
 import { CheckCheck } from 'lucide-react';
 
-import { CardList } from '@/components/home';
+import { CompletedCard } from '@/components/home';
 import { PageHeader } from '@/components/layout/page-header';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -44,7 +44,11 @@ export default function CompletedCardsPage() {
             description="カードを学習して「覚えた」と評価すると、ここに表示されます"
           />
         ) : (
-          <CardList cards={completedCards} />
+          <div className="space-y-4" data-testid="card-list">
+            {completedCards.map((card) => (
+              <CompletedCard key={card.id} card={card} />
+            ))}
+          </div>
         )}
       </div>
     </div>
