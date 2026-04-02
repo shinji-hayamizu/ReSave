@@ -24,6 +24,15 @@
     "paths": {
       "@/*": [
         "./src/*"
+      ],
+      "@resave/shared": [
+        "../../packages/shared/src/index.ts"
+      ],
+      "@resave/shared/types": [
+        "../../packages/shared/src/types/index.ts"
+      ],
+      "@resave/shared/validations": [
+        "../../packages/shared/src/validations/index.ts"
       ]
     },
     "target": "ES2017"
