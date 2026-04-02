@@ -4,15 +4,15 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import type { CardWithTags } from '@/types/card';
 
-const mockUseHomeCards = vi.fn();
+const mockUseTodayCompletedCards = vi.fn();
 
-vi.mock('@/hooks/useHomeCards', () => ({
-  useHomeCards: () => mockUseHomeCards(),
+vi.mock('@/hooks/useCards', () => ({
+  useTodayCompletedCards: () => mockUseTodayCompletedCards(),
 }));
 
 vi.mock('@/components/home', () => ({
-  CardList: ({ cards }: { cards: CardWithTags[] }) => (
-    <div data-testid="card-list">{cards.length} cards</div>
+  CompletedCard: ({ card }: { card: CardWithTags }) => (
+    <div data-testid="completed-card">{card.id}</div>
   ),
 }));
 
@@ -49,8 +49,8 @@ function createCard(overrides: Partial<CardWithTags> = {}): CardWithTags {
     schedule: [1, 3, 7, 14, 30, 180],
     currentStep: 0,
     nextReviewAt: null,
-    status: 'new',
-    completedAt: null,
+    status: 'completed',
+    completedAt: '2026-04-02T10:00:00Z',
     createdAt: '2025-01-01T00:00:00Z',
     updatedAt: '2025-01-01T00:00:00Z',
     tags: [],
@@ -82,8 +82,8 @@ describe('CompletedCardsPage', () => {
 
   it('ページヘッダーに「完了」タイトルが表示される', async () => {
     // Given: データ読み込み完了
-    mockUseHomeCards.mockReturnValue({
-      data: { cards: [], todayStudiedCardIds: [] },
+    mockUseTodayCompletedCards.mockReturnValue({
+      data: [],
       isLoading: false,
     });
 
@@ -97,7 +97,7 @@ describe('CompletedCardsPage', () => {
 
   it('読み込み中の場合: スケルトンが表示される', async () => {
     // Given: データ読み込み中
-    mockUseHomeCards.mockReturnValue({
+    mockUseTodayCompletedCards.mockReturnValue({
       data: undefined,
       isLoading: true,
     });
@@ -110,10 +110,9 @@ describe('CompletedCardsPage', () => {
   });
 
   it('完了カードがない場合: 空状態が表示される', async () => {
-    // Given: 完了カードなし（activeカードのみ）
-    const activeCard = createCard({ id: 'a1', status: 'active' });
-    mockUseHomeCards.mockReturnValue({
-      data: { cards: [activeCard], todayStudiedCardIds: [] },
+    // Given: 完了カードなし
+    mockUseTodayCompletedCards.mockReturnValue({
+      data: [],
       isLoading: false,
     });
 
@@ -127,30 +126,29 @@ describe('CompletedCardsPage', () => {
     });
   });
 
-  it('完了カードがある場合: CardListに完了カードのみ渡される', async () => {
-    // Given: 完了カード2件、activeカード1件
-    const completedCard1 = createCard({ id: 'c1', status: 'completed' });
-    const completedCard2 = createCard({ id: 'c2', status: 'completed' });
-    const activeCard = createCard({ id: 'a1', status: 'active' });
-    mockUseHomeCards.mockReturnValue({
-      data: { cards: [completedCard1, completedCard2, activeCard], todayStudiedCardIds: [] },
+  it('完了カードがある場合: CompletedCardが件数分表示される', async () => {
+    // Given: 完了カード2件
+    const card1 = createCard({ id: 'c1' });
+    const card2 = createCard({ id: 'c2' });
+    mockUseTodayCompletedCards.mockReturnValue({
+      data: [card1, card2],
       isLoading: false,
     });
 
     // When: ページをレンダリング
     await renderPage();
 
-    // Then: CardListに完了カード2件のみ渡される
+    // Then: 完了カード2件表示される
     await waitFor(() => {
-      expect(screen.getByTestId('card-list')).toHaveTextContent('2 cards');
+      expect(screen.getAllByTestId('completed-card')).toHaveLength(2);
+      expect(screen.getByTestId('card-list')).toBeInTheDocument();
     });
   });
 
-  it('newカードは完了カードに含まれない', async () => {
-    // Given: newカードのみ
-    const newCard = createCard({ id: 'n1', status: 'new' });
-    mockUseHomeCards.mockReturnValue({
-      data: { cards: [newCard], todayStudiedCardIds: [] },
+  it('dataがundefinedの場合: 空状態が表示される', async () => {
+    // Given: dataがundefined（初期状態）
+    mockUseTodayCompletedCards.mockReturnValue({
+      data: undefined,
       isLoading: false,
     });
 
