@@ -1,14 +1,12 @@
 'use client';
 
-import { useMemo } from 'react';
-
 import { CheckCheck } from 'lucide-react';
 
 import { CardList } from '@/components/home';
 import { PageHeader } from '@/components/layout/page-header';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useHomeCards } from '@/hooks/useHomeCards';
+import { useTodayCompletedCards } from '@/hooks/useCards';
 
 function CompletedPageSkeleton() {
   return (
@@ -28,12 +26,7 @@ function CompletedPageSkeleton() {
 }
 
 export default function CompletedCardsPage() {
-  const { data, isLoading } = useHomeCards();
-
-  const completedCards = useMemo(() => {
-    if (!data) return [];
-    return data.cards.filter((card) => card.status === 'completed');
-  }, [data]);
+  const { data: completedCards, isLoading } = useTodayCompletedCards();
 
   return (
     <div>
@@ -44,7 +37,7 @@ export default function CompletedCardsPage() {
       <div className="p-4 md:p-6">
         {isLoading ? (
           <CompletedPageSkeleton />
-        ) : completedCards.length === 0 ? (
+        ) : !completedCards || completedCards.length === 0 ? (
           <EmptyState
             icon={<CheckCheck />}
             title="完了済みカードなし"
