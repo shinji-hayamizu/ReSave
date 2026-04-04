@@ -4,7 +4,7 @@ description: |
   ReSaveで新機能開発を開始するスキル。
   developブランチから feature/* ブランチを作成し、
   EnterWorktreeで分離されたworktree環境に入り、Plan modeで計画→GitHub Issue作成→実装→コミット→PR作成→devサーバー起動まで行う。
-allowed-tools: Bash, EnterWorktree, EnterPlanMode, AskUserQuestion, Skill, Read, Glob, Grep
+allowed-tools: Bash, EnterWorktree, EnterPlanMode, AskUserQuestion, Skill, Read, Glob, Grep, Write, mcp__playwright__browser_navigate, mcp__playwright__browser_take_screenshot
 ---
 
 # 新機能開発開始スキル
@@ -84,6 +84,52 @@ worktree内で実際のコードを調査しながら以下を行う:
 - 実装方針・タスクの分解
 - **GitHub Issueのタイトル・概要・タスクリスト**を策定
 - 影響範囲・注意点の洗い出し
+
+#### Step 5-A: UIモック生成（UIの変更・追加が含まれる場合のみ）
+
+タスクにUIの変更・新規追加が含まれる場合、以下を実行する:
+
+1. **既存UIの把握**
+   - 変更対象の既存コンポーネント・ページを Read で読み込む
+   - 現在のデザイン（カラー、レイアウト、コンポーネント構造）を把握する
+
+2. **HTMLモックを3パターン生成**
+   - `docs/mocks/<branch-name>/` ディレクトリに以下を出力:
+     - `pattern-1.html` - アプローチ1（説明付き）
+     - `pattern-2.html` - アプローチ2（説明付き）
+     - `pattern-3.html` - アプローチ3（説明付き）
+   - 各HTMLは単体で開けるスタンドアロンHTML（Tailwind CDN使用）
+   - 既存のデザインシステム（カラー、スペーシング）に沿ったスタイルにする
+   - UIテキストは日本語で記述する
+   - パターンの差別化:
+     - pattern-1: 現状に近いアプローチ（保守的）
+     - pattern-2: 改善提案（推奨案）
+     - pattern-3: 大胆な変更（実験的）
+
+3. **ブラウザで表示してスクリーンショットを会話上に表示**
+   - `docs/mocks/<branch-name>/` ディレクトリでローカルHTTPサーバーを起動する（`python3 -m http.server <port>`、バックグラウンド実行）
+   - `mcp__playwright__browser_navigate` で `http://localhost:<port>/pattern-1.html` 等を開く
+   - `mcp__playwright__browser_take_screenshot` でスクリーンショットを撮影し、会話画面に画像として表示する（3パターン分）
+   - AskUserQuestion で「どのパターンが好みですか？カスタマイズしたい点はありますか？」と質問する
+   - 確認完了後、HTTPサーバーを停止する
+
+4. **承認後に実装方針を確定**
+   - ユーザーが選んだパターンを実装方針に反映する
+
+**UIモック生成の判定基準:**
+
+以下を含む場合は **UIモック生成あり**:
+- 新規画面・ページの追加
+- 既存ページのレイアウト変更
+- 新規コンポーネントの追加
+- フォーム、リスト、カードなどのUI要素の変更
+
+以下の場合は **スキップ**:
+- Server Actions / API Routes のみの変更
+- 型定義・バリデーションの変更
+- テストの追加・修正
+- パフォーマンス改善（見た目の変更なし）
+- バグ修正（UIの見た目は変わらない）
 
 ユーザーが計画を承認したら次のステップへ進む。
 
