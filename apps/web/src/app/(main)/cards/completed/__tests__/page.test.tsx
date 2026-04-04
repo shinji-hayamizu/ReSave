@@ -81,11 +81,7 @@ describe('CompletedCardsPage', () => {
   });
 
   it('ページヘッダーに「完了」タイトルが表示される', async () => {
-<<<<<<< HEAD
     // Given: データ読み込み完了
-=======
-    // Given: データ読み込み完了・完了カードなし
->>>>>>> 9ee3760 (fix(completed): fix completed cards not showing after marking as remembered)
     mockUseTodayCompletedCards.mockReturnValue({
       data: [],
       isLoading: false,
@@ -104,21 +100,49 @@ describe('CompletedCardsPage', () => {
     mockUseTodayCompletedCards.mockReturnValue({
       data: undefined,
       isLoading: true,
+      isFetching: true,
     });
 
     // When: ページをレンダリング
     await renderPage();
 
-    // Then: スケルトンが表示される
+    // Then: スケルトンが表示され、ローディングバーは表示されない
     expect(screen.getAllByTestId('skeleton').length).toBeGreaterThan(0);
+    expect(screen.queryByTestId('loading-bar')).not.toBeInTheDocument();
+  });
+
+  it('リフェッチ中の場合: ローディングバーが表示される', async () => {
+    // Given: リフェッチ中（初回ロード完了済み）
+    mockUseTodayCompletedCards.mockReturnValue({
+      data: [],
+      isLoading: false,
+      isFetching: true,
+    });
+
+    // When: ページをレンダリング
+    await renderPage();
+
+    // Then: ローディングバーが表示される
+    expect(screen.getByTestId('loading-bar')).toBeInTheDocument();
+  });
+
+  it('リフェッチ中でない場合: ローディングバーが表示されない', async () => {
+    // Given: リフェッチ完了
+    mockUseTodayCompletedCards.mockReturnValue({
+      data: [],
+      isLoading: false,
+      isFetching: false,
+    });
+
+    // When: ページをレンダリング
+    await renderPage();
+
+    // Then: ローディングバーが表示されない
+    expect(screen.queryByTestId('loading-bar')).not.toBeInTheDocument();
   });
 
   it('完了カードがない場合: 空状態が表示される', async () => {
-<<<<<<< HEAD
     // Given: 完了カードなし
-=======
-    // Given: 完了カードなし（空配列）
->>>>>>> 9ee3760 (fix(completed): fix completed cards not showing after marking as remembered)
     mockUseTodayCompletedCards.mockReturnValue({
       data: [],
       isLoading: false,
@@ -134,7 +158,22 @@ describe('CompletedCardsPage', () => {
     });
   });
 
-<<<<<<< HEAD
+  it('dataがundefinedの場合: 空状態が表示される', async () => {
+    // Given: dataがundefined（初期状態）
+    mockUseTodayCompletedCards.mockReturnValue({
+      data: undefined,
+      isLoading: false,
+    });
+
+    // When: ページをレンダリング
+    await renderPage();
+
+    // Then: 空状態が表示される
+    await waitFor(() => {
+      expect(screen.getByTestId('empty-state')).toBeInTheDocument();
+    });
+  });
+
   it('完了カードがある場合: CompletedCardが件数分表示される', async () => {
     // Given: 完了カード2件
     const card1 = createCard({ id: 'c1' });
@@ -151,44 +190,6 @@ describe('CompletedCardsPage', () => {
     await waitFor(() => {
       expect(screen.getAllByTestId('completed-card')).toHaveLength(2);
       expect(screen.getByTestId('card-list')).toBeInTheDocument();
-    });
-  });
-
-  it('dataがundefinedの場合: 空状態が表示される', async () => {
-    // Given: dataがundefined（初期状態）
-=======
-  it('データがundefinedの場合: 空状態が表示される', async () => {
-    // Given: データが未取得
->>>>>>> 9ee3760 (fix(completed): fix completed cards not showing after marking as remembered)
-    mockUseTodayCompletedCards.mockReturnValue({
-      data: undefined,
-      isLoading: false,
-    });
-
-    // When: ページをレンダリング
-    await renderPage();
-
-    // Then: 空状態が表示される
-    await waitFor(() => {
-      expect(screen.getByTestId('empty-state')).toBeInTheDocument();
-    });
-  });
-
-  it('完了カードがある場合: CardListに全カードが渡される', async () => {
-    // Given: 完了カード2件
-    const completedCard1 = createCard({ id: 'c1', status: 'completed' });
-    const completedCard2 = createCard({ id: 'c2', status: 'completed' });
-    mockUseTodayCompletedCards.mockReturnValue({
-      data: [completedCard1, completedCard2],
-      isLoading: false,
-    });
-
-    // When: ページをレンダリング
-    await renderPage();
-
-    // Then: CardListに完了カード2件が渡される
-    await waitFor(() => {
-      expect(screen.getByTestId('card-list')).toHaveTextContent('2 cards');
     });
   });
 });
