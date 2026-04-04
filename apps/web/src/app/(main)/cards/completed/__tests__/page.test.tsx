@@ -81,7 +81,11 @@ describe('CompletedCardsPage', () => {
   });
 
   it('ページヘッダーに「完了」タイトルが表示される', async () => {
+<<<<<<< HEAD
     // Given: データ読み込み完了
+=======
+    // Given: データ読み込み完了・完了カードなし
+>>>>>>> 9ee3760 (fix(completed): fix completed cards not showing after marking as remembered)
     mockUseTodayCompletedCards.mockReturnValue({
       data: [],
       isLoading: false,
@@ -110,7 +114,11 @@ describe('CompletedCardsPage', () => {
   });
 
   it('完了カードがない場合: 空状態が表示される', async () => {
+<<<<<<< HEAD
     // Given: 完了カードなし
+=======
+    // Given: 完了カードなし（空配列）
+>>>>>>> 9ee3760 (fix(completed): fix completed cards not showing after marking as remembered)
     mockUseTodayCompletedCards.mockReturnValue({
       data: [],
       isLoading: false,
@@ -126,6 +134,7 @@ describe('CompletedCardsPage', () => {
     });
   });
 
+<<<<<<< HEAD
   it('完了カードがある場合: CompletedCardが件数分表示される', async () => {
     // Given: 完了カード2件
     const card1 = createCard({ id: 'c1' });
@@ -147,6 +156,10 @@ describe('CompletedCardsPage', () => {
 
   it('dataがundefinedの場合: 空状態が表示される', async () => {
     // Given: dataがundefined（初期状態）
+=======
+  it('データがundefinedの場合: 空状態が表示される', async () => {
+    // Given: データが未取得
+>>>>>>> 9ee3760 (fix(completed): fix completed cards not showing after marking as remembered)
     mockUseTodayCompletedCards.mockReturnValue({
       data: undefined,
       isLoading: false,
@@ -158,6 +171,24 @@ describe('CompletedCardsPage', () => {
     // Then: 空状態が表示される
     await waitFor(() => {
       expect(screen.getByTestId('empty-state')).toBeInTheDocument();
+    });
+  });
+
+  it('完了カードがある場合: CardListに全カードが渡される', async () => {
+    // Given: 完了カード2件
+    const completedCard1 = createCard({ id: 'c1', status: 'completed' });
+    const completedCard2 = createCard({ id: 'c2', status: 'completed' });
+    mockUseTodayCompletedCards.mockReturnValue({
+      data: [completedCard1, completedCard2],
+      isLoading: false,
+    });
+
+    // When: ページをレンダリング
+    await renderPage();
+
+    // Then: CardListに完了カード2件が渡される
+    await waitFor(() => {
+      expect(screen.getByTestId('card-list')).toHaveTextContent('2 cards');
     });
   });
 });
