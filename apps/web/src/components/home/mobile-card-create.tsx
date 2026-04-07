@@ -2,7 +2,7 @@
 
 import { memo, useCallback, useState } from 'react';
 
-import { CreateCardSheet } from '@/components/home/create-card-sheet';
+import { CreateCardDialog } from '@/components/cards/create-card-dialog';
 import { FabButton } from '@/components/home/fab-button';
 
 interface MobileCardCreateProps {
@@ -10,23 +10,23 @@ interface MobileCardCreateProps {
 }
 
 export const MobileCardCreate = memo(function MobileCardCreate({ onCardCreated }: MobileCardCreateProps) {
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const handleToggle = useCallback(() => {
-    setIsSheetOpen(prev => !prev);
+  const handleOpen = useCallback(() => {
+    setIsDialogOpen(true);
   }, []);
 
-  const handleClose = useCallback(() => {
-    setIsSheetOpen(false);
+  const handleOpenChange = useCallback((open: boolean) => {
+    setIsDialogOpen(open);
   }, []);
 
   return (
     <>
-      <FabButton isOpen={isSheetOpen} onClick={handleToggle} />
-      <CreateCardSheet
-        isOpen={isSheetOpen}
+      <FabButton isOpen={isDialogOpen} onClick={handleOpen} />
+      <CreateCardDialog
+        open={isDialogOpen}
         onCardCreated={onCardCreated}
-        onClose={handleClose}
+        onOpenChange={handleOpenChange}
       />
     </>
   );

@@ -67,7 +67,8 @@ export function CreateCardDialog({
     <DialogContent
       className={cn(
         'flex flex-col gap-0 p-0',
-        'max-h-[90vh] sm:max-h-[85vh]',
+        'h-[100dvh] max-h-[100dvh] rounded-none',
+        'sm:h-auto sm:max-h-[85vh] sm:rounded-lg',
         'sm:max-w-lg'
       )}
     >

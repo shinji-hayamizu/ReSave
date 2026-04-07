@@ -4,8 +4,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { MobileCardCreate } from '@/components/home/mobile-card-create';
 
-vi.mock('@/hooks/useHomeCards', () => ({
-  useHomeCreateCard: () => ({
+vi.mock('@/hooks/useCards', () => ({
+  useCreateCard: () => ({
     mutateAsync: vi.fn().mockResolvedValue({ id: '1', front: 'test', back: '' }),
     isPending: false,
   }),
@@ -42,29 +42,16 @@ describe('MobileCardCreate', () => {
     expect(screen.getByRole('button', { name: '新規カード作成' })).toBeInTheDocument();
   });
 
-  it('FABをクリックするとシートが開く', () => {
+  it('FABをクリックするとダイアログが開く', () => {
     // Given: レンダリング済みのMobileCardCreate
     render(<MobileCardCreate />, { wrapper: createWrapper() });
 
     // When: FABボタンをクリック
     fireEvent.click(screen.getByRole('button', { name: '新規カード作成' }));
 
-    // Then: シートが表示状態になる（translate-y-0）
-    const dialog = screen.getByRole('dialog');
-    expect(dialog.className).toContain('translate-y-0');
-  });
-
-  it('シートの閉じるボタンでシートが閉じる', () => {
-    // Given: シートが開いている状態
-    render(<MobileCardCreate />, { wrapper: createWrapper() });
-    fireEvent.click(screen.getByRole('button', { name: '新規カード作成' }));
-
-    // When: 閉じるボタンをクリック
-    fireEvent.click(screen.getByRole('button', { name: '閉じる' }));
-
-    // Then: シートが非表示状態になる（translate-y-full）
-    const dialog = screen.getByRole('dialog', { hidden: true });
-    expect(dialog.className).toContain('translate-y-full');
+    // Then: ダイアログが表示される
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    expect(screen.getByText('カード作成')).toBeInTheDocument();
   });
 
   it('FABをクリックすると+アイコンが回転する', () => {
