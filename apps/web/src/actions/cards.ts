@@ -340,6 +340,7 @@ export async function resetCardToUnlearned(id: string): Promise<Card> {
       next_review_at: null,
       status: 'new',
       completed_at: null,
+      created_at: now.toISOString(),
       updated_at: now.toISOString(),
     })
     .eq('id', id)

@@ -313,13 +313,15 @@ export function useHomeResetCard() {
       ]);
       const context = saveBothTabs(qc);
 
+      const nowStr = new Date().toISOString();
       const resetCard: CardWithTags = {
         ...card,
         currentStep: 0,
         status: 'new' as const,
         nextReviewAt: null,
         completedAt: null,
-        updatedAt: new Date().toISOString(),
+        createdAt: nowStr,
+        updatedAt: nowStr,
       };
 
       qc.setQueryData<InfiniteData<HomeCardsPage>>(homeCardKeys.tab('due'), (old) => {
