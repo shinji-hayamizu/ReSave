@@ -30,8 +30,11 @@ pnpm test:e2e         # Playwright
 
 ## 共有コード
 
-`apps/web/src/types/` と `apps/web/src/validations/` がマスター。
-変更時は `apps/mobile/` に手動コピー。
+`packages/shared/src/types/` と `packages/shared/src/validations/` がマスター。
+Web・Mobile ともに `@resave/shared` パッケージを参照する。
+型・バリデーションを変更する場合は `packages/shared/` を直接編集すること。
+
+`apps/web/src/types/` と `apps/web/src/validations/` は `@resave/shared` からの re-export のみ。
 
 ## 復習スケジューリング
 

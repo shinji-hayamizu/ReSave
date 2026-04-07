@@ -14,6 +14,7 @@ import {
   updateCard,
 } from '@/actions/cards';
 import { submitAssessment } from '@/actions/study';
+import { cardKeys } from '@/hooks/useCards';
 import { homeCardKeys } from '@/lib/query-keys';
 import { DEFAULT_INTERVALS } from '@/types/review-schedule';
 import type {
@@ -424,6 +425,7 @@ export function useHomeSubmitAssessment() {
           }));
         });
       }
+      qc.invalidateQueries({ queryKey: cardKeys.todayCompleted() });
     },
   });
 }

@@ -384,8 +384,7 @@ export async function resetCardToUnlearned(id: string): Promise<Card> {
 
 /**
  * 完了タブに表示するカードを取得
- * 1. status = 'completed' のカード（復習完了済み）
- * 2. 今日復習したカード（study_logsで今日評価を受けたカード）
+ * status = 'completed' のカードのみ（completed_at 降順）
  */
 export async function getTodayCompletedCards(): Promise<CardWithTags[]> {
   const supabase = await createClient();
@@ -395,72 +394,23 @@ export async function getTodayCompletedCards(): Promise<CardWithTags[]> {
     throw new Error('Unauthorized');
   }
 
-  // 今日の開始時刻（00:00:00）
-  const todayStart = new Date();
-  todayStart.setHours(0, 0, 0, 0);
+  const { data, error } = await supabase
+    .from('cards')
+    .select(`
+      *,
+      card_tags (
+        tag:tags (*)
+      )
+    `)
+    .eq('user_id', user.id)
+    .eq('status', 'completed')
+    .order('completed_at', { ascending: false });
 
-  // 並列で取得: 1. status='completed'のカード 2. 今日評価を受けたカードID
-  const [completedCardsResult, studyLogsResult] = await Promise.all([
-    supabase
-      .from('cards')
-      .select(`
-        *,
-        card_tags (
-          tag:tags (*)
-        )
-      `)
-      .eq('user_id', user.id)
-      .eq('status', 'completed')
-      .order('completed_at', { ascending: false }),
-    supabase
-      .from('study_logs')
-      .select('card_id')
-      .eq('user_id', user.id)
-      .gte('studied_at', todayStart.toISOString()),
-  ]);
-
-  if (completedCardsResult.error) {
-    throw new Error(`Failed to fetch completed cards: ${completedCardsResult.error.message}`);
+  if (error) {
+    throw new Error(`Failed to fetch completed cards: ${error.message}`);
   }
 
-  if (studyLogsResult.error) {
-    throw new Error(`Failed to fetch study logs: ${studyLogsResult.error.message}`);
-  }
-
-  const completedCards = completedCardsResult.data || [];
-  const studyLogs = studyLogsResult.data || [];
-
-  // 今日復習したカードIDを取得（重複除去）
-  const todayStudiedCardIds = [...new Set(studyLogs.map(log => log.card_id))];
-
-  // completedCardsのIDセット（重複チェック用）
-  const completedCardIds = new Set(completedCards.map(card => card.id));
-
-  // 今日復習したがstatus='completed'ではないカードを取得
-  const additionalCardIds = todayStudiedCardIds.filter(id => !completedCardIds.has(id));
-
-  let additionalCards: SupabaseCardRow[] = [];
-  if (additionalCardIds.length > 0) {
-    const { data, error } = await supabase
-      .from('cards')
-      .select(`
-        *,
-        card_tags (
-          tag:tags (*)
-        )
-      `)
-      .eq('user_id', user.id)
-      .in('id', additionalCardIds);
-
-    if (error) {
-      throw new Error(`Failed to fetch additional cards: ${error.message}`);
-    }
-    additionalCards = (data || []) as unknown as SupabaseCardRow[];
-  }
-
-  const allCards = [...completedCards, ...additionalCards];
-
-  return (allCards as unknown as SupabaseCardRow[]).map(mapCardRow);
+  return ((data || []) as unknown as SupabaseCardRow[]).map(mapCardRow);
 }
 
 /**
