@@ -32,6 +32,19 @@ import { loginSchema } from '@/validations/user';
 
 import type { LoginInput } from '@/validations/user';
 
+function getLoginErrorMessage(error: { code?: string; message?: string; status?: number }): string {
+  if (error.code === 'invalid_credentials' || error.message?.includes('Invalid login credentials')) {
+    return 'メールアドレスまたはパスワードが正しくありません';
+  }
+  if (error.code === 'user_not_found') {
+    return 'アカウントが見つかりません';
+  }
+  if (error.code === 'email_rate_limit_exceeded' || error.status === 429) {
+    return 'しばらく時間をおいてから再度お試しください';
+  }
+  return 'ログインに失敗しました。しばらくしてから再度お試しください';
+}
+
 export function LoginForm() {
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get('redirect') || '/';
@@ -65,7 +78,7 @@ export function LoginForm() {
     });
 
     if (error) {
-      setError('メールアドレスまたはパスワードが正しくありません');
+      setError(getLoginErrorMessage(error));
       setLoading(false);
       return;
     }

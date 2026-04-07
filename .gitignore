@@ -71,5 +71,8 @@ e2e/.auth/
 .claude/settings.local.json
 .mcp.json
 
+# Obsidian
+.obsidian/
+
 # Plans
 docs/plans/

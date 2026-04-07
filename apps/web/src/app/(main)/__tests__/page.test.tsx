@@ -1,18 +1,24 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import type { CardWithTags, HomeCardsData } from '@/types/card';
+import type { CardWithTags, HomeCardsPage } from '@/types/card';
+import type { InfiniteData } from '@tanstack/react-query';
 
-const mockUseHomeCards = vi.fn();
+const mockUseHomeDueCards = vi.fn();
+const mockUseHomeLearningCards = vi.fn();
+const mockGetTotalFromInfiniteData = vi.fn();
 
 vi.mock('@/hooks/useHomeCards', () => ({
-  useHomeCards: () => mockUseHomeCards(),
+  useHomeDueCards: () => mockUseHomeDueCards(),
+  useHomeLearningCards: () => mockUseHomeLearningCards(),
+  getTotalFromInfiniteData: (data: InfiniteData<HomeCardsPage> | undefined) => mockGetTotalFromInfiniteData(data),
+}));
+
+vi.mock('@/hooks/useIntersectionObserver', () => ({
+  useIntersectionObserver: () => { return { current: null }; },
 }));
 
 vi.mock('@/components/home', () => ({
-  CardList: ({ cards }: { cards: CardWithTags[] }) => (
-    <div data-testid="card-list">{cards.length} cards</div>
-  ),
   CardTabs: ({
     value,
     onChange,
@@ -35,6 +41,7 @@ vi.mock('@/components/home', () => ({
     <div data-testid="study-card">{front}</div>
   ),
   QuickInputForm: () => <div data-testid="quick-input" />,
+  LoadMoreIndicator: () => null,
 }));
 
 vi.mock('@/components/cards/edit-card-dialog', () => ({
@@ -71,8 +78,43 @@ function createCard(overrides: Partial<CardWithTags> = {}): CardWithTags {
   };
 }
 
-function createHomeCardsData(cards: CardWithTags[], todayStudiedCardIds: string[] = []): HomeCardsData {
-  return { cards, todayStudiedCardIds, fetchedAt: new Date().toISOString() };
+function createInfiniteData(cards: CardWithTags[], total?: number): InfiniteData<HomeCardsPage> {
+  return {
+    pages: [{
+      cards,
+      todayStudiedCardIds: [],
+      fetchedAt: new Date().toISOString(),
+      pagination: {
+        total: total ?? cards.length,
+        limit: 10,
+        offset: 0,
+        hasMore: false,
+      },
+    }],
+    pageParams: [0],
+  };
+}
+
+function createInfiniteQueryResult(cards: CardWithTags[], overrides: Record<string, unknown> = {}) {
+  const data = createInfiniteData(cards);
+  return {
+    data,
+    isLoading: false,
+    isFetchingNextPage: false,
+    hasNextPage: false,
+    fetchNextPage: vi.fn(),
+    ...overrides,
+  };
+}
+
+function createLoadingQueryResult() {
+  return {
+    data: undefined,
+    isLoading: true,
+    isFetchingNextPage: false,
+    hasNextPage: false,
+    fetchNextPage: vi.fn(),
+  };
 }
 
 function createQueryClient() {
@@ -95,25 +137,24 @@ describe('DashboardPage 初期タブ選択', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.resetModules();
+    mockGetTotalFromInfiniteData.mockImplementation((data: InfiniteData<HomeCardsPage> | undefined) => {
+      if (!data || data.pages.length === 0) return 0;
+      return data.pages[0].pagination.total;
+    });
   });
 
   it('復習中カードがある場合: learningタブが初期表示される', async () => {
-    // Given: 復習中カードが1件（active + nextReviewAt <= now）
     const todayCard = createCard({
       id: 'today-1',
       status: 'active',
       front: 'review card',
       nextReviewAt: new Date(Date.now() - 60000).toISOString(),
     });
-    mockUseHomeCards.mockReturnValue({
-      data: createHomeCardsData([todayCard]),
-      isLoading: false,
-    });
+    mockUseHomeDueCards.mockReturnValue(createInfiniteQueryResult([]));
+    mockUseHomeLearningCards.mockReturnValue(createInfiniteQueryResult([todayCard]));
 
-    // When: ページをレンダリング
     await renderPage();
 
-    // Then: learningタブが選択される
     await waitFor(() => {
       const tabs = screen.getByTestId('card-tabs');
       expect(tabs.getAttribute('data-value')).toBe('learning');
@@ -121,17 +162,12 @@ describe('DashboardPage 初期タブ選択', () => {
   });
 
   it('復習中カードがない場合: dueタブが初期表示される', async () => {
-    // Given: 未学習カードが1件、復習中カードが0件
     const newCard = createCard({ id: 'new-1', status: 'new', front: 'new card' });
-    mockUseHomeCards.mockReturnValue({
-      data: createHomeCardsData([newCard]),
-      isLoading: false,
-    });
+    mockUseHomeDueCards.mockReturnValue(createInfiniteQueryResult([newCard]));
+    mockUseHomeLearningCards.mockReturnValue(createInfiniteQueryResult([]));
 
-    // When: ページをレンダリング
     await renderPage();
 
-    // Then: dueタブが選択される
     await waitFor(() => {
       const tabs = screen.getByTestId('card-tabs');
       expect(tabs.getAttribute('data-value')).toBe('due');
@@ -139,16 +175,11 @@ describe('DashboardPage 初期タブ選択', () => {
   });
 
   it('全カードが0件の場合: dueタブが初期表示される', async () => {
-    // Given: すべてのカードが0件
-    mockUseHomeCards.mockReturnValue({
-      data: createHomeCardsData([]),
-      isLoading: false,
-    });
+    mockUseHomeDueCards.mockReturnValue(createInfiniteQueryResult([]));
+    mockUseHomeLearningCards.mockReturnValue(createInfiniteQueryResult([]));
 
-    // When: ページをレンダリング
     await renderPage();
 
-    // Then: dueタブが選択される
     await waitFor(() => {
       const tabs = screen.getByTestId('card-tabs');
       expect(tabs.getAttribute('data-value')).toBe('due');
@@ -156,46 +187,33 @@ describe('DashboardPage 初期タブ選択', () => {
   });
 
   it('データ読み込み中: スケルトンが表示される', async () => {
-    // Given: データがまだ読み込み中
-    mockUseHomeCards.mockReturnValue({
-      data: undefined,
-      isLoading: true,
-    });
+    mockUseHomeDueCards.mockReturnValue(createLoadingQueryResult());
+    mockUseHomeLearningCards.mockReturnValue(createLoadingQueryResult());
 
-    // When: ページをレンダリング
     await renderPage();
 
-    // Then: スケルトンが表示される
     expect(screen.getAllByTestId('skeleton').length).toBeGreaterThan(0);
   });
 
   it('データ読み込み中: スケルトンが表示される（activeTabはdue）', async () => {
-    // Given: データがまだ読み込み中、activeTabはnullではなく'due'を返す
-    mockUseHomeCards.mockReturnValue({
-      data: undefined,
-      isLoading: true,
-    });
+    mockUseHomeDueCards.mockReturnValue(createLoadingQueryResult());
+    mockUseHomeLearningCards.mockReturnValue(createLoadingQueryResult());
 
-    // When: ページをレンダリング
     await renderPage();
 
-    // Then: スケルトンが表示され、card-tabsのvalueはdueになる
     expect(screen.getAllByTestId('skeleton').length).toBeGreaterThan(0);
     const tabs = screen.getByTestId('card-tabs');
     expect(tabs.getAttribute('data-value')).toBe('due');
   });
 
   it('復習中タブ表示中に復習中カードが0枚になった場合: dueタブに自動切替される', async () => {
-    // Given: 復習中カードが1件ある状態で初期表示
     const todayCard = createCard({
       id: 'today-1',
       status: 'active',
       nextReviewAt: new Date(Date.now() - 60000).toISOString(),
     });
-    mockUseHomeCards.mockReturnValue({
-      data: createHomeCardsData([todayCard]),
-      isLoading: false,
-    });
+    mockUseHomeDueCards.mockReturnValue(createInfiniteQueryResult([]));
+    mockUseHomeLearningCards.mockReturnValue(createInfiniteQueryResult([todayCard]));
 
     const { rerender } = await renderPage();
 
@@ -203,11 +221,8 @@ describe('DashboardPage 初期タブ選択', () => {
       expect(screen.getByTestId('card-tabs').getAttribute('data-value')).toBe('learning');
     });
 
-    // When: 復習中カードが0枚になった（全て復習完了）
-    mockUseHomeCards.mockReturnValue({
-      data: createHomeCardsData([]),
-      isLoading: false,
-    });
+    mockUseHomeDueCards.mockReturnValue(createInfiniteQueryResult([]));
+    mockUseHomeLearningCards.mockReturnValue(createInfiniteQueryResult([]));
 
     const { DashboardContent } = await import('../_components/dashboard-content');
     const queryClient = createQueryClient();
@@ -217,7 +232,6 @@ describe('DashboardPage 初期タブ選択', () => {
       </QueryClientProvider>
     );
 
-    // Then: dueタブに自動切替される
     await waitFor(() => {
       expect(screen.getByTestId('card-tabs').getAttribute('data-value')).toBe('due');
     });
