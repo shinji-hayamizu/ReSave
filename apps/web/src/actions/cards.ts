@@ -331,27 +331,14 @@ export async function resetCardToUnlearned(id: string): Promise<Card> {
     throw new Error('Unauthorized');
   }
 
-  const { data: existingCard, error: fetchError } = await supabase
-    .from('cards')
-    .select('schedule')
-    .eq('id', id)
-    .eq('user_id', user.id)
-    .single();
-
-  if (fetchError || !existingCard) {
-    throw new Error('Card not found');
-  }
-
   const now = new Date();
-  const nextReviewAt = new Date(now);
-  nextReviewAt.setDate(nextReviewAt.getDate() + existingCard.schedule[0]);
 
   const { data: card, error } = await supabase
     .from('cards')
     .update({
       current_step: 0,
-      next_review_at: nextReviewAt.toISOString(),
-      status: 'active',
+      next_review_at: null,
+      status: 'new',
       completed_at: null,
       updated_at: now.toISOString(),
     })

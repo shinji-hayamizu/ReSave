@@ -151,28 +151,28 @@ export function useHomeDeleteCard() {
 
 export function useHomeResetCard() {
   const qc = useQueryClient();
-  return useMutation<Card, Error, string, HomeCardMutationContext>({
-    mutationFn: (id: string) => resetCardToUnlearned(id),
-    onMutate: async (id) => {
+  return useMutation<Card, Error, { id: string; card: CardWithTags }, HomeCardMutationContext>({
+    mutationFn: ({ id }) => resetCardToUnlearned(id),
+    onMutate: async ({ id, card }) => {
       await qc.cancelQueries({ queryKey: homeCardKeys.all });
       const previousData = qc.getQueryData<HomeCardsData>(homeCardKeys.all);
 
+      const resetCard: CardWithTags = {
+        ...card,
+        currentStep: 0,
+        status: 'new' as const,
+        nextReviewAt: null,
+        completedAt: null,
+        updatedAt: new Date().toISOString(),
+      };
+
       qc.setQueryData<HomeCardsData>(homeCardKeys.all, (old) => {
         if (!old) return old;
-        const cards = old.cards.map((c) => {
-          if (c.id !== id) return c;
-          const nextReviewAt = new Date();
-          nextReviewAt.setDate(nextReviewAt.getDate() + c.schedule[0]);
-          return {
-            ...c,
-            currentStep: 0,
-            status: 'active' as const,
-            nextReviewAt: nextReviewAt.toISOString(),
-            completedAt: null,
-            updatedAt: new Date().toISOString(),
-          };
-        });
-        return { ...old, cards };
+        const exists = old.cards.some((c) => c.id === id);
+        if (exists) {
+          return { ...old, cards: old.cards.map((c) => c.id === id ? resetCard : c) };
+        }
+        return { ...old, cards: [resetCard, ...old.cards] };
       });
 
       return { previousData };
@@ -186,11 +186,18 @@ export function useHomeResetCard() {
     onSuccess: (updatedCard) => {
       qc.setQueryData<HomeCardsData>(homeCardKeys.all, (old) => {
         if (!old) return old;
-        const cards = old.cards.map((c) =>
-          c.id === updatedCard.id ? { ...c, ...updatedCard } : c
-        );
-        return { ...old, cards };
+        const exists = old.cards.some((c) => c.id === updatedCard.id);
+        if (exists) {
+          const cards = old.cards.map((c) =>
+            c.id === updatedCard.id ? { ...c, ...updatedCard } : c
+          );
+          return { ...old, cards };
+        }
+        return { ...old, cards: [{ ...old.cards[0], ...updatedCard } as CardWithTags, ...old.cards] };
       });
+    },
+    onSettled: () => {
+      qc.invalidateQueries({ queryKey: homeCardKeys.all });
     },
   });
 }

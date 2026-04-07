@@ -565,7 +565,7 @@ describe('useHomeResetCard', () => {
     queryClient = createQueryClient();
   });
 
-  it('楽観的更新: カードのステータスがactiveに、currentStepが0にリセットされる', async () => {
+  it('楽観的更新: カードのステータスがnewに、currentStepが0にリセットされる', async () => {
     const card = createTestCard({
       id: 'card-1',
       status: 'completed',
@@ -581,8 +581,8 @@ describe('useHomeResetCard', () => {
       back: card.back,
       schedule: card.schedule,
       currentStep: 0,
-      nextReviewAt: new Date().toISOString(),
-      status: 'active',
+      nextReviewAt: null,
+      status: 'new',
       completedAt: null,
       createdAt: card.createdAt,
       updatedAt: card.updatedAt,
@@ -594,7 +594,7 @@ describe('useHomeResetCard', () => {
     });
 
     await act(async () => {
-      result.current.mutate('card-1');
+      result.current.mutate({ id: 'card-1', card });
     });
 
     await waitFor(() => {
@@ -602,9 +602,10 @@ describe('useHomeResetCard', () => {
     });
 
     const cached = queryClient.getQueryData<HomeCardsData>(homeCardKeys.all);
-    expect(cached?.cards[0].status).toBe('active');
+    expect(cached?.cards[0].status).toBe('new');
     expect(cached?.cards[0].currentStep).toBe(0);
     expect(cached?.cards[0].completedAt).toBeNull();
+    expect(cached?.cards[0].nextReviewAt).toBeNull();
   });
 
   it('エラー時: 前の状態にロールバックされる', async () => {
@@ -622,7 +623,7 @@ describe('useHomeResetCard', () => {
     });
 
     await act(async () => {
-      result.current.mutate('card-1');
+      result.current.mutate({ id: 'card-1', card });
     });
 
     await waitFor(() => {
@@ -635,6 +636,7 @@ describe('useHomeResetCard', () => {
   });
 
   it('エラー時: context.previousDataがない場合はロールバックしない', async () => {
+    const card = createTestCard({ id: 'card-1', status: 'completed', currentStep: 5 });
     mockResetCardToUnlearned.mockRejectedValue(new Error('fail'));
 
     const { result } = renderHook(() => useHomeResetCard(), {
@@ -642,7 +644,7 @@ describe('useHomeResetCard', () => {
     });
 
     await act(async () => {
-      result.current.mutate('card-1');
+      result.current.mutate({ id: 'card-1', card });
     });
 
     await waitFor(() => {
@@ -662,8 +664,8 @@ describe('useHomeResetCard', () => {
       back: card1.back,
       schedule: card1.schedule,
       currentStep: 0,
-      nextReviewAt: new Date().toISOString(),
-      status: 'active',
+      nextReviewAt: null,
+      status: 'new',
       completedAt: null,
       createdAt: card1.createdAt,
       updatedAt: card1.updatedAt,
@@ -675,7 +677,7 @@ describe('useHomeResetCard', () => {
     });
 
     await act(async () => {
-      result.current.mutate('card-1');
+      result.current.mutate({ id: 'card-1', card: card1 });
     });
 
     await waitFor(() => {
@@ -697,8 +699,8 @@ describe('useHomeResetCard', () => {
       back: card.back,
       schedule: card.schedule,
       currentStep: 0,
-      nextReviewAt: new Date().toISOString(),
-      status: 'active',
+      nextReviewAt: null,
+      status: 'new',
       completedAt: null,
       createdAt: card.createdAt,
       updatedAt: card.updatedAt,
@@ -712,7 +714,7 @@ describe('useHomeResetCard', () => {
     queryClient.removeQueries({ queryKey: homeCardKeys.all });
 
     await act(async () => {
-      result.current.mutate('card-1');
+      result.current.mutate({ id: 'card-1', card });
     });
 
     await waitFor(() => {
