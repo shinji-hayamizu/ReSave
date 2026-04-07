@@ -39,6 +39,7 @@ vi.mock('@/actions/study', () => ({
 vi.mock('@/lib/query-keys', () => ({
   homeCardKeys: {
     all: ['cards', 'home'],
+    tab: (tab: string) => ['cards', 'home', tab],
   },
 }));
 
