@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Plus, Check, Loader2 } from 'lucide-react';
+import { Plus, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
@@ -66,42 +66,19 @@ export function CreateCardDialog({
   const dialogContent = (
     <DialogContent
       className={cn(
-        'flex flex-col gap-0 p-0',
-        'max-h-[90vh] sm:max-h-[85vh]',
+        'flex flex-col gap-0 p-0 overflow-hidden',
+        'h-[100dvh] max-h-[100dvh] rounded-none',
+        'sm:h-auto sm:max-h-[85vh] sm:rounded-lg',
         'sm:max-w-lg'
       )}
     >
-      {/* Sticky Header */}
-      <DialogHeader className="sticky top-0 z-10 flex-shrink-0 px-4 py-3 sm:px-6 sm:py-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
-        <div className="flex items-center justify-between gap-3">
-          <DialogTitle className="text-lg font-semibold">
-            カード作成
-          </DialogTitle>
-          {/* Desktop Save Button in Header */}
-          <Button
-            type="submit"
-            form="create-card-form"
-            size="sm"
-            className="hidden sm:inline-flex gap-1.5"
-            disabled={createCard.isPending}
-          >
-            {createCard.isPending ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                <span>保存中...</span>
-              </>
-            ) : (
-              <>
-                <Check className="h-4 w-4" />
-                <span>保存</span>
-              </>
-            )}
-          </Button>
-        </div>
+      <DialogHeader className="flex-shrink-0 px-4 py-3 sm:px-6 sm:py-4 border-b bg-background">
+        <DialogTitle className="text-lg font-semibold">
+          カード作成
+        </DialogTitle>
       </DialogHeader>
 
-      {/* Scrollable Content */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 sm:px-6 sm:py-5">
+      <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:px-6 sm:py-5">
         <CardInputForm
           mode="create"
           formId="create-card-form"
@@ -112,8 +89,7 @@ export function CreateCardDialog({
         />
       </div>
 
-      {/* Mobile Sticky Footer */}
-      <div className="sm:hidden sticky bottom-0 flex-shrink-0 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 p-3 pb-[max(12px,env(safe-area-inset-bottom))]">
+      <div className="flex-shrink-0 border-t bg-background p-3 sm:px-6 sm:py-4 pb-[max(12px,env(safe-area-inset-bottom))] sm:pb-4">
         <div className="flex gap-3">
           <Button
             type="button"

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pattern 2: ラベル付きFAB（推奨案）</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+</style>
+</head>
+<body class="bg-gray-50">
+
+<!-- 説明 -->
+<div class="bg-green-50 border border-green-200 p-3 text-sm text-green-800 mx-4 mt-4 rounded-lg">
+  <strong>Pattern 2: ラベル付きFAB（推奨案）</strong><br>
+  「+ 新規カード」のテキストと+アイコンを持つ横長のFABボタン。何のボタンか一目で分かる。
+</div>
+
+<!-- モバイルプレビュー（375px相当） -->
+<div class="mx-auto mt-6 mb-10" style="width: 375px; border: 2px solid #e2e8f0; border-radius: 12px; overflow: hidden; position: relative; height: 700px; background: white; box-shadow: 0 4px 20px rgba(0,0,0,0.15);">
+
+  <!-- Header（新規カードボタンなし） -->
+  <header class="sticky top-0 z-40 bg-white border-b flex items-center justify-between px-4 h-14">
+    <div class="flex items-center gap-3">
+      <button class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-gray-100">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+      </button>
+      <span class="text-xl font-bold">ReSave</span>
+    </div>
+    <!-- ヘッダーボタンなし（モバイル時） -->
+  </header>
+
+  <!-- Main Content -->
+  <main class="px-4 pb-24 overflow-y-auto" style="height: calc(700px - 56px - 64px);">
+    <!-- Quick Input Form -->
+    <div class="mt-4 bg-gray-50 rounded-xl p-4 border">
+      <p class="text-sm text-gray-500 mb-2">クイック入力</p>
+      <div class="bg-white rounded-lg border p-3 text-sm text-gray-400">表面のテキストを入力...</div>
+    </div>
+
+    <!-- Card List -->
+    <div class="mt-4">
+      <div class="flex gap-4 border-b mb-3">
+        <button class="pb-2 text-sm font-medium text-blue-600 border-b-2 border-blue-600">未学習 (12)</button>
+        <button class="pb-2 text-sm text-gray-500">復習中 (5)</button>
+      </div>
+      <div class="space-y-2">
+        <div class="bg-white rounded-lg border p-3 text-sm">
+          <p class="font-medium text-gray-800">JavaScript の Promise とは？</p>
+          <p class="text-gray-500 text-xs mt-1">非同期処理を扱うオブジェクト</p>
+        </div>
+        <div class="bg-white rounded-lg border p-3 text-sm">
+          <p class="font-medium text-gray-800">useEffect の第2引数は？</p>
+          <p class="text-gray-500 text-xs mt-1">依存配列</p>
+        </div>
+        <div class="bg-white rounded-lg border p-3 text-sm">
+          <p class="font-medium text-gray-800">React の key prop の役割</p>
+          <p class="text-gray-500 text-xs mt-1">リストの差分検出に使用</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- FAB: ラベル付き横長ボタン -->
+  <button
+    class="absolute z-40 bg-blue-600 text-white rounded-full shadow-lg flex items-center gap-2 px-5 active:scale-95 transition-transform"
+    style="height: 52px; bottom: 80px; right: 16px; box-shadow: 0 4px 14px rgba(59,130,246,0.5);"
+    aria-label="新規カード作成"
+  >
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+    </svg>
+    <span class="text-sm font-semibold">新規カード</span>
+  </button>
+
+  <!-- Bottom Nav -->
+  <nav class="absolute bottom-0 left-0 right-0 border-t bg-white h-16 flex items-center justify-around">
+    <button class="flex flex-col items-center gap-1 text-blue-600">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l9-9 9 9M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9"/></svg>
+      <span class="text-xs">ホーム</span>
+    </button>
+    <button class="flex flex-col items-center gap-1 text-gray-400">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+      <span class="text-xs">完了</span>
+    </button>
+    <button class="flex flex-col items-center gap-1 text-gray-400">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+      <span class="text-xs">タグ</span>
+    </button>
+    <button class="flex flex-col items-center gap-1 text-gray-400">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3"/></svg>
+      <span class="text-xs">設定</span>
+    </button>
+  </nav>
+
+</div>
+
+<p class="text-center text-sm text-gray-400 mb-4">↑ モバイル表示（375px）</p>
+
+</body>
+</html>
