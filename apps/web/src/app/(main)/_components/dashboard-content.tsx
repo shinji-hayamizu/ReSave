@@ -8,11 +8,13 @@ import {
   CardTabs,
   type CardTabValue,
   HomeStudyCard,
+  MobileCardCreate,
   QuickInputForm,
 } from '@/components/home';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useHomeCards } from '@/hooks/useHomeCards';
+import { useIsMobile } from '@/hooks/use-mobile';
 import type { CardWithTags } from '@/types/card';
 
 function getNextInterval(schedule: number[], currentStep: number, isNew: boolean): string {
@@ -105,13 +107,16 @@ export function DashboardContent() {
     setUserSelectedTab('due');
   }, []);
 
+  const isMobile = useIsMobile();
   const activeCards = categorizedCards[activeTab];
 
   return (
     <div className="pt-1 pb-2 md:pt-2 md:pb-4">
-        <div className="mb-2">
-          <QuickInputForm onCardCreated={handleCardCreated} />
-        </div>
+        {!isMobile && (
+          <div className="mb-2">
+            <QuickInputForm onCardCreated={handleCardCreated} />
+          </div>
+        )}
 
         <CardTabs counts={counts} value={activeTab} onChange={handleTabChange} />
 
@@ -154,6 +159,8 @@ export function DashboardContent() {
           open={isEditDialogOpen}
           onOpenChange={handleEditDialogClose}
         />
+
+        {isMobile && <MobileCardCreate onCardCreated={handleCardCreated} />}
     </div>
   );
 }
