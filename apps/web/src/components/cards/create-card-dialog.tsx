@@ -65,7 +65,6 @@ export function CreateCardDialog({
 
   const dialogContent = (
     <DialogContent
-      hideCloseButton
       className={cn(
         'flex flex-col gap-0 p-0 overflow-hidden',
         'h-[100dvh] max-h-[100dvh] rounded-none',
