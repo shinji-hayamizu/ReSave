@@ -12,6 +12,7 @@ import {
 } from '@/actions/cards';
 import { submitAssessment } from '@/actions/study';
 import { homeCardKeys } from '@/lib/query-keys';
+import { cardKeys } from '@/hooks/useCards';
 import { DEFAULT_INTERVALS } from '@/types/review-schedule';
 import type {
   Card,
@@ -155,6 +156,7 @@ export function useHomeResetCard() {
     mutationFn: ({ id }) => resetCardToUnlearned(id),
     onMutate: async ({ id, card }) => {
       await qc.cancelQueries({ queryKey: homeCardKeys.all });
+      await qc.cancelQueries({ queryKey: cardKeys.todayCompleted() });
       const previousData = qc.getQueryData<HomeCardsData>(homeCardKeys.all);
 
       const resetCard: CardWithTags = {
@@ -173,6 +175,11 @@ export function useHomeResetCard() {
           return { ...old, cards: old.cards.map((c) => c.id === id ? resetCard : c) };
         }
         return { ...old, cards: [resetCard, ...old.cards] };
+      });
+
+      qc.setQueryData<CardWithTags[]>(cardKeys.todayCompleted(), (old) => {
+        if (!old) return old;
+        return old.filter((c) => c.id !== id);
       });
 
       return { previousData };
@@ -198,6 +205,7 @@ export function useHomeResetCard() {
     },
     onSettled: () => {
       qc.invalidateQueries({ queryKey: homeCardKeys.all });
+      qc.invalidateQueries({ queryKey: cardKeys.todayCompleted() });
     },
   });
 }
