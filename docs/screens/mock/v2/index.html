@@ -71,9 +71,10 @@
 
            @navigation:
              - / : ホーム
+             - /cards/completed : 完了
              - /tags : タグ管理
-             - /stats : 統計
              - /settings : 設定
+             - /about : About
            ================================================================ -->
       <nav class="sidebar__nav" data-component="SidebarNav">
         <!-- @condition: className={pathname === '/' ? 'active' : ''} -->
@@ -83,16 +84,16 @@
           <span class="sidebar__label">ホーム</span>
         </a>
 
+        <a href="#" class="sidebar__link" data-page="completed" data-action="onClick:handleNavClick">
+          <!-- @icon: lucide-react CheckCheck -->
+          <svg class="sidebar__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 7 17l-5-5"/><path d="m22 10-7.5 7.5L13 16"/></svg>
+          <span class="sidebar__label">完了</span>
+        </a>
+
         <a href="#" class="sidebar__link" data-page="tags" data-action="onClick:handleNavClick">
           <!-- @icon: lucide-react Tag -->
           <svg class="sidebar__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r=".5" fill="currentColor"/></svg>
           <span class="sidebar__label">タグ</span>
-        </a>
-
-        <a href="#" class="sidebar__link" data-page="stats" data-action="onClick:handleNavClick">
-          <!-- @icon: lucide-react BarChart3 -->
-          <svg class="sidebar__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>
-          <span class="sidebar__label">統計</span>
         </a>
 
         <a href="#" class="sidebar__link" data-page="settings" data-action="onClick:handleNavClick">
@@ -101,13 +102,10 @@
           <span class="sidebar__label">設定</span>
         </a>
 
-        <div style="flex: 1;"></div>
-
-        <!-- @event: onClick={handleLogout} -->
-        <a href="login.html" class="sidebar__link" data-action="onClick:handleLogout">
-          <!-- @icon: lucide-react LogOut -->
-          <svg class="sidebar__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
-          <span class="sidebar__label">ログアウト</span>
+        <a href="#" class="sidebar__link" data-page="about" data-action="onClick:handleNavClick">
+          <!-- @icon: lucide-react Info -->
+          <svg class="sidebar__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+          <span class="sidebar__label">About</span>
         </a>
       </nav>
     </aside>
@@ -139,9 +137,18 @@
           <h1 class="header__title">ReSave</h1>
         </div>
         <div class="header__right">
-          <!-- @component: UserAvatar -->
-          <!-- @event: onClick={openUserMenu} -->
-          <div class="header__avatar" data-component="UserAvatar">U</div>
+          <!-- @component: CreateCardDialog -->
+          <!-- @file: components/cards/create-card-dialog.tsx -->
+          <button
+            type="button"
+            class="btn btn--primary btn--icon"
+            title="カード作成"
+            data-component="CreateCardDialog"
+            data-action="onClick:openCreateCardDialog"
+          >
+            <!-- @icon: lucide-react Plus -->
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+          </button>
         </div>
       </header>
       <!-- [/Component: AppHeader] -->
@@ -153,9 +160,10 @@
 
            @routes:
              - main.html (/) - ホーム画面
+             - completed.html (/cards/completed) - 完了カード
              - tags.html (/tags) - タグ管理
-             - stats.html (/stats) - 統計
              - settings.html (/settings) - 設定
+             - about.html (/about) - About
              - card-input.html (/cards/:id/edit) - カード編集
            ================================================================ -->
       <iframe
