@@ -12,9 +12,10 @@ document.addEventListener('DOMContentLoaded', () => {
   // Page mapping
   const pages = {
     main: 'main.html',
+    completed: 'completed.html',
     tags: 'tags.html',
-    stats: 'stats.html',
     settings: 'settings.html',
+    about: 'about.html',
     'card-input': 'card-input.html',
   };
 
