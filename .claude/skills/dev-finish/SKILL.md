@@ -1,74 +1,32 @@
 ---
 name: dev:finish
 description: |
-  ReSaveの機能実装を完了し、developブランチにPR経由でマージするスキル。
-  テスト → コミット → PR作成 → マージ → worktreeクリーンアップ。
+  ReSaveの機能確認完了後、PRをマージしてクリーンアップするスキル。
+  PRマージ → devサーバー停止 → worktree・ブランチ削除。
 allowed-tools: Bash, Skill
 ---
 
-# 機能実装完了スキル
+# 機能完了スキル
 
-実装完了からPRマージ・クリーンアップまでを一括で行う。
-
-## 引数
-
-- `--no-merge`: PR作成のみ、マージはしない
+動作確認済みのPRをマージし、devサーバー停止・worktreeクリーンアップまでを一括で行う。
 
 ## フロー
 
-### Step 1: ブランチ確認
+### Step 1: ブランチ・PR確認
 
 ```bash
 git branch --show-current
 ```
 
-`feature/*` ブランチにいることを確認する。
-`develop` または `master` ブランチの場合は中断し、`feature/*` ブランチで実行するよう案内する。
-
-現在のブランチ名から worktree 名（`feature/` を除いた部分）を取得する。
-
-### Step 2: 未コミット変更をコミット
+現在のブランチ名（worktree名）を取得する。
 
 ```bash
-git status --porcelain
+gh pr view --json number,url,baseRefName,title
 ```
 
-未コミット変更がある場合:
+対象PRの番号とURLを確認する。PRがない場合は中断する。
 
-```
-Skill(convenience:commit)
-```
-
-コミット内容を確認してからコミットする。
-
-変更がない場合はこのステップをスキップ。
-
-### Step 4: ブランチをpush
-
-```bash
-git push origin feature/<name>
-```
-
-### Step 5: PR作成
-
-```
-Skill(convenience:create-pr)
-```
-
-**PR設定:**
-- ベースブランチ: `develop`
-- タイトル: コミット内容から自動生成
-- 本文: 変更内容のサマリー
-
-PR URLを表示する。
-
-### Step 6: マージ or 終了
-
-`--no-merge` 引数がある場合はここで終了し、PRのURLを表示する。
-
-`--no-merge` がない場合はそのまま Step 7 へ進む（確認不要）。
-
-### Step 7: PRをマージ
+### Step 2: PRをマージ
 
 ```bash
 gh pr merge <PR番号> --merge --delete-branch
@@ -76,35 +34,45 @@ gh pr merge <PR番号> --merge --delete-branch
 
 `--delete-branch` でリモートブランチを自動削除。
 
-### Step 8: worktreeとローカルブランチを削除
+### Step 3: devサーバーを停止
+
+起動中のdevサーバー（3000・3002番）を停止する:
 
 ```bash
-# developに戻る
-git checkout develop
-git pull origin develop
-
-# worktreeを削除
-git worktree remove .claude/worktrees/<name> --force
-
-# ローカルブランチを削除
-git branch -D feature/<name> 2>/dev/null || true
+lsof -ti:3000 | xargs kill -9 2>/dev/null || true
+lsof -ti:3002 | xargs kill -9 2>/dev/null || true
 ```
 
-### Step 9: 完了報告
+### Step 4: worktreeとローカルブランチを削除
+
+worktree名を現在のブランチ名から取得する（例: `worktree-auth-error-messages`）。
+
+Codex MCPを使って以下を実行する（Bashのcwdがworktree内にあるため、直接Bashでは実行できない）:
+
+```
+mcp__codex__codex({
+  prompt: "以下を順番に実行してください:\n1. git checkout develop\n2. git pull origin develop\n3. git worktree remove .claude/worktrees/<name> --force 2>/dev/null || echo 'worktree already removed'\n4. git worktree prune\n5. git branch -D <branch> 2>/dev/null || echo 'branch already gone'\n6. git worktree list",
+  cwd: "/Users/haya/development/myApps/job/ReSave",
+  sandbox: "workspace-write",
+  approval-policy: "never"
+})
+```
+
+### Step 5: 完了報告
 
 ```
 完了しました。
 
 マージ先: develop
-削除したブランチ: feature/<name>
+削除したブランチ: <branch>
+devサーバー: 停止済み
 
 次のアクション:
 - /release          developをmasterにリリース
-- /dev:new-feature  次の機能開発を開始
+- /dev-new-feature  次の機能開発を開始
 ```
 
 ## 注意事項
 
-- マージ後のクリーンアップは自動で行われる
-- `--no-merge` を使用した場合、worktreeとブランチは手動で削除する必要がある
-- PRのレビューが必要な場合は `--no-merge` を使用してレビュワーを追加してからマージする
+- dev-new-feature で起動したdevサーバーを自動停止する
+- worktreeとローカルブランチはマージ後に自動削除される

@@ -127,6 +127,28 @@ document.addEventListener('DOMContentLoaded', () => {
               toggle.classList.toggle('active');
             });
           });
+
+          // FAB - open create sheet
+          const fabBtn = iframeDoc.getElementById('fab-btn');
+          const fabOverlay = iframeDoc.getElementById('fab-overlay');
+          const createSheet = iframeDoc.getElementById('create-sheet');
+          const sheetCloseBtn = iframeDoc.getElementById('sheet-close-btn');
+          const sheetCancelBtn = iframeDoc.getElementById('sheet-cancel-btn');
+
+          function openCreateSheet() {
+            createSheet?.classList.add('open');
+            fabOverlay?.classList.add('active');
+          }
+
+          function closeCreateSheet() {
+            createSheet?.classList.remove('open');
+            fabOverlay?.classList.remove('active');
+          }
+
+          fabBtn?.addEventListener('click', openCreateSheet);
+          fabOverlay?.addEventListener('click', closeCreateSheet);
+          sheetCloseBtn?.addEventListener('click', closeCreateSheet);
+          sheetCancelBtn?.addEventListener('click', closeCreateSheet);
         }
       } catch (e) {
         // Cross-origin iframe access may fail, which is expected

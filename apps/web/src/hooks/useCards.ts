@@ -67,6 +67,7 @@ export function useTodayCompletedCards() {
   return useQuery<CardWithTags[]>({
     queryKey: cardKeys.todayCompleted(),
     queryFn: () => getTodayCompletedCards(),
+    refetchOnMount: 'always',
   });
 }
 

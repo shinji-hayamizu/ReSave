@@ -63,7 +63,8 @@
            - Cmd/Ctrl+Enter on front: focus back
            - Cmd/Ctrl+Enter on back: submit
          ================================================================ -->
-    <div class="quick-input mb-2" data-component="QuickInputForm">
+    <!-- @condition: Mobile only - hidden on mobile, shown on desktop via .mobile-hidden -->
+    <div class="quick-input mb-2 mobile-hidden" data-component="QuickInputForm">
       <form data-action="onSubmit:handleSubmit">
         <!-- @row: 問題入力行 -->
         <div class="quick-input__row">
@@ -482,6 +483,108 @@
 
   </div>
   <!-- [/Component: DashboardPage] -->
+
+  <!-- ================================================================
+       @component: FAB (Floating Action Button)
+       @description: モバイル用カード作成フローティングボタン
+       @condition: Mobile only (<768px)
+       @event: onClick - カード作成シートを開く
+       ================================================================ -->
+  <button class="fab" id="fab-btn" type="button" aria-label="新規カード作成">
+    <!-- @icon: lucide-react Plus -->
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+  </button>
+  <!-- [/Component: FAB] -->
+
+  <!-- ================================================================
+       @component: FAB Overlay
+       @description: カード作成シート表示時の背景オーバーレイ
+       @condition: Mobile only - visible when create-sheet is open
+       @event: onClick - シートを閉じる
+       ================================================================ -->
+  <div class="fab-overlay" id="fab-overlay"></div>
+  <!-- [/Component: FAB Overlay] -->
+
+  <!-- ================================================================
+       @component: CreateCardSheet
+       @description: モバイル用カード作成ボトムシート
+       @condition: Mobile only - slides up from bottom when FAB is tapped
+       @file: components/home/create-card-sheet.tsx (Mobile)
+
+       @state:
+         - front: string - 問題テキスト (useState)
+         - back: string - 答えテキスト (useState)
+
+       @hooks:
+         - useCreateCard() - カード作成mutation
+
+       @validation:
+         - MAX_FRONT_LENGTH: 500
+         - MAX_BACK_LENGTH: 2000
+       ================================================================ -->
+  <div class="create-sheet" id="create-sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
+    <!-- @component: Sheet handle indicator -->
+    <div class="sheet-handle"></div>
+
+    <!-- @component: Sheet header -->
+    <div class="sheet-header">
+      <h2 class="sheet-header__title" id="sheet-title">新規カード作成</h2>
+      <!-- @event: onClick - シートを閉じる -->
+      <button class="sheet-header__close" id="sheet-close-btn" type="button" aria-label="閉じる">
+        <!-- @icon: lucide-react X -->
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+      </button>
+    </div>
+
+    <!-- @component: Sheet form body -->
+    <div class="sheet-body">
+      <form id="sheet-form">
+        <!-- @field: 覚えたいこと (必須) -->
+        <div class="form-group">
+          <label class="form-label" for="sheet-front">
+            覚えたいこと<span class="required">*</span>
+          </label>
+          <!-- @component: TextareaAutosize -->
+          <!-- @props: maxLength={MAX_FRONT_LENGTH} -->
+          <textarea
+            id="sheet-front"
+            class="form-textarea"
+            placeholder="例: 日本の首都は？"
+            maxlength="500"
+            rows="3"
+            data-prop="front"
+            data-action="onChange:setFront"
+          ></textarea>
+        </div>
+
+        <!-- @field: 答え (任意) -->
+        <div class="form-group">
+          <label class="form-label" for="sheet-back">答え（任意）</label>
+          <!-- @component: TextareaAutosize -->
+          <!-- @props: maxLength={MAX_BACK_LENGTH} -->
+          <textarea
+            id="sheet-back"
+            class="form-textarea"
+            placeholder="例: 東京"
+            maxlength="2000"
+            rows="3"
+            data-prop="back"
+            data-action="onChange:setBack"
+          ></textarea>
+        </div>
+      </form>
+    </div>
+
+    <!-- @component: Sheet action buttons -->
+    <div class="sheet-actions">
+      <!-- @event: onClick - シートを閉じる -->
+      <button class="btn btn--outline" id="sheet-cancel-btn" type="button">キャンセル</button>
+      <!-- @event: onClick - カードを保存する -->
+      <!-- @condition: disabled={!front.trim()} -->
+      <button class="btn btn--primary" id="sheet-save-btn" type="submit" form="sheet-form">保存</button>
+    </div>
+  </div>
+  <!-- [/Component: CreateCardSheet] -->
 
 </body>
 </html>
