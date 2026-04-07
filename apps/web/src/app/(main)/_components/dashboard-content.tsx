@@ -8,11 +8,13 @@ import {
   CardTabs,
   type CardTabValue,
   HomeStudyCard,
+  LoadMoreIndicator,
   QuickInputForm,
 } from '@/components/home';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useHomeCards } from '@/hooks/useHomeCards';
+import { useHomeDueCards, useHomeLearningCards, getTotalFromInfiniteData } from '@/hooks/useHomeCards';
+import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
 import type { CardWithTags } from '@/types/card';
 
 function getNextInterval(schedule: number[], currentStep: number, isNew: boolean): string {
@@ -46,44 +48,52 @@ export function DashboardContent() {
   const [userSelectedTab, setUserSelectedTab] = useState<CardTabValue | null>(null);
   const [editingCard, setEditingCard] = useState<CardWithTags | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const { data, isLoading } = useHomeCards();
 
-  const categorizedCards = useMemo(() => {
-    if (!data) return { due: [], learning: [] };
+  const dueQuery = useHomeDueCards();
+  const learningQuery = useHomeLearningCards();
 
-    const now = data.fetchedAt;
+  const dueCards = useMemo(() =>
+    dueQuery.data?.pages.flatMap((page) => page.cards) ?? [],
+    [dueQuery.data]
+  );
 
-    const due: CardWithTags[] = [];
-    const learning: CardWithTags[] = [];
-
-    for (const card of data.cards) {
-      if (card.status === 'new') {
-        due.push(card);
-      } else if (card.status === 'active' && card.nextReviewAt && card.nextReviewAt <= now) {
-        learning.push(card);
-      }
-    }
-
-    return { due, learning };
-  }, [data]);
+  const learningCards = useMemo(() =>
+    learningQuery.data?.pages.flatMap((page) => page.cards) ?? [],
+    [learningQuery.data]
+  );
 
   const counts = useMemo(() => ({
-    due: categorizedCards.due.length,
-    learning: categorizedCards.learning.length,
-  }), [categorizedCards]);
+    due: getTotalFromInfiniteData(dueQuery.data),
+    learning: getTotalFromInfiniteData(learningQuery.data),
+  }), [dueQuery.data, learningQuery.data]);
 
+  const isLoading = dueQuery.isLoading || learningQuery.isLoading;
   const dataReady = !isLoading;
-  const todayCardCount = categorizedCards.learning.length;
 
   const activeTab = useMemo<CardTabValue>(() => {
     if (!dataReady) return 'due';
 
     if (userSelectedTab === null) {
-      return todayCardCount > 0 ? 'learning' : 'due';
+      return counts.learning > 0 ? 'learning' : 'due';
     }
 
     return userSelectedTab;
-  }, [dataReady, userSelectedTab, todayCardCount]);
+  }, [dataReady, userSelectedTab, counts.learning]);
+
+  const activeQuery = activeTab === 'due' ? dueQuery : learningQuery;
+  const activeCards = activeTab === 'due' ? dueCards : learningCards;
+
+  const handleFetchNextPage = useCallback(() => {
+    if (activeQuery.hasNextPage && !activeQuery.isFetchingNextPage) {
+      activeQuery.fetchNextPage();
+    }
+  }, [activeQuery]);
+
+  const triggerRef = useIntersectionObserver({
+    enabled: !!activeQuery.hasNextPage && !activeQuery.isFetchingNextPage,
+    rootMargin: '200px',
+    onIntersect: handleFetchNextPage,
+  });
 
   const handleTabChange = useCallback((value: CardTabValue) => {
     setUserSelectedTab(value);
@@ -104,8 +114,6 @@ export function DashboardContent() {
   const handleCardCreated = useCallback(() => {
     setUserSelectedTab('due');
   }, []);
-
-  const activeCards = categorizedCards[activeTab];
 
   return (
     <div className="pt-1 pb-2 md:pt-2 md:pb-4">
@@ -128,25 +136,36 @@ export function DashboardContent() {
             title="カードなし"
           />
         ) : (
-          <div className="bg-card shadow-sm divide-y divide-border">
-            {activeCards.map((card) => (
-              <HomeStudyCard
-                key={card.id}
-                back={card.back}
-                currentStep={card.currentStep}
-                front={card.front}
-                id={card.id}
-                intervals={{
-                  ok: getNextInterval(card.schedule, card.currentStep, card.status === 'new'),
-                  again: `${card.schedule[0]}日後`,
-                }}
-                schedule={card.schedule}
-                showAgain={card.currentStep > 0}
-                tags={card.tags}
-                onEdit={() => handleEdit(card)}
-              />
-            ))}
-          </div>
+          <>
+            <div className="bg-card shadow-sm divide-y divide-border">
+              {activeCards.map((card, index) => (
+                <div key={card.id}>
+                  <HomeStudyCard
+                    back={card.back}
+                    currentStep={card.currentStep}
+                    front={card.front}
+                    id={card.id}
+                    intervals={{
+                      ok: getNextInterval(card.schedule, card.currentStep, card.status === 'new'),
+                      again: `${card.schedule[0]}日後`,
+                    }}
+                    schedule={card.schedule}
+                    showAgain={card.currentStep > 0}
+                    tags={card.tags}
+                    onEdit={() => handleEdit(card)}
+                  />
+                  {index === activeCards.length - 2 && (
+                    <div ref={triggerRef} aria-hidden="true" />
+                  )}
+                </div>
+              ))}
+            </div>
+            <LoadMoreIndicator
+              hasNextPage={!!activeQuery.hasNextPage}
+              isFetchingNextPage={activeQuery.isFetchingNextPage}
+              totalCount={counts[activeTab]}
+            />
+          </>
         )}
 
         <EditCardDialog

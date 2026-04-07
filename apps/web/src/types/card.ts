@@ -68,3 +68,15 @@ export type HomeCardsData = {
   todayStudiedCardIds: string[];
   fetchedAt: string;
 };
+
+export type HomeCardsPage = {
+  cards: CardWithTags[];
+  todayStudiedCardIds: string[];
+  fetchedAt: string;
+  pagination: {
+    total: number;
+    limit: number;
+    offset: number;
+    hasMore: boolean;
+  };
+};
