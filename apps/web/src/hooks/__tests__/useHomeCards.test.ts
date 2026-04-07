@@ -733,7 +733,7 @@ describe('useHomeResetCard', () => {
     queryClient = createQueryClient();
   });
 
-  it('楽観的更新: カードのステータスがactiveに、currentStepが0にリセットされる', async () => {
+  it('楽観的更新: カードのステータスがnewに、currentStepが0にリセットされる', async () => {
     const card = createTestCard({
       id: 'card-1',
       status: 'completed',
@@ -749,8 +749,8 @@ describe('useHomeResetCard', () => {
       back: card.back,
       schedule: card.schedule,
       currentStep: 0,
-      nextReviewAt: new Date().toISOString(),
-      status: 'active',
+      nextReviewAt: null,
+      status: 'new',
       completedAt: null,
       createdAt: card.createdAt,
       updatedAt: card.updatedAt,
@@ -762,7 +762,7 @@ describe('useHomeResetCard', () => {
     });
 
     await act(async () => {
-      result.current.mutate('card-1');
+      result.current.mutate({ id: 'card-1', card });
     });
 
     await waitFor(() => {
@@ -770,9 +770,10 @@ describe('useHomeResetCard', () => {
     });
 
     const dueCards = getAllCardsFromTab(queryClient, 'due');
-    expect(dueCards[0].status).toBe('active');
+    expect(dueCards[0].status).toBe('new');
     expect(dueCards[0].currentStep).toBe(0);
     expect(dueCards[0].completedAt).toBeNull();
+    expect(dueCards[0].nextReviewAt).toBeNull();
   });
 
   it('エラー時: 前の状態にロールバックされる', async () => {
@@ -790,7 +791,7 @@ describe('useHomeResetCard', () => {
     });
 
     await act(async () => {
-      result.current.mutate('card-1');
+      result.current.mutate({ id: 'card-1', card });
     });
 
     await waitFor(() => {
@@ -803,6 +804,7 @@ describe('useHomeResetCard', () => {
   });
 
   it('エラー時: context.previousDataがない場合はロールバックしない', async () => {
+    const card = createTestCard({ id: 'card-1', status: 'completed', currentStep: 5 });
     mockResetCardToUnlearned.mockRejectedValue(new Error('fail'));
 
     const { result } = renderHook(() => useHomeResetCard(), {
@@ -810,7 +812,7 @@ describe('useHomeResetCard', () => {
     });
 
     await act(async () => {
-      result.current.mutate('card-1');
+      result.current.mutate({ id: 'card-1', card });
     });
 
     await waitFor(() => {
@@ -821,7 +823,7 @@ describe('useHomeResetCard', () => {
   it('onMutate: 対象外カードはそのまま返される', async () => {
     const card1 = createTestCard({ id: 'card-1', status: 'completed', currentStep: 5 });
     const card2 = createTestCard({ id: 'card-2', currentStep: 2 });
-    setTabCache(queryClient, 'due', [card1, card2]);
+    setTabCache(queryClient, 'due', [card2]);
 
     const resetFromServer: Card = {
       id: card1.id,
@@ -830,8 +832,8 @@ describe('useHomeResetCard', () => {
       back: card1.back,
       schedule: card1.schedule,
       currentStep: 0,
-      nextReviewAt: new Date().toISOString(),
-      status: 'active',
+      nextReviewAt: null,
+      status: 'new',
       completedAt: null,
       createdAt: card1.createdAt,
       updatedAt: card1.updatedAt,
@@ -843,7 +845,7 @@ describe('useHomeResetCard', () => {
     });
 
     await act(async () => {
-      result.current.mutate('card-1');
+      result.current.mutate({ id: 'card-1', card: card1 });
     });
 
     await waitFor(() => {
@@ -851,6 +853,9 @@ describe('useHomeResetCard', () => {
     });
 
     const dueCards = getAllCardsFromTab(queryClient, 'due');
+    expect(dueCards[0].id).toBe('card-1');
+    expect(dueCards[0].status).toBe('new');
+    expect(dueCards[1].id).toBe('card-2');
     expect(dueCards[1].currentStep).toBe(2);
   });
 
@@ -865,8 +870,8 @@ describe('useHomeResetCard', () => {
       back: card.back,
       schedule: card.schedule,
       currentStep: 0,
-      nextReviewAt: new Date().toISOString(),
-      status: 'active',
+      nextReviewAt: null,
+      status: 'new',
       completedAt: null,
       createdAt: card.createdAt,
       updatedAt: card.updatedAt,
@@ -881,7 +886,7 @@ describe('useHomeResetCard', () => {
     queryClient.removeQueries({ queryKey: homeCardKeys.tab('learning') });
 
     await act(async () => {
-      result.current.mutate('card-1');
+      result.current.mutate({ id: 'card-1', card });
     });
 
     await waitFor(() => {

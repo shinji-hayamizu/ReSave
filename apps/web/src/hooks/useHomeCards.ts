@@ -303,33 +303,34 @@ export function useHomeDeleteCard() {
 
 export function useHomeResetCard() {
   const qc = useQueryClient();
-  return useMutation<Card, Error, string, HomeCardMutationContext>({
-    mutationFn: (id: string) => resetCardToUnlearned(id),
-    onMutate: async (id) => {
+  return useMutation<Card, Error, { id: string; card: CardWithTags }, HomeCardMutationContext>({
+    mutationFn: ({ id }) => resetCardToUnlearned(id),
+    onMutate: async ({ id, card }) => {
       await Promise.all([
         qc.cancelQueries({ queryKey: homeCardKeys.tab('due') }),
         qc.cancelQueries({ queryKey: homeCardKeys.tab('learning') }),
+        qc.cancelQueries({ queryKey: cardKeys.todayCompleted() }),
       ]);
       const context = saveBothTabs(qc);
 
-      const tabs: TabKey[] = ['due', 'learning'];
-      for (const tab of tabs) {
-        qc.setQueryData<InfiniteData<HomeCardsPage>>(homeCardKeys.tab(tab), (old) => {
-          if (!old) return old;
-          return updateCardInInfiniteData(old, id, (c) => {
-            const nextReviewAt = new Date();
-            nextReviewAt.setDate(nextReviewAt.getDate() + c.schedule[0]);
-            return {
-              ...c,
-              currentStep: 0,
-              status: 'active' as const,
-              nextReviewAt: nextReviewAt.toISOString(),
-              completedAt: null,
-              updatedAt: new Date().toISOString(),
-            };
-          });
-        });
-      }
+      const resetCard: CardWithTags = {
+        ...card,
+        currentStep: 0,
+        status: 'new' as const,
+        nextReviewAt: null,
+        completedAt: null,
+        updatedAt: new Date().toISOString(),
+      };
+
+      qc.setQueryData<InfiniteData<HomeCardsPage>>(homeCardKeys.tab('due'), (old) => {
+        if (!old) return old;
+        return prependCardToInfiniteData(old, resetCard);
+      });
+
+      qc.setQueryData<CardWithTags[]>(cardKeys.todayCompleted(), (old) => {
+        if (!old) return old;
+        return old.filter((c) => c.id !== id);
+      });
 
       return context;
     },
@@ -340,16 +341,19 @@ export function useHomeResetCard() {
       toast.error('カードのリセットに失敗しました');
     },
     onSuccess: (updatedCard) => {
-      const tabs: TabKey[] = ['due', 'learning'];
-      for (const tab of tabs) {
-        qc.setQueryData<InfiniteData<HomeCardsPage>>(homeCardKeys.tab(tab), (old) => {
-          if (!old) return old;
-          return updateCardInInfiniteData(old, updatedCard.id, (c) => ({
-            ...c,
-            ...updatedCard,
-          }));
-        });
-      }
+      qc.setQueryData<InfiniteData<HomeCardsPage>>(homeCardKeys.tab('due'), (old) => {
+        if (!old) return old;
+        return updateCardInInfiniteData(old, updatedCard.id, (c) => ({
+          ...c,
+          ...updatedCard,
+          status: updatedCard.status as CardWithTags['status'],
+        }));
+      });
+    },
+    onSettled: () => {
+      qc.invalidateQueries({ queryKey: homeCardKeys.tab('due') });
+      qc.invalidateQueries({ queryKey: homeCardKeys.tab('learning') });
+      qc.invalidateQueries({ queryKey: cardKeys.todayCompleted() });
     },
   });
 }

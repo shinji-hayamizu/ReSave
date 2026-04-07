@@ -47,7 +47,7 @@ function createCard(overrides: Partial<CardWithTags> = {}): CardWithTags {
     front: 'front',
     back: 'back',
     schedule: [1, 3, 7, 14, 30, 180],
-    currentStep: 0,
+    currentStep: 6,
     nextReviewAt: null,
     status: 'completed',
     completedAt: '2026-04-02T10:00:00Z',
@@ -87,10 +87,8 @@ describe('CompletedCardsPage', () => {
       isLoading: false,
     });
 
-    // When: ページをレンダリング
     await renderPage();
 
-    // Then: ヘッダーに「完了」が表示される
     expect(screen.getByText('完了')).toBeInTheDocument();
     expect(screen.getByText('学習が完了したカード')).toBeInTheDocument();
   });
@@ -103,7 +101,6 @@ describe('CompletedCardsPage', () => {
       isFetching: true,
     });
 
-    // When: ページをレンダリング
     await renderPage();
 
     // Then: スケルトンが表示され、ローディングバーは表示されない
@@ -148,10 +145,8 @@ describe('CompletedCardsPage', () => {
       isLoading: false,
     });
 
-    // When: ページをレンダリング
     await renderPage();
 
-    // Then: 空状態が表示される
     await waitFor(() => {
       expect(screen.getByTestId('empty-state')).toBeInTheDocument();
       expect(screen.getByText('完了済みカードなし')).toBeInTheDocument();
@@ -165,10 +160,8 @@ describe('CompletedCardsPage', () => {
       isLoading: false,
     });
 
-    // When: ページをレンダリング
     await renderPage();
 
-    // Then: 空状態が表示される
     await waitFor(() => {
       expect(screen.getByTestId('empty-state')).toBeInTheDocument();
     });
