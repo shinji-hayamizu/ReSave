@@ -101,10 +101,12 @@
         >
           <div class="tag-item__info">
             <!-- @prop: style={{ backgroundColor: color }} -->
-            <div class="tag-item__color" style="background-color: #ef4444;" data-prop="color"></div>
+            <div class="tag-item__color" style="background-color: #0284c7;" data-prop="color"></div>
             <div>
-              <!-- @prop: name -->
-              <div class="tag-item__name" data-prop="name">React</div>
+              <!-- @prop: name displayed as TagBadge -->
+              <div class="tag-item__name" data-prop="name">
+                <span class="tag-badge" style="background-color: #0284c7; color: white;">React</span>
+              </div>
               <!-- @prop: `${cardCount}枚のカード` -->
               <div class="tag-item__count" data-prop="cardCount">12枚のカード</div>
             </div>
@@ -137,9 +139,11 @@
         <!-- @sample: サンプルタグ 2 -->
         <div class="tag-item" data-list-item>
           <div class="tag-item__info">
-            <div class="tag-item__color" style="background-color: #3b82f6;"></div>
+            <div class="tag-item__color" style="background-color: #16a34a;"></div>
             <div>
-              <div class="tag-item__name">JavaScript</div>
+              <div class="tag-item__name">
+                <span class="tag-badge" style="background-color: #16a34a; color: white;">JavaScript</span>
+              </div>
               <div class="tag-item__count">8枚のカード</div>
             </div>
           </div>
@@ -156,9 +160,11 @@
         <!-- @sample: サンプルタグ 3 -->
         <div class="tag-item" data-list-item>
           <div class="tag-item__info">
-            <div class="tag-item__color" style="background-color: #10b981;"></div>
+            <div class="tag-item__color" style="background-color: #7c3aed;"></div>
             <div>
-              <div class="tag-item__name">アルゴリズム</div>
+              <div class="tag-item__name">
+                <span class="tag-badge" style="background-color: #7c3aed; color: white;">アルゴリズム</span>
+              </div>
               <div class="tag-item__count">5枚のカード</div>
             </div>
           </div>
@@ -175,9 +181,11 @@
         <!-- @sample: サンプルタグ 4 -->
         <div class="tag-item" data-list-item>
           <div class="tag-item__info">
-            <div class="tag-item__color" style="background-color: #f59e0b;"></div>
+            <div class="tag-item__color" style="background-color: #ea580c;"></div>
             <div>
-              <div class="tag-item__name">英語</div>
+              <div class="tag-item__name">
+                <span class="tag-badge" style="background-color: #ea580c; color: white;">英語</span>
+              </div>
               <div class="tag-item__count">23枚のカード</div>
             </div>
           </div>
@@ -208,7 +216,7 @@
     </div>
 
     <!-- ================================================================
-         @component: TagFormModal (Create)
+         @component: TagFormModal (Create mode)
          @description: タグ作成モーダル
          @file: components/tags/tag-form-modal.tsx
          @condition: {modalState.type === 'create' && <TagFormModal />}
@@ -221,7 +229,60 @@
            - onClose: () => void
            - isSubmitting: boolean
          ================================================================ -->
-    <!-- Modal shown conditionally - static example below -->
+    <div class="modal-overlay" data-component="TagFormModal" style="position: relative; background: none; padding: 2rem; margin-top: 2rem;">
+      <div class="modal">
+        <div class="modal__header">
+          <div class="modal__title">タグを追加</div>
+        </div>
+        <div class="modal__content" style="display: flex; flex-direction: column; gap: 1rem;">
+          <!-- Tag name input with character counter -->
+          <div>
+            <label class="text-sm font-medium" style="display: block; margin-bottom: 0.5rem;">タグ名</label>
+            <div style="position: relative;">
+              <input
+                type="text"
+                class="input"
+                placeholder="タグ名を入力"
+                value="React"
+                maxlength="30"
+                style="width: 100%; padding-right: 3rem;"
+              >
+              <span class="text-xs text-muted" style="position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%);">5/30</span>
+            </div>
+          </div>
+
+          <!-- Color Palette -->
+          <div>
+            <label class="text-sm font-medium" style="display: block; margin-bottom: 0.5rem;">カラー</label>
+            <div class="color-palette">
+              <!-- sky-600 (selected) -->
+              <button type="button" class="color-swatch selected" style="background-color: #0284c7;" data-color="sky-600">
+                <div class="color-swatch__indicator"></div>
+              </button>
+              <!-- green-600 -->
+              <button type="button" class="color-swatch" style="background-color: #16a34a;" data-color="green-600"></button>
+              <!-- violet-600 -->
+              <button type="button" class="color-swatch" style="background-color: #7c3aed;" data-color="violet-600"></button>
+              <!-- orange-600 -->
+              <button type="button" class="color-swatch" style="background-color: #ea580c;" data-color="orange-600"></button>
+              <!-- pink-600 -->
+              <button type="button" class="color-swatch" style="background-color: #db2777;" data-color="pink-600"></button>
+              <!-- cyan-600 -->
+              <button type="button" class="color-swatch" style="background-color: #0891b2;" data-color="cyan-600"></button>
+              <!-- yellow-600 -->
+              <button type="button" class="color-swatch" style="background-color: #ca8a04;" data-color="yellow-600"></button>
+              <!-- slate-500 -->
+              <button type="button" class="color-swatch" style="background-color: #64748b;" data-color="slate-500"></button>
+            </div>
+          </div>
+        </div>
+        <div class="modal__footer">
+          <button type="button" class="btn btn--outline" data-action="onClick:onClose">キャンセル</button>
+          <button type="button" class="btn btn--primary" data-action="onClick:onSubmit">保存</button>
+        </div>
+      </div>
+    </div>
+    <!-- [/Component: TagFormModal] -->
 
     <!-- ================================================================
          @component: DeleteConfirmModal
@@ -237,7 +298,33 @@
            - onClose: () => void
            - isDeleting: boolean
          ================================================================ -->
-    <!-- Modal shown conditionally -->
+    <div class="modal-overlay" data-component="DeleteConfirmModal" style="position: relative; background: none; padding: 2rem; margin-top: 1rem;">
+      <div class="modal">
+        <div class="modal__header">
+          <div class="modal__title">タグを削除</div>
+          <div class="modal__description">このタグを削除しますか？</div>
+        </div>
+        <div class="modal__content" style="display: flex; flex-direction: column; gap: 1rem;">
+          <!-- Tag info -->
+          <p class="text-sm font-medium">
+            <span class="tag-badge" style="background-color: #0284c7; color: white;">React</span>
+            <span class="text-muted" style="margin-left: 0.5rem;">(12枚のカードに紐付け)</span>
+          </p>
+
+          <!-- Warning box -->
+          <div class="warning-box">
+            <!-- @icon: lucide-react Info -->
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+            <span>紐付いているカードは削除されません。タグの関連付けのみが解除されます。</span>
+          </div>
+        </div>
+        <div class="modal__footer">
+          <button type="button" class="btn btn--outline" data-action="onClick:onClose">キャンセル</button>
+          <button type="button" class="btn btn--destructive" data-action="onClick:onConfirm">削除する</button>
+        </div>
+      </div>
+    </div>
+    <!-- [/Component: DeleteConfirmModal] -->
 
   </div>
   <!-- [/Component: TagsPage] -->

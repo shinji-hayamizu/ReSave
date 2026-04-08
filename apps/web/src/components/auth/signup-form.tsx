@@ -31,6 +31,22 @@ import { signupSchema } from '@/validations/user';
 
 import type { SignupInput } from '@/validations/user';
 
+function getSignupErrorMessage(error: { code?: string; message?: string; status?: number }): string {
+  if (error.code === 'user_already_exists') {
+    return 'このメールアドレスはすでに登録されています';
+  }
+  if (error.code === 'weak_password') {
+    return 'パスワードが弱すぎます。8文字以上の英数字混在にしてください';
+  }
+  if (error.code === 'email_rate_limit_exceeded' || error.status === 429) {
+    return 'しばらく時間をおいてから再度お試しください';
+  }
+  if (error.code === 'email_provider_disabled') {
+    return 'メール認証が無効です。管理者にお問い合わせください';
+  }
+  return '登録に失敗しました。しばらくしてから再度お試しください';
+}
+
 export function SignupForm() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -51,7 +67,7 @@ export function SignupForm() {
     setLoading(true);
 
     const supabase = createClient();
-    const { error } = await supabase.auth.signUp({
+    const { data: signUpData, error } = await supabase.auth.signUp({
       email: data.email,
       password: data.password,
       options: {
@@ -60,7 +76,13 @@ export function SignupForm() {
     });
 
     if (error) {
-      setError('登録に失敗しました。しばらくしてから再度お試しください');
+      setError(getSignupErrorMessage(error));
+      setLoading(false);
+      return;
+    }
+
+    if (signUpData.user?.identities?.length === 0) {
+      setError('このメールアドレスはすでに登録されています');
       setLoading(false);
       return;
     }
