@@ -230,34 +230,41 @@ export async function getStudySession(): Promise<
 
 /**
  * ユーザーの現在の学習ストリークを計算
+ * 1回のクエリで全ログ日付を取得し、メモリ内でストリーク計算
  */
 async function calculateStreak(
   supabase: Awaited<ReturnType<typeof createClient>>,
   userId: string
 ): Promise<number> {
+  const { data: logs, error } = await supabase
+    .from('study_logs')
+    .select('studied_at')
+    .eq('user_id', userId)
+    .order('studied_at', { ascending: false });
+
+  if (error || !logs || logs.length === 0) {
+    return 0;
+  }
+
+  const studyDates = new Set<string>();
+  logs.forEach((log) => {
+    const date = new Date(log.studied_at);
+    date.setHours(0, 0, 0, 0);
+    studyDates.add(date.toISOString().split('T')[0]);
+  });
+
   const today = new Date();
+  today.setHours(0, 0, 0, 0);
   let streak = 0;
   const checkDate = new Date(today);
 
-  for (let i = 0; i < 365; i++) {
-    checkDate.setHours(0, 0, 0, 0);
-    const startOfDay = checkDate.toISOString();
+  if (studyDates.has(checkDate.toISOString().split('T')[0])) {
+    streak = 1;
+  }
+  checkDate.setDate(checkDate.getDate() - 1);
 
-    checkDate.setHours(23, 59, 59, 999);
-    const endOfDay = checkDate.toISOString();
-
-    const { count, error } = await supabase
-      .from('study_logs')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', userId)
-      .gte('studied_at', startOfDay)
-      .lte('studied_at', endOfDay);
-
-    if (error || !count || count === 0) {
-      break;
-    }
-
-    streak++;
+  while (studyDates.has(checkDate.toISOString().split('T')[0])) {
+    streak += 1;
     checkDate.setDate(checkDate.getDate() - 1);
   }
 
