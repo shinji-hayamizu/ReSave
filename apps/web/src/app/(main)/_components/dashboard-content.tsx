@@ -9,10 +9,12 @@ import {
   type CardTabValue,
   HomeStudyCard,
   QuickInputForm,
+  TagFilterBar,
 } from '@/components/home';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useHomeCards } from '@/hooks/useHomeCards';
+import { useTags } from '@/hooks/useTags';
 import type { CardWithTags } from '@/types/card';
 
 function getNextInterval(schedule: number[], currentStep: number, isNew: boolean): string {
@@ -44,9 +46,11 @@ function StudyCardsSkeleton() {
 
 export function DashboardContent() {
   const [userSelectedTab, setUserSelectedTab] = useState<CardTabValue | null>(null);
+  const [selectedTagId, setSelectedTagId] = useState<string | null>(null);
   const [editingCard, setEditingCard] = useState<CardWithTags | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const { data, isLoading } = useHomeCards();
+  const { data: tags = [] } = useTags();
 
   const categorizedCards = useMemo(() => {
     if (!data) return { due: [], learning: [] };
@@ -67,10 +71,22 @@ export function DashboardContent() {
     return { due, learning };
   }, [data]);
 
+  const filteredCards = useMemo(() => {
+    if (!selectedTagId) return categorizedCards;
+    return {
+      due: categorizedCards.due.filter((card) =>
+        card.tags.some((tag) => tag.id === selectedTagId)
+      ),
+      learning: categorizedCards.learning.filter((card) =>
+        card.tags.some((tag) => tag.id === selectedTagId)
+      ),
+    };
+  }, [categorizedCards, selectedTagId]);
+
   const counts = useMemo(() => ({
-    due: categorizedCards.due.length,
-    learning: categorizedCards.learning.length,
-  }), [categorizedCards]);
+    due: filteredCards.due.length,
+    learning: filteredCards.learning.length,
+  }), [filteredCards]);
 
   const dataReady = !isLoading;
   const todayCardCount = categorizedCards.learning.length;
@@ -105,13 +121,23 @@ export function DashboardContent() {
     setUserSelectedTab('due');
   }, []);
 
-  const activeCards = categorizedCards[activeTab];
+  const activeCards = filteredCards[activeTab];
 
   return (
     <div className="pt-1 pb-2 md:pt-2 md:pb-4">
         <div className="mb-2">
           <QuickInputForm onCardCreated={handleCardCreated} />
         </div>
+
+        {tags.length > 0 && (
+          <div className="mb-2">
+            <TagFilterBar
+              tags={tags}
+              selectedTagId={selectedTagId}
+              onTagSelect={setSelectedTagId}
+            />
+          </div>
+        )}
 
         <CardTabs counts={counts} value={activeTab} onChange={handleTabChange} />
 
@@ -120,9 +146,11 @@ export function DashboardContent() {
         ) : activeCards.length === 0 ? (
           <EmptyState
             description={
-              activeTab === 'due'
-                ? '新しいカードを追加して学習を始めましょう'
-                : '復習予定のカードはありません'
+              selectedTagId
+                ? 'このタグのカードはありません'
+                : activeTab === 'due'
+                  ? '新しいカードを追加して学習を始めましょう'
+                  : '復習予定のカードはありません'
             }
             icon={<FileQuestion />}
             title="カードなし"
