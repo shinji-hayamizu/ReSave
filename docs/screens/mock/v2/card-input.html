@@ -29,7 +29,6 @@
       - back: optional, maxLength 2000
       - tagIds: optional, array of tag IDs, max 10
       - sourceUrl: optional, valid URL
-      - repeatMode: 'spaced' | 'daily' | 'weekly' | 'none'
 
     @hooks:
       - useUpdateCard() - カード更新mutation
@@ -73,7 +72,7 @@
            @form:
              - useForm<CardInputFormValues>
              - resolver: zodResolver(cardInputSchema)
-             - defaultValues: { front, back, tagIds, sourceUrl, repeatMode }
+             - defaultValues: { front, back, tagIds, sourceUrl }
            ================================================================ -->
       <form data-component="CardInputForm" data-action="onSubmit:handleSubmit">
 
@@ -243,38 +242,6 @@
                 <p class="form-hint">参照元のURLを記録できます</p>
               </div>
 
-              <!-- ================================================================
-                   @component: FormField - repeatMode
-                   @description: リピートモード選択
-                   @file: components/cards/repeat-selector.tsx
-                   ================================================================ -->
-              <div class="form-group" data-component="FormField" data-field="repeatMode" style="margin-bottom: 0;">
-                <label class="form-label" for="repeatMode" style="margin-bottom: 0.5rem;">リピートモード</label>
-                <!-- @component: RepeatSelector (as simple select for mock) -->
-                <select
-                  id="repeatMode"
-                  name="repeatMode"
-                  class="form-input"
-                  style="height: 2.75rem; border-radius: 0.5rem; appearance: auto;"
-                  data-prop="repeatMode"
-                  data-action="onChange:field.onChange"
-                >
-                  <option value="spaced" selected>間隔反復</option>
-                  <option value="daily">毎日</option>
-                  <option value="weekly">毎週</option>
-                  <option value="none">なし</option>
-                </select>
-                <!-- @event: onClick - show info about spaced repetition -->
-                <button
-                  type="button"
-                  style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.8125rem; color: hsl(var(--muted-foreground)); margin-top: 0.5rem; border: none; background: transparent; cursor: pointer; transition: color 0.15s ease;"
-                  data-action="onClick:showInfo"
-                >
-                  <!-- @icon: lucide-react Info -->
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-                  間隔反復について詳しく
-                </button>
-              </div>
 
             </div>
           </div>
