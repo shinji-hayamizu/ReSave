@@ -5,11 +5,13 @@ import type { CardWithTags, HomeCardsPage } from '@/types/card';
 import type { InfiniteData } from '@tanstack/react-query';
 
 const mockUseHomeDueCards = vi.fn();
+const mockUseHomeDueCount = vi.fn();
 const mockUseHomeLearningCards = vi.fn();
 const mockGetTotalFromInfiniteData = vi.fn();
 
 vi.mock('@/hooks/useHomeCards', () => ({
   useHomeDueCards: () => mockUseHomeDueCards(),
+  useHomeDueCount: () => mockUseHomeDueCount(),
   useHomeLearningCards: () => mockUseHomeLearningCards(),
   getTotalFromInfiniteData: (data: InfiniteData<HomeCardsPage> | undefined) => mockGetTotalFromInfiniteData(data),
 }));
@@ -42,10 +44,20 @@ vi.mock('@/components/home', () => ({
   ),
   QuickInputForm: () => <div data-testid="quick-input" />,
   LoadMoreIndicator: () => null,
+  MobileCardCreate: () => null,
+  TagFilterBar: () => null,
 }));
 
 vi.mock('@/components/cards/edit-card-dialog', () => ({
   EditCardDialog: () => null,
+}));
+
+vi.mock('@/hooks/useTags', () => ({
+  useTags: () => ({ data: [] }),
+}));
+
+vi.mock('@/hooks/use-mobile', () => ({
+  useIsMobile: () => false,
 }));
 
 vi.mock('@/components/ui/empty-state', () => ({
@@ -141,6 +153,7 @@ describe('DashboardPage 初期タブ選択', () => {
       if (!data || data.pages.length === 0) return 0;
       return data.pages[0].pagination.total;
     });
+    mockUseHomeDueCount.mockReturnValue({ data: 0, isLoading: false });
   });
 
   it('復習中カードがある場合: learningタブが初期表示される', async () => {

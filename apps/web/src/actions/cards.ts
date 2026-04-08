@@ -524,6 +524,30 @@ export async function getHomeCards(): Promise<HomeCardsData> {
 }
 
 /**
+ * ホーム画面: 未学習(status='new')カードの件数のみ取得（バッジ表示用）
+ */
+export async function getHomeDueCount(): Promise<number> {
+  const supabase = await createClient();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    throw new Error('Unauthorized');
+  }
+
+  const { count, error } = await supabase
+    .from('cards')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', user.id)
+    .eq('status', 'new');
+
+  if (error) {
+    throw new Error(`Failed to fetch due count: ${error.message}`);
+  }
+
+  return count ?? 0;
+}
+
+/**
  * ホーム画面: 未学習(status='new')カードをページネーション取得
  */
 export async function getHomeDueCards({ limit, offset }: { limit: number; offset: number }): Promise<HomeCardsPage> {

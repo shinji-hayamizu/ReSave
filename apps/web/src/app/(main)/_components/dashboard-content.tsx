@@ -15,7 +15,7 @@ import {
 } from '@/components/home';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useHomeDueCards, useHomeLearningCards, getTotalFromInfiniteData } from '@/hooks/useHomeCards';
+import { useHomeDueCards, useHomeDueCount, useHomeLearningCards, getTotalFromInfiniteData } from '@/hooks/useHomeCards';
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useTags } from '@/hooks/useTags';
@@ -53,10 +53,18 @@ export function DashboardContent() {
   const [selectedTagId, setSelectedTagId] = useState<string | null>(null);
   const [editingCard, setEditingCard] = useState<CardWithTags | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isDueUserEnabled, setIsDueUserEnabled] = useState(false);
 
-  const dueQuery = useHomeDueCards();
+  const dueCountQuery = useHomeDueCount();
   const learningQuery = useHomeLearningCards();
   const { data: tags = [] } = useTags();
+
+  const learningSettled = !learningQuery.isLoading && learningQuery.data !== undefined;
+  const learningIsEmpty = learningSettled && getTotalFromInfiniteData(learningQuery.data) === 0;
+
+  const isDueEnabled = isDueUserEnabled || learningIsEmpty;
+
+  const dueQuery = useHomeDueCards({ enabled: isDueEnabled });
 
   const dueCards = useMemo(() =>
     dueQuery.data?.pages.flatMap((page) => page.cards) ?? [],
@@ -78,12 +86,17 @@ export function DashboardContent() {
     return learningCards.filter((card) => card.tags.some((tag) => tag.id === selectedTagId));
   }, [learningCards, selectedTagId]);
 
-  const counts = useMemo(() => ({
-    due: selectedTagId ? filteredDueCards.length : getTotalFromInfiniteData(dueQuery.data),
-    learning: selectedTagId ? filteredLearningCards.length : getTotalFromInfiniteData(learningQuery.data),
-  }), [selectedTagId, filteredDueCards.length, filteredLearningCards.length, dueQuery.data, learningQuery.data]);
+  const counts = useMemo(() => {
+    const dueTotal = isDueEnabled
+      ? getTotalFromInfiniteData(dueQuery.data)
+      : (dueCountQuery.data ?? 0);
+    return {
+      due: selectedTagId ? filteredDueCards.length : dueTotal,
+      learning: selectedTagId ? filteredLearningCards.length : getTotalFromInfiniteData(learningQuery.data),
+    };
+  }, [isDueEnabled, dueQuery.data, dueCountQuery.data, selectedTagId, filteredDueCards.length, filteredLearningCards.length, learningQuery.data]);
 
-  const isLoading = dueQuery.isLoading || learningQuery.isLoading;
+  const isLoading = learningQuery.isLoading || (isDueEnabled && dueQuery.isLoading);
   const dataReady = !isLoading;
 
   const activeTab = useMemo<CardTabValue>(() => {
@@ -113,6 +126,9 @@ export function DashboardContent() {
 
   const handleTabChange = useCallback((value: CardTabValue) => {
     setUserSelectedTab(value);
+    if (value === 'due') {
+      setIsDueUserEnabled(true);
+    }
   }, []);
 
   const handleEdit = useCallback((card: CardWithTags) => {
@@ -128,6 +144,7 @@ export function DashboardContent() {
   }, []);
 
   const handleCardCreated = useCallback(() => {
+    setIsDueUserEnabled(true);
     setUserSelectedTab('due');
   }, []);
 
