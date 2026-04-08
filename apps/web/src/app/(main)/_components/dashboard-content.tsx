@@ -11,12 +11,14 @@ import {
   LoadMoreIndicator,
   MobileCardCreate,
   QuickInputForm,
+  TagFilterBar,
 } from '@/components/home';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useHomeDueCards, useHomeLearningCards, getTotalFromInfiniteData } from '@/hooks/useHomeCards';
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useTags } from '@/hooks/useTags';
 import type { CardWithTags } from '@/types/card';
 
 function getNextInterval(schedule: number[], currentStep: number, isNew: boolean): string {
@@ -48,11 +50,13 @@ function StudyCardsSkeleton() {
 
 export function DashboardContent() {
   const [userSelectedTab, setUserSelectedTab] = useState<CardTabValue | null>(null);
+  const [selectedTagId, setSelectedTagId] = useState<string | null>(null);
   const [editingCard, setEditingCard] = useState<CardWithTags | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   const dueQuery = useHomeDueCards();
   const learningQuery = useHomeLearningCards();
+  const { data: tags = [] } = useTags();
 
   const dueCards = useMemo(() =>
     dueQuery.data?.pages.flatMap((page) => page.cards) ?? [],
@@ -64,10 +68,20 @@ export function DashboardContent() {
     [learningQuery.data]
   );
 
+  const filteredDueCards = useMemo(() => {
+    if (!selectedTagId) return dueCards;
+    return dueCards.filter((card) => card.tags.some((tag) => tag.id === selectedTagId));
+  }, [dueCards, selectedTagId]);
+
+  const filteredLearningCards = useMemo(() => {
+    if (!selectedTagId) return learningCards;
+    return learningCards.filter((card) => card.tags.some((tag) => tag.id === selectedTagId));
+  }, [learningCards, selectedTagId]);
+
   const counts = useMemo(() => ({
-    due: getTotalFromInfiniteData(dueQuery.data),
-    learning: getTotalFromInfiniteData(learningQuery.data),
-  }), [dueQuery.data, learningQuery.data]);
+    due: selectedTagId ? filteredDueCards.length : getTotalFromInfiniteData(dueQuery.data),
+    learning: selectedTagId ? filteredLearningCards.length : getTotalFromInfiniteData(learningQuery.data),
+  }), [selectedTagId, filteredDueCards.length, filteredLearningCards.length, dueQuery.data, learningQuery.data]);
 
   const isLoading = dueQuery.isLoading || learningQuery.isLoading;
   const dataReady = !isLoading;
@@ -83,7 +97,7 @@ export function DashboardContent() {
   }, [dataReady, userSelectedTab, counts.learning]);
 
   const activeQuery = activeTab === 'due' ? dueQuery : learningQuery;
-  const activeCards = activeTab === 'due' ? dueCards : learningCards;
+  const activeCards = activeTab === 'due' ? filteredDueCards : filteredLearningCards;
 
   const handleFetchNextPage = useCallback(() => {
     if (activeQuery.hasNextPage && !activeQuery.isFetchingNextPage) {
@@ -127,6 +141,16 @@ export function DashboardContent() {
           </div>
         )}
 
+        {tags.length > 0 && (
+          <div className="mb-2">
+            <TagFilterBar
+              tags={tags}
+              selectedTagId={selectedTagId}
+              onTagSelect={setSelectedTagId}
+            />
+          </div>
+        )}
+
         <CardTabs counts={counts} value={activeTab} onChange={handleTabChange} />
 
         {isLoading ? (
@@ -134,9 +158,11 @@ export function DashboardContent() {
         ) : activeCards.length === 0 ? (
           <EmptyState
             description={
-              activeTab === 'due'
-                ? '新しいカードを追加して学習を始めましょう'
-                : '復習予定のカードはありません'
+              selectedTagId
+                ? 'このタグのカードはありません'
+                : activeTab === 'due'
+                  ? '新しいカードを追加して学習を始めましょう'
+                  : '復習予定のカードはありません'
             }
             icon={<FileQuestion />}
             title="カードなし"
