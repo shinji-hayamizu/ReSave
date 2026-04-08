@@ -20,3 +20,13 @@ export type HomeCardsPage = {
     hasMore: boolean;
   };
 };
+
+export type CompletedCardsPage = {
+  cards: import('@resave/shared/types').CardWithTags[];
+  pagination: {
+    total: number;
+    limit: number;
+    offset: number;
+    hasMore: boolean;
+  };
+};

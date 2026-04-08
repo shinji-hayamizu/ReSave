@@ -10,21 +10,26 @@
     @screen: カード詳細入力画面 (編集ダイアログ)
     @path: /cards/:id/edit or Dialog
     @description: カードの詳細編集画面/ダイアログ
-    @file: components/cards/edit-card-dialog.tsx
+    @file: components/cards/card-input-form.tsx
     @feature: F-013 (カード作成), F-014 (カード編集)
 
     @props:
-      - card: CardWithTags | null
-      - open: boolean
-      - onOpenChange: (open: boolean) => void
+      - mode: 'create' | 'edit'
+      - defaultValues?: Partial<CardInputFormValues>
+      - onSubmit: (data: CardInputFormValues) => Promise<void>
+      - isSubmitting?: boolean
+      - formId?: string
 
     @state-management:
-      - form state via react-hook-form
+      - form state via react-hook-form + zod
+      - optionsOpen: boolean - 詳細設定の開閉状態
 
     @form-validation:
       - front: required, maxLength 500
       - back: optional, maxLength 2000
-      - tagIds: optional, array of tag IDs
+      - tagIds: optional, array of tag IDs, max 10
+      - sourceUrl: optional, valid URL
+      - repeatMode: 'spaced' | 'daily' | 'weekly' | 'none'
 
     @hooks:
       - useUpdateCard() - カード更新mutation
@@ -59,164 +64,265 @@
     <div class="content-wrapper p-4" style="max-width: 42rem;">
 
       <!-- ================================================================
-           @component: CardForm
+           @component: CardInputForm
            @description: カード編集フォーム
-           @file: components/cards/card-form.tsx
+           @file: components/cards/card-input-form.tsx
 
            @uses: react-hook-form, @hookform/resolvers/zod
 
            @form:
-             - useForm<CardFormInput>
-             - resolver: zodResolver(cardFormSchema)
-             - defaultValues: { front: card?.front, back: card?.back, tagIds: card?.tags.map(t => t.id) }
+             - useForm<CardInputFormValues>
+             - resolver: zodResolver(cardInputSchema)
+             - defaultValues: { front, back, tagIds, sourceUrl, repeatMode }
            ================================================================ -->
-      <form class="card" data-component="CardForm" data-action="onSubmit:handleSubmit">
-        <div class="card-content space-y-4">
+      <form data-component="CardInputForm" data-action="onSubmit:handleSubmit">
 
-          <!-- ================================================================
-               @component: FormField - front (問題)
-               @validation: required, maxLength 500
-               ================================================================ -->
-          <div class="form-group" data-component="FormField" data-field="front">
-            <label class="form-label" for="front">問題 <span class="text-destructive">*</span></label>
-            <!-- @component: Textarea (shadcn/ui) -->
-            <!-- @props: value={field.value}, onChange={field.onChange} -->
-            <textarea
-              id="front"
-              name="front"
-              class="form-textarea"
-              placeholder="覚えたい内容を入力"
-              maxlength="500"
-              rows="3"
-              data-prop="front"
-              data-action="onChange:field.onChange"
-            >日本の首都は？</textarea>
-            <p class="form-hint">最大500文字</p>
-            <p class="form-error" data-show-if="errors.front" style="display: none;">問題を入力してください</p>
-          </div>
+        <!-- Main Card -->
+        <div style="border-radius: 0.75rem; border: 1px solid hsl(var(--border)); background: hsl(var(--card)); box-shadow: 0 1px 2px rgba(0,0,0,0.05); overflow: hidden;">
 
-          <!-- ================================================================
-               @component: FormField - back (答え)
-               @validation: optional, maxLength 2000
-               ================================================================ -->
-          <div class="form-group" data-component="FormField" data-field="back">
-            <label class="form-label" for="back">答え</label>
-            <textarea
-              id="back"
-              name="back"
-              class="form-textarea"
-              placeholder="答えを入力（任意）"
-              maxlength="2000"
-              rows="4"
-              data-prop="back"
-              data-action="onChange:field.onChange"
-            >東京</textarea>
-            <p class="form-hint">最大2000文字</p>
-          </div>
+          <!-- Required Fields -->
+          <div style="padding: 1.25rem;" class="space-y-5">
 
-          <!-- ================================================================
-               @component: FormField - tags
-               @description: タグ選択
-               @implementation: Multi-select or Checkbox group
-               ================================================================ -->
-          <div class="form-group" data-component="FormField" data-field="tagIds">
-            <label class="form-label">タグ</label>
-            <!-- @component: TagSelect (custom) -->
-            <!-- @props: value={field.value}, onChange={field.onChange}, options={tags} -->
-            <div class="flex gap-2" style="flex-wrap: wrap;" data-component="TagSelect" data-list="tags">
-              <!-- @loop: tags.map(tag => <TagCheckbox key={tag.id} {...tag} />) -->
-              <!-- @condition: className={selected ? 'selected' : ''} -->
-              <label
-                class="tag-checkbox"
-                style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.375rem 0.75rem; border: 1px solid hsl(var(--border)); border-radius: var(--radius); cursor: pointer; font-size: 0.875rem;"
-                data-list-item
-                data-key="tag.id"
-              >
-                <input type="checkbox" name="tagIds" value="1" checked style="accent-color: hsl(var(--primary));">
-                <span class="tag-item__color" style="width: 0.75rem; height: 0.75rem; border-radius: 50%; background: #ef4444;"></span>
-                <span>React</span>
-              </label>
-              <label
-                class="tag-checkbox"
-                style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.375rem 0.75rem; border: 1px solid hsl(var(--border)); border-radius: var(--radius); cursor: pointer; font-size: 0.875rem;"
-                data-list-item
-              >
-                <input type="checkbox" name="tagIds" value="2" style="accent-color: hsl(var(--primary));">
-                <span class="tag-item__color" style="width: 0.75rem; height: 0.75rem; border-radius: 50%; background: #3b82f6;"></span>
-                <span>JavaScript</span>
-              </label>
-              <label
-                class="tag-checkbox"
-                style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.375rem 0.75rem; border: 1px solid hsl(var(--border)); border-radius: var(--radius); cursor: pointer; font-size: 0.875rem;"
-                data-list-item
-              >
-                <input type="checkbox" name="tagIds" value="3" style="accent-color: hsl(var(--primary));">
-                <span class="tag-item__color" style="width: 0.75rem; height: 0.75rem; border-radius: 50%; background: #10b981;"></span>
-                <span>アルゴリズム</span>
-              </label>
-              <label
-                class="tag-checkbox"
-                style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.375rem 0.75rem; border: 1px solid hsl(var(--border)); border-radius: var(--radius); cursor: pointer; font-size: 0.875rem;"
-                data-list-item
-              >
-                <input type="checkbox" name="tagIds" value="4" checked style="accent-color: hsl(var(--primary));">
-                <span class="tag-item__color" style="width: 0.75rem; height: 0.75rem; border-radius: 50%; background: #f59e0b;"></span>
-                <span>地理</span>
-              </label>
+            <!-- ================================================================
+                 @component: FormField - front (テキスト)
+                 @validation: required, maxLength 500
+                 ================================================================ -->
+            <div class="form-group" data-component="FormField" data-field="front" style="margin-bottom: 0;">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
+                <label class="form-label" for="front" style="margin-bottom: 0;">テキスト <span class="text-destructive">*</span></label>
+                <!-- @component: CharacterCounter -->
+                <span class="text-xs text-muted" data-component="CharacterCounter">12 / 500</span>
+              </div>
+              <!-- @component: TextareaAutosize -->
+              <!-- @props: value={field.value}, onChange={field.onChange} -->
+              <textarea
+                id="front"
+                name="front"
+                class="form-textarea"
+                placeholder="覚えたいことを入力してください"
+                maxlength="500"
+                rows="4"
+                style="border-radius: 0.5rem; padding: 0.75rem 0.875rem; font-size: 1rem; line-height: 1.6; resize: none;"
+                data-prop="front"
+                data-action="onChange:field.onChange"
+              >日本の首都は？</textarea>
+              <p class="form-error" data-show-if="errors.front" style="display: none;">テキストを入力してください</p>
             </div>
-            <p class="form-hint">複数選択可能</p>
-          </div>
 
-          <!-- @section: フォームアクション -->
-          <div class="flex gap-2" style="justify-content: flex-end; padding-top: 1rem; border-top: 1px solid hsl(var(--border));">
-            <!-- @event: onClick={handleClose} -->
+            <!-- ================================================================
+                 @component: FormField - back (隠しテキスト/答え)
+                 @validation: optional, maxLength 2000
+                 ================================================================ -->
+            <div class="form-group" data-component="FormField" data-field="back" style="margin-bottom: 0;">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
+                <label class="form-label" for="back" style="margin-bottom: 0;">隠しテキスト（答え）</label>
+                <span class="text-xs text-muted" data-component="CharacterCounter">4 / 2000</span>
+              </div>
+              <textarea
+                id="back"
+                name="back"
+                class="form-textarea"
+                placeholder="タップで表示される答えを入力（任意）"
+                maxlength="2000"
+                rows="3"
+                style="border-radius: 0.5rem; padding: 0.75rem 0.875rem; font-size: 1rem; line-height: 1.6; resize: none;"
+                data-prop="back"
+                data-action="onChange:field.onChange"
+              >東京</textarea>
+            </div>
+
+            <!-- ================================================================
+                 @component: FormField - tags (TagSelector)
+                 @description: Popover-style タグ選択
+                 @file: components/cards/tag-selector.tsx
+                 ================================================================ -->
+            <div class="form-group" data-component="FormField" data-field="tagIds" style="margin-bottom: 0;">
+              <label class="form-label" style="margin-bottom: 0.5rem;">タグ</label>
+              <!-- @component: TagSelector (Popover-style) -->
+              <!-- @props: selectedTagIds={field.value}, onChange={field.onChange}, maxTags={10} -->
+              <div
+                data-component="TagSelector"
+                style="display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; min-height: 52px; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid hsl(var(--input)); background: transparent; transition: border-color 0.15s ease;"
+              >
+                <!-- Selected Tag Pills -->
+                <span style="display: inline-flex; align-items: center; gap: 0.375rem; height: 2rem; padding: 0 0.75rem; font-size: 0.8125rem; font-weight: 500; border-radius: 9999px; background: hsl(var(--primary)); color: white;">
+                  <span>React</span>
+                  <button type="button" style="display: flex; align-items: center; justify-content: center; width: 18px; height: 18px; margin-right: -0.25rem; border-radius: 9999px; background: rgba(255,255,255,0.25); border: none; color: white; cursor: pointer;" aria-label="Reactを削除">
+                    <!-- @icon: lucide-react X -->
+                    <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                  </button>
+                </span>
+
+                <span style="display: inline-flex; align-items: center; gap: 0.375rem; height: 2rem; padding: 0 0.75rem; font-size: 0.8125rem; font-weight: 500; border-radius: 9999px; background: #f59e0b; color: white;">
+                  <span>地理</span>
+                  <button type="button" style="display: flex; align-items: center; justify-content: center; width: 18px; height: 18px; margin-right: -0.25rem; border-radius: 9999px; background: rgba(255,255,255,0.25); border: none; color: white; cursor: pointer;" aria-label="地理を削除">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                  </button>
+                </span>
+
+                <!-- Add Tag Button (Popover trigger) -->
+                <!-- @component: Popover + PopoverTrigger -->
+                <div style="position: relative;" data-component="Popover">
+                  <button
+                    type="button"
+                    style="display: inline-flex; align-items: center; gap: 0.25rem; height: 2rem; padding: 0 0.75rem; font-size: 0.8125rem; font-weight: 500; border-radius: 9999px; background: hsl(var(--muted) / 0.6); color: hsl(var(--muted-foreground)); border: 1px dashed hsl(var(--border)); cursor: pointer; transition: all 0.15s ease;"
+                    data-action="onClick:togglePopover"
+                  >
+                    <!-- @icon: lucide-react Plus -->
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                    追加
+                  </button>
+
+                  <!-- @component: PopoverContent (shown as example) -->
+                  <div
+                    data-component="PopoverContent"
+                    style="position: absolute; top: calc(100% + 0.5rem); left: 0; width: 280px; padding: 0.5rem; background: hsl(var(--card)); border: 1px solid hsl(var(--border)); border-radius: var(--radius); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); z-index: 50;"
+                  >
+                    <div style="max-height: 200px; overflow-y: auto;">
+                      <!-- Available tag items -->
+                      <button type="button" style="display: flex; align-items: center; gap: 0.5rem; width: 100%; padding: 0.5rem 0.75rem; border: none; background: transparent; border-radius: calc(var(--radius) - 2px); font-size: 0.875rem; text-align: left; cursor: pointer; transition: background 0.15s ease;" data-action="onClick:handleSelect">
+                        <span style="display: inline-flex; align-items: center; padding: 0.125rem 0.625rem; font-size: 0.75rem; font-weight: 500; border-radius: 9999px; background: #3b82f6; color: white;">JavaScript</span>
+                      </button>
+                      <button type="button" style="display: flex; align-items: center; gap: 0.5rem; width: 100%; padding: 0.5rem 0.75rem; border: none; background: transparent; border-radius: calc(var(--radius) - 2px); font-size: 0.875rem; text-align: left; cursor: pointer; transition: background 0.15s ease;" data-action="onClick:handleSelect">
+                        <span style="display: inline-flex; align-items: center; padding: 0.125rem 0.625rem; font-size: 0.75rem; font-weight: 500; border-radius: 9999px; background: #10b981; color: white;">アルゴリズム</span>
+                      </button>
+                      <button type="button" style="display: flex; align-items: center; gap: 0.5rem; width: 100%; padding: 0.5rem 0.75rem; border: none; background: transparent; border-radius: calc(var(--radius) - 2px); font-size: 0.875rem; text-align: left; cursor: pointer; transition: background 0.15s ease;" data-action="onClick:handleSelect">
+                        <span style="display: inline-flex; align-items: center; padding: 0.125rem 0.625rem; font-size: 0.75rem; font-weight: 500; border-radius: 9999px; background: #8b5cf6; color: white;">TypeScript</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <p class="form-hint">タグは最大10個まで設定できます</p>
+            </div>
+
+          </div>
+          <!-- [/Required Fields] -->
+
+          <!-- ================================================================
+               @component: Collapsible - 詳細設定
+               @description: Optional settings section (collapsed by default, shown open)
+               @file: components/cards/card-input-form.tsx
+               ================================================================ -->
+          <div data-component="Collapsible">
+            <!-- @component: CollapsibleTrigger -->
             <button
               type="button"
-              class="btn btn--outline"
-              data-action="onClick:handleClose"
-            >キャンセル</button>
-            <!-- @event: type="submit" -->
-            <!-- @condition: disabled={isSubmitting || !form.formState.isValid} -->
-            <button
-              type="submit"
-              class="btn btn--primary"
-              data-prop="disabled:isSubmitting"
+              data-component="CollapsibleTrigger"
+              data-action="onClick:toggleOptions"
+              style="width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.25rem; background: hsl(var(--muted) / 0.4); border: none; border-top: 1px solid hsl(var(--border)); cursor: pointer; transition: background 0.15s ease;"
             >
-              <!-- @condition: {isSubmitting ? '保存中...' : '保存'} -->
-              <span data-prop="buttonText">保存</span>
+              <span style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; font-weight: 500; color: hsl(var(--muted-foreground));">
+                <!-- @icon: lucide-react Settings -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+                詳細設定
+              </span>
+              <!-- @icon: lucide-react ChevronDown (rotated when open) -->
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="hsl(var(--muted-foreground))" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transform: rotate(180deg); transition: transform 0.2s ease;"><path d="m6 9 6 6 6-6"/></svg>
             </button>
+
+            <!-- @component: CollapsibleContent (shown as open) -->
+            <div data-component="CollapsibleContent" style="padding: 1.25rem; background: hsl(var(--muted) / 0.4); border-top: 1px solid hsl(var(--border));" class="space-y-5">
+
+              <!-- ================================================================
+                   @component: FormField - sourceUrl
+                   @validation: optional, valid URL
+                   ================================================================ -->
+              <div class="form-group" data-component="FormField" data-field="sourceUrl" style="margin-bottom: 0;">
+                <label class="form-label" for="sourceUrl" style="margin-bottom: 0.5rem;">ソースURL</label>
+                <input
+                  type="url"
+                  id="sourceUrl"
+                  name="sourceUrl"
+                  class="form-input"
+                  placeholder="https://example.com"
+                  style="height: 2.75rem; border-radius: 0.5rem;"
+                  data-prop="sourceUrl"
+                  data-action="onChange:field.onChange"
+                >
+                <p class="form-hint">参照元のURLを記録できます</p>
+              </div>
+
+              <!-- ================================================================
+                   @component: FormField - repeatMode
+                   @description: リピートモード選択
+                   @file: components/cards/repeat-selector.tsx
+                   ================================================================ -->
+              <div class="form-group" data-component="FormField" data-field="repeatMode" style="margin-bottom: 0;">
+                <label class="form-label" for="repeatMode" style="margin-bottom: 0.5rem;">リピートモード</label>
+                <!-- @component: RepeatSelector (as simple select for mock) -->
+                <select
+                  id="repeatMode"
+                  name="repeatMode"
+                  class="form-input"
+                  style="height: 2.75rem; border-radius: 0.5rem; appearance: auto;"
+                  data-prop="repeatMode"
+                  data-action="onChange:field.onChange"
+                >
+                  <option value="spaced" selected>間隔反復</option>
+                  <option value="daily">毎日</option>
+                  <option value="weekly">毎週</option>
+                  <option value="none">なし</option>
+                </select>
+                <!-- @event: onClick - show info about spaced repetition -->
+                <button
+                  type="button"
+                  style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.8125rem; color: hsl(var(--muted-foreground)); margin-top: 0.5rem; border: none; background: transparent; cursor: pointer; transition: color 0.15s ease;"
+                  data-action="onClick:showInfo"
+                >
+                  <!-- @icon: lucide-react Info -->
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                  間隔反復について詳しく
+                </button>
+              </div>
+
+            </div>
           </div>
+          <!-- [/Component: Collapsible] -->
 
         </div>
+        <!-- [/Main Card] -->
+
+        <!-- @section: Submit Button (desktop only) -->
+        <div style="display: flex; justify-content: flex-end; padding-top: 1rem;">
+          <!-- @condition: disabled={!frontValue.trim() || isSubmitting} -->
+          <button
+            type="submit"
+            class="btn btn--primary"
+            style="min-width: 120px; height: 2.75rem;"
+            data-prop="disabled:isSaveDisabled"
+          >
+            <!-- @condition: {isSubmitting ? '保存中...' : '保存'} -->
+            <span data-prop="buttonText">保存</span>
+          </button>
+        </div>
+
       </form>
-      <!-- [/Component: CardForm] -->
+      <!-- [/Component: CardInputForm] -->
+
+      <!-- ================================================================
+           @section: Danger Section (edit mode only)
+           @condition: {mode === 'edit'}
+           @description: カード削除の危険操作セクション
+           ================================================================ -->
+      <div class="danger-section" style="margin-top: 1.5rem;" data-show-if="mode:edit">
+        <h3>危険な操作</h3>
+        <p>この操作は取り消すことができません。</p>
+        <!-- @event: onClick={handleDelete} -->
+        <button
+          type="button"
+          class="btn btn--destructive"
+          data-action="onClick:handleDelete"
+        >
+          <!-- @icon: lucide-react Trash2 -->
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+          カードを削除
+        </button>
+      </div>
 
     </div>
   </div>
   <!-- [/Component: EditCardDialog] -->
-
-  <!-- ================================================================
-       @section: Dialog version (Modal)
-       @description: ダイアログとして表示する場合の参考
-       @component: Dialog (shadcn/ui)
-       ================================================================ -->
-  <!--
-  <div class="modal-overlay" data-component="Dialog" data-show-if="open">
-    <div class="modal">
-      <div class="modal__header">
-        <h2 class="modal__title">カード編集</h2>
-        <p class="modal__description">カードの内容を編集します</p>
-      </div>
-      <div class="modal__content">
-        [CardForm component here]
-      </div>
-      <div class="modal__footer">
-        <button type="button" class="btn btn--outline">キャンセル</button>
-        <button type="submit" class="btn btn--primary">保存</button>
-      </div>
-    </div>
-  </div>
-  -->
 
 </body>
 </html>

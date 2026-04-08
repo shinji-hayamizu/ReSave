@@ -1,13 +1,15 @@
 'use client';
 
 import { CheckCheck } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { CompletedCard } from '@/components/home';
+import { LoadMoreIndicator } from '@/components/home';
 import { PageHeader } from '@/components/layout/page-header';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useTodayCompletedCards } from '@/hooks/useCards';
+import { useCompletedCards } from '@/hooks/useCompletedCards';
+import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
 
 function CompletedPageSkeleton() {
   return (
@@ -27,13 +29,37 @@ function CompletedPageSkeleton() {
 }
 
 export default function CompletedCardsPage() {
-  const { data: completedCards, isLoading, isFetching } = useTodayCompletedCards();
+  const {
+    data,
+    isLoading,
+    isFetching,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+  } = useCompletedCards();
+
+  const completedCards = useMemo(
+    () => data?.pages.flatMap((page) => page.cards) ?? [],
+    [data],
+  );
+
+  const totalCount = data?.pages[0]?.pagination.total ?? 0;
+
+  const handleFetchNextPage = useCallback(() => {
+    fetchNextPage();
+  }, [fetchNextPage]);
+
+  const triggerRef = useIntersectionObserver({
+    enabled: !!hasNextPage && !isFetchingNextPage,
+    rootMargin: '200px',
+    onIntersect: handleFetchNextPage,
+  });
 
   const prevIdsRef = useRef<Set<string>>(new Set());
   const [newCardIds, setNewCardIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
-    if (!completedCards || isLoading) {
+    if (completedCards.length === 0 || isLoading) {
       return;
     }
 
@@ -66,7 +92,7 @@ export default function CompletedCardsPage() {
   return (
     <div>
       <div className="relative">
-        {isFetching && !isLoading && (
+        {isFetching && !isLoading && !isFetchingNextPage && (
           <div
             data-testid="loading-bar"
             className="absolute bottom-0 left-0 right-0 h-px z-10"
@@ -85,20 +111,30 @@ export default function CompletedCardsPage() {
       <div className="p-4 md:p-6">
         {isLoading ? (
           <CompletedPageSkeleton />
-        ) : !completedCards || completedCards.length === 0 ? (
+        ) : completedCards.length === 0 ? (
           <EmptyState
             icon={<CheckCheck />}
             title="完了済みカードなし"
             description="カードを学習して「覚えた」と評価すると、ここに表示されます"
           />
         ) : (
-          <div className="space-y-4" data-testid="card-list">
-            {completedCards.map((card) => (
-              <div key={card.id} className={newCardIds.has(card.id) ? 'card-enter' : undefined}>
-                <CompletedCard card={card} />
-              </div>
-            ))}
-          </div>
+          <>
+            <div className="space-y-4" data-testid="card-list">
+              {completedCards.map((card, index) => (
+                <div key={card.id} className={newCardIds.has(card.id) ? 'card-enter' : undefined}>
+                  <CompletedCard card={card} />
+                  {index === completedCards.length - 2 && (
+                    <div ref={triggerRef} aria-hidden="true" />
+                  )}
+                </div>
+              ))}
+            </div>
+            <LoadMoreIndicator
+              hasNextPage={!!hasNextPage}
+              isFetchingNextPage={isFetchingNextPage}
+              totalCount={totalCount}
+            />
+          </>
         )}
       </div>
     </div>

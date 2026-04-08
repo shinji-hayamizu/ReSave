@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
     tags: 'tags.html',
     settings: 'settings.html',
     about: 'about.html',
+    'update-password': 'update-password.html',
     'card-input': 'card-input.html',
   };
 
@@ -128,27 +129,11 @@ document.addEventListener('DOMContentLoaded', () => {
             });
           });
 
-          // FAB - open create sheet
+          // FAB - toggle open state (rotate animation)
           const fabBtn = iframeDoc.getElementById('fab-btn');
-          const fabOverlay = iframeDoc.getElementById('fab-overlay');
-          const createSheet = iframeDoc.getElementById('create-sheet');
-          const sheetCloseBtn = iframeDoc.getElementById('sheet-close-btn');
-          const sheetCancelBtn = iframeDoc.getElementById('sheet-cancel-btn');
-
-          function openCreateSheet() {
-            createSheet?.classList.add('open');
-            fabOverlay?.classList.add('active');
-          }
-
-          function closeCreateSheet() {
-            createSheet?.classList.remove('open');
-            fabOverlay?.classList.remove('active');
-          }
-
-          fabBtn?.addEventListener('click', openCreateSheet);
-          fabOverlay?.addEventListener('click', closeCreateSheet);
-          sheetCloseBtn?.addEventListener('click', closeCreateSheet);
-          sheetCancelBtn?.addEventListener('click', closeCreateSheet);
+          fabBtn?.addEventListener('click', () => {
+            fabBtn.classList.toggle('open');
+          });
         }
       } catch (e) {
         // Cross-origin iframe access may fail, which is expected

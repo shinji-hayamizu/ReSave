@@ -1,3 +1,16 @@
 {
-  "plansDirectory": "./docs/plans"
+  "plansDirectory": "./docs/plans",
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/check-docs-update.sh",
+            "timeout": 15
+          }
+        ]
+      }
+    ]
+  }
 }

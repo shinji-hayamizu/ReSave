@@ -2,18 +2,23 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-import type { CardWithTags } from '@/types/card';
+import type { CardWithTags, CompletedCardsPage } from '@/types/card';
 
-const mockUseTodayCompletedCards = vi.fn();
+const mockUseCompletedCards = vi.fn();
 
-vi.mock('@/hooks/useCards', () => ({
-  useTodayCompletedCards: () => mockUseTodayCompletedCards(),
+vi.mock('@/hooks/useCompletedCards', () => ({
+  useCompletedCards: () => mockUseCompletedCards(),
+}));
+
+vi.mock('@/hooks/useIntersectionObserver', () => ({
+  useIntersectionObserver: () => ({ current: null }),
 }));
 
 vi.mock('@/components/home', () => ({
   CompletedCard: ({ card }: { card: CardWithTags }) => (
     <div data-testid="completed-card">{card.id}</div>
   ),
+  LoadMoreIndicator: () => null,
 }));
 
 vi.mock('@/components/layout/page-header', () => ({
@@ -58,6 +63,16 @@ function createCard(overrides: Partial<CardWithTags> = {}): CardWithTags {
   };
 }
 
+function createInfiniteData(cards: CardWithTags[], hasMore = false) {
+  return {
+    pages: [{
+      cards,
+      pagination: { total: cards.length, limit: 10, offset: 0, hasMore },
+    } satisfies CompletedCardsPage],
+    pageParams: [0],
+  };
+}
+
 function createQueryClient() {
   return new QueryClient({
     defaultOptions: { queries: { retry: false } },
@@ -81,10 +96,13 @@ describe('CompletedCardsPage', () => {
   });
 
   it('ページヘッダーに「完了」タイトルが表示される', async () => {
-    // Given: データ読み込み完了
-    mockUseTodayCompletedCards.mockReturnValue({
-      data: [],
+    mockUseCompletedCards.mockReturnValue({
+      data: createInfiniteData([]),
       isLoading: false,
+      isFetching: false,
+      hasNextPage: false,
+      isFetchingNextPage: false,
+      fetchNextPage: vi.fn(),
     });
 
     await renderPage();
@@ -94,55 +112,59 @@ describe('CompletedCardsPage', () => {
   });
 
   it('読み込み中の場合: スケルトンが表示される', async () => {
-    // Given: データ読み込み中
-    mockUseTodayCompletedCards.mockReturnValue({
+    mockUseCompletedCards.mockReturnValue({
       data: undefined,
       isLoading: true,
       isFetching: true,
+      hasNextPage: false,
+      isFetchingNextPage: false,
+      fetchNextPage: vi.fn(),
     });
 
     await renderPage();
 
-    // Then: スケルトンが表示され、ローディングバーは表示されない
     expect(screen.getAllByTestId('skeleton').length).toBeGreaterThan(0);
     expect(screen.queryByTestId('loading-bar')).not.toBeInTheDocument();
   });
 
   it('リフェッチ中の場合: ローディングバーが表示される', async () => {
-    // Given: リフェッチ中（初回ロード完了済み）
-    mockUseTodayCompletedCards.mockReturnValue({
-      data: [],
+    mockUseCompletedCards.mockReturnValue({
+      data: createInfiniteData([]),
       isLoading: false,
       isFetching: true,
+      hasNextPage: false,
+      isFetchingNextPage: false,
+      fetchNextPage: vi.fn(),
     });
 
-    // When: ページをレンダリング
     await renderPage();
 
-    // Then: ローディングバーが表示される
     expect(screen.getByTestId('loading-bar')).toBeInTheDocument();
   });
 
   it('リフェッチ中でない場合: ローディングバーが表示されない', async () => {
-    // Given: リフェッチ完了
-    mockUseTodayCompletedCards.mockReturnValue({
-      data: [],
+    mockUseCompletedCards.mockReturnValue({
+      data: createInfiniteData([]),
       isLoading: false,
       isFetching: false,
+      hasNextPage: false,
+      isFetchingNextPage: false,
+      fetchNextPage: vi.fn(),
     });
 
-    // When: ページをレンダリング
     await renderPage();
 
-    // Then: ローディングバーが表示されない
     expect(screen.queryByTestId('loading-bar')).not.toBeInTheDocument();
   });
 
   it('完了カードがない場合: 空状態が表示される', async () => {
-    // Given: 完了カードなし
-    mockUseTodayCompletedCards.mockReturnValue({
-      data: [],
+    mockUseCompletedCards.mockReturnValue({
+      data: createInfiniteData([]),
       isLoading: false,
+      isFetching: false,
+      hasNextPage: false,
+      isFetchingNextPage: false,
+      fetchNextPage: vi.fn(),
     });
 
     await renderPage();
@@ -154,10 +176,13 @@ describe('CompletedCardsPage', () => {
   });
 
   it('dataがundefinedの場合: 空状態が表示される', async () => {
-    // Given: dataがundefined（初期状態）
-    mockUseTodayCompletedCards.mockReturnValue({
+    mockUseCompletedCards.mockReturnValue({
       data: undefined,
       isLoading: false,
+      isFetching: false,
+      hasNextPage: false,
+      isFetchingNextPage: false,
+      fetchNextPage: vi.fn(),
     });
 
     await renderPage();
@@ -168,21 +193,37 @@ describe('CompletedCardsPage', () => {
   });
 
   it('完了カードがある場合: CompletedCardが件数分表示される', async () => {
-    // Given: 完了カード2件
     const card1 = createCard({ id: 'c1' });
     const card2 = createCard({ id: 'c2' });
-    mockUseTodayCompletedCards.mockReturnValue({
-      data: [card1, card2],
+    mockUseCompletedCards.mockReturnValue({
+      data: createInfiniteData([card1, card2]),
       isLoading: false,
+      isFetching: false,
+      hasNextPage: false,
+      isFetchingNextPage: false,
+      fetchNextPage: vi.fn(),
     });
 
-    // When: ページをレンダリング
     await renderPage();
 
-    // Then: 完了カード2件表示される
     await waitFor(() => {
       expect(screen.getAllByTestId('completed-card')).toHaveLength(2);
       expect(screen.getByTestId('card-list')).toBeInTheDocument();
     });
+  });
+
+  it('次ページ読み込み中の場合: ローディングバーは表示されない', async () => {
+    mockUseCompletedCards.mockReturnValue({
+      data: createInfiniteData([createCard()], true),
+      isLoading: false,
+      isFetching: true,
+      hasNextPage: true,
+      isFetchingNextPage: true,
+      fetchNextPage: vi.fn(),
+    });
+
+    await renderPage();
+
+    expect(screen.queryByTestId('loading-bar')).not.toBeInTheDocument();
   });
 });

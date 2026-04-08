@@ -356,6 +356,7 @@ export function useHomeResetCard() {
       qc.invalidateQueries({ queryKey: homeCardKeys.tab('due') });
       qc.invalidateQueries({ queryKey: homeCardKeys.tab('learning') });
       qc.invalidateQueries({ queryKey: cardKeys.todayCompleted() });
+      qc.invalidateQueries({ queryKey: homeCardKeys.tab('completed') });
     },
   });
 }
@@ -432,6 +433,7 @@ export function useHomeSubmitAssessment() {
         });
       }
       qc.invalidateQueries({ queryKey: cardKeys.todayCompleted() });
+      qc.invalidateQueries({ queryKey: homeCardKeys.tab('completed') });
     },
   });
 }

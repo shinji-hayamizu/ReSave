@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 
-import type { Card, CardWithTags, CreateCardInput, UpdateCardInput, CardFilters, CardListResponse, HomeCardsData, HomeCardsPage } from '@/types/card';
+import type { Card, CardWithTags, CreateCardInput, UpdateCardInput, CardFilters, CardListResponse, HomeCardsData, HomeCardsPage, CompletedCardsPage } from '@/types/card';
 import { DEFAULT_INTERVALS } from '@/types/review-schedule';
 import { createCardSchema, updateCardSchema } from '@/validations/card';
 import { createClient } from '@/lib/supabase/server';
@@ -399,6 +399,48 @@ export async function getTodayCompletedCards(): Promise<CardWithTags[]> {
   }
 
   return ((data || []) as unknown as SupabaseCardRow[]).map(mapCardRow);
+}
+
+/**
+ * 完了カードをページネーション取得（completed_at 降順）
+ */
+export async function getCompletedCards({ limit, offset }: { limit: number; offset: number }): Promise<CompletedCardsPage> {
+  const supabase = await createClient();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    throw new Error('Unauthorized');
+  }
+
+  const { data, error, count } = await supabase
+    .from('cards')
+    .select(`
+      *,
+      card_tags (
+        tag:tags (*)
+      )
+    `, { count: 'exact' })
+    .eq('user_id', user.id)
+    .eq('status', 'completed')
+    .order('completed_at', { ascending: false })
+    .range(offset, offset + limit - 1);
+
+  if (error) {
+    throw new Error(`Failed to fetch completed cards: ${error.message}`);
+  }
+
+  const cards: CardWithTags[] = ((data || []) as unknown as SupabaseCardRow[]).map(mapCardRow);
+  const total = count ?? 0;
+
+  return {
+    cards,
+    pagination: {
+      total,
+      limit,
+      offset,
+      hasMore: offset + limit < total,
+    },
+  };
 }
 
 /**
