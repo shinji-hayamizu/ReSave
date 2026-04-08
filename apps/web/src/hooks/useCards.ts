@@ -15,6 +15,7 @@ import {
   resetCardToUnlearned,
   updateCard,
 } from '@/actions/cards';
+import { homeCardKeys } from '@/lib/query-keys';
 import { DEFAULT_INTERVALS } from '@/types/review-schedule';
 import type {
   CardFilters,
@@ -67,6 +68,7 @@ export function useTodayCompletedCards() {
   return useQuery<CardWithTags[]>({
     queryKey: cardKeys.todayCompleted(),
     queryFn: () => getTodayCompletedCards(),
+    refetchOnMount: 'always',
   });
 }
 
@@ -242,6 +244,7 @@ export function useUpdateCard() {
       qc.invalidateQueries({ queryKey: cardKeys.new() });
       qc.invalidateQueries({ queryKey: cardKeys.today() });
       qc.invalidateQueries({ queryKey: cardKeys.todayCompleted() });
+      qc.invalidateQueries({ queryKey: homeCardKeys.tab('completed') });
     },
   });
 }
@@ -332,6 +335,7 @@ export function useDeleteCard() {
       qc.invalidateQueries({ queryKey: cardKeys.new() });
       qc.invalidateQueries({ queryKey: cardKeys.today() });
       qc.invalidateQueries({ queryKey: cardKeys.todayCompleted() });
+      qc.invalidateQueries({ queryKey: homeCardKeys.tab('completed') });
     },
   });
 }
@@ -384,6 +388,7 @@ export function useResetCard() {
       qc.invalidateQueries({ queryKey: cardKeys.new() });
       qc.invalidateQueries({ queryKey: cardKeys.today() });
       qc.invalidateQueries({ queryKey: cardKeys.todayCompleted() });
+      qc.invalidateQueries({ queryKey: homeCardKeys.tab('completed') });
     },
   });
 }

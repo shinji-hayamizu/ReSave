@@ -8,12 +8,16 @@ import {
   CardTabs,
   type CardTabValue,
   HomeStudyCard,
+  LoadMoreIndicator,
+  MobileCardCreate,
   QuickInputForm,
   TagFilterBar,
 } from '@/components/home';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useHomeCards } from '@/hooks/useHomeCards';
+import { useHomeDueCards, useHomeLearningCards, getTotalFromInfiniteData } from '@/hooks/useHomeCards';
+import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { useTags } from '@/hooks/useTags';
 import type { CardWithTags } from '@/types/card';
 
@@ -49,57 +53,63 @@ export function DashboardContent() {
   const [selectedTagId, setSelectedTagId] = useState<string | null>(null);
   const [editingCard, setEditingCard] = useState<CardWithTags | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const { data, isLoading } = useHomeCards();
+
+  const dueQuery = useHomeDueCards();
+  const learningQuery = useHomeLearningCards();
   const { data: tags = [] } = useTags();
 
-  const categorizedCards = useMemo(() => {
-    if (!data) return { due: [], learning: [] };
+  const dueCards = useMemo(() =>
+    dueQuery.data?.pages.flatMap((page) => page.cards) ?? [],
+    [dueQuery.data]
+  );
 
-    const now = data.fetchedAt;
+  const learningCards = useMemo(() =>
+    learningQuery.data?.pages.flatMap((page) => page.cards) ?? [],
+    [learningQuery.data]
+  );
 
-    const due: CardWithTags[] = [];
-    const learning: CardWithTags[] = [];
+  const filteredDueCards = useMemo(() => {
+    if (!selectedTagId) return dueCards;
+    return dueCards.filter((card) => card.tags.some((tag) => tag.id === selectedTagId));
+  }, [dueCards, selectedTagId]);
 
-    for (const card of data.cards) {
-      if (card.status === 'new') {
-        due.push(card);
-      } else if (card.status === 'active' && card.nextReviewAt && card.nextReviewAt <= now) {
-        learning.push(card);
-      }
-    }
-
-    return { due, learning };
-  }, [data]);
-
-  const filteredCards = useMemo(() => {
-    if (!selectedTagId) return categorizedCards;
-    return {
-      due: categorizedCards.due.filter((card) =>
-        card.tags.some((tag) => tag.id === selectedTagId)
-      ),
-      learning: categorizedCards.learning.filter((card) =>
-        card.tags.some((tag) => tag.id === selectedTagId)
-      ),
-    };
-  }, [categorizedCards, selectedTagId]);
+  const filteredLearningCards = useMemo(() => {
+    if (!selectedTagId) return learningCards;
+    return learningCards.filter((card) => card.tags.some((tag) => tag.id === selectedTagId));
+  }, [learningCards, selectedTagId]);
 
   const counts = useMemo(() => ({
-    due: filteredCards.due.length,
-    learning: filteredCards.learning.length,
-  }), [filteredCards]);
+    due: selectedTagId ? filteredDueCards.length : getTotalFromInfiniteData(dueQuery.data),
+    learning: selectedTagId ? filteredLearningCards.length : getTotalFromInfiniteData(learningQuery.data),
+  }), [selectedTagId, filteredDueCards.length, filteredLearningCards.length, dueQuery.data, learningQuery.data]);
 
+  const isLoading = dueQuery.isLoading || learningQuery.isLoading;
   const dataReady = !isLoading;
-  const todayCardCount = categorizedCards.learning.length;
 
   const activeTab = useMemo<CardTabValue>(() => {
     if (!dataReady) return 'due';
 
     if (userSelectedTab === null) {
-      return todayCardCount > 0 ? 'learning' : 'due';
+      return counts.learning > 0 ? 'learning' : 'due';
     }
 
     return userSelectedTab;
-  }, [dataReady, userSelectedTab, todayCardCount]);
+  }, [dataReady, userSelectedTab, counts.learning]);
+
+  const activeQuery = activeTab === 'due' ? dueQuery : learningQuery;
+  const activeCards = activeTab === 'due' ? filteredDueCards : filteredLearningCards;
+
+  const handleFetchNextPage = useCallback(() => {
+    if (activeQuery.hasNextPage && !activeQuery.isFetchingNextPage) {
+      activeQuery.fetchNextPage();
+    }
+  }, [activeQuery]);
+
+  const triggerRef = useIntersectionObserver({
+    enabled: !!activeQuery.hasNextPage && !activeQuery.isFetchingNextPage,
+    rootMargin: '200px',
+    onIntersect: handleFetchNextPage,
+  });
 
   const handleTabChange = useCallback((value: CardTabValue) => {
     setUserSelectedTab(value);
@@ -121,13 +131,15 @@ export function DashboardContent() {
     setUserSelectedTab('due');
   }, []);
 
-  const activeCards = filteredCards[activeTab];
+  const isMobile = useIsMobile();
 
   return (
     <div className="pt-1 pb-2 md:pt-2 md:pb-4">
-        <div className="mb-2">
-          <QuickInputForm onCardCreated={handleCardCreated} />
-        </div>
+        {!isMobile && (
+          <div className="mb-2">
+            <QuickInputForm onCardCreated={handleCardCreated} />
+          </div>
+        )}
 
         {tags.length > 0 && (
           <div className="mb-2">
@@ -156,25 +168,36 @@ export function DashboardContent() {
             title="カードなし"
           />
         ) : (
-          <div className="bg-card shadow-sm divide-y divide-border">
-            {activeCards.map((card) => (
-              <HomeStudyCard
-                key={card.id}
-                back={card.back}
-                currentStep={card.currentStep}
-                front={card.front}
-                id={card.id}
-                intervals={{
-                  ok: getNextInterval(card.schedule, card.currentStep, card.status === 'new'),
-                  again: `${card.schedule[0]}日後`,
-                }}
-                schedule={card.schedule}
-                showAgain={card.currentStep > 0}
-                tags={card.tags}
-                onEdit={() => handleEdit(card)}
-              />
-            ))}
-          </div>
+          <>
+            <div className="bg-card shadow-sm divide-y divide-border">
+              {activeCards.map((card, index) => (
+                <div key={card.id}>
+                  <HomeStudyCard
+                    back={card.back}
+                    currentStep={card.currentStep}
+                    front={card.front}
+                    id={card.id}
+                    intervals={{
+                      ok: getNextInterval(card.schedule, card.currentStep, card.status === 'new'),
+                      again: `${card.schedule[0]}日後`,
+                    }}
+                    schedule={card.schedule}
+                    showAgain={card.currentStep > 0}
+                    tags={card.tags}
+                    onEdit={() => handleEdit(card)}
+                  />
+                  {index === activeCards.length - 2 && (
+                    <div ref={triggerRef} aria-hidden="true" />
+                  )}
+                </div>
+              ))}
+            </div>
+            <LoadMoreIndicator
+              hasNextPage={!!activeQuery.hasNextPage}
+              isFetchingNextPage={activeQuery.isFetchingNextPage}
+              totalCount={counts[activeTab]}
+            />
+          </>
         )}
 
         <EditCardDialog
@@ -182,6 +205,8 @@ export function DashboardContent() {
           open={isEditDialogOpen}
           onOpenChange={handleEditDialogClose}
         />
+
+        {isMobile && <MobileCardCreate onCardCreated={handleCardCreated} />}
     </div>
   );
 }

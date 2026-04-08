@@ -12,9 +12,11 @@ document.addEventListener('DOMContentLoaded', () => {
   // Page mapping
   const pages = {
     main: 'main.html',
+    completed: 'completed.html',
     tags: 'tags.html',
-    stats: 'stats.html',
     settings: 'settings.html',
+    about: 'about.html',
+    'update-password': 'update-password.html',
     'card-input': 'card-input.html',
   };
 
@@ -125,6 +127,12 @@ document.addEventListener('DOMContentLoaded', () => {
             toggle.addEventListener('click', () => {
               toggle.classList.toggle('active');
             });
+          });
+
+          // FAB - toggle open state (rotate animation)
+          const fabBtn = iframeDoc.getElementById('fab-btn');
+          fabBtn?.addEventListener('click', () => {
+            fabBtn.classList.toggle('open');
           });
         }
       } catch (e) {

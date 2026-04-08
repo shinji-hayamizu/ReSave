@@ -89,7 +89,6 @@ export default function EditCardPage({ params }: EditCardPageProps) {
     back: card.back,
     tagIds: card.tags?.map((tag) => tag.id) ?? [],
     sourceUrl: '',
-    repeatMode: 'spaced',
   };
 
   return (

@@ -8,46 +8,46 @@
 
 | ID | 機能名 | ファイル | 優先度 | ステータス |
 |----|-------|---------|-------|----------|
-| F-001 | ユーザー登録 | [F-001-user-registration.md](./auth/F-001-user-registration.md) | P0 | Draft |
-| F-002 | ログイン | [F-002-user-login.md](./auth/F-002-user-login.md) | P0 | Draft |
-| F-003 | パスワードリセット | [F-003-password-reset.md](./auth/F-003-password-reset.md) | P0 | Draft |
+| F-001 | ユーザー登録 | [F-001-user-registration.md](./auth/F-001-user-registration.md) | P0 | Implemented |
+| F-002 | ログイン | [F-002-user-login.md](./auth/F-002-user-login.md) | P0 | Implemented |
+| F-003 | パスワードリセット | [F-003-password-reset.md](./auth/F-003-password-reset.md) | P0 | Implemented |
 
 ### card（カード管理）
 
 | ID | 機能名 | ファイル | 優先度 | ステータス |
 |----|-------|---------|-------|----------|
-| F-013 | カード作成 | [F-013-card-create.md](./card/F-013-card-create.md) | P0 | Draft |
-| F-014 | カード編集 | [F-014-card-edit.md](./card/F-014-card-edit.md) | P0 | Draft |
-| F-015 | カード削除 | [F-015-card-delete.md](./card/F-015-card-delete.md) | P0 | Draft |
-| F-016 | カードへのタグ付け | [F-016-card-tagging.md](./card/F-016-card-tagging.md) | P0 | Draft |
+| F-013 | カード作成 | [F-013-card-create.md](./card/F-013-card-create.md) | P0 | Implemented |
+| F-014 | カード編集 | [F-014-card-edit.md](./card/F-014-card-edit.md) | P0 | Implemented |
+| F-015 | カード削除 | [F-015-card-delete.md](./card/F-015-card-delete.md) | P0 | Implemented |
+| F-016 | カードへのタグ付け | [F-016-card-tagging.md](./card/F-016-card-tagging.md) | P0 | Implemented |
 
 ### tag（タグ管理）
 
 | ID | 機能名 | ファイル | 優先度 | ステータス |
 |----|-------|---------|-------|----------|
-| F-017 | タグ管理 | [F-017-tag-management.md](./tag/F-017-tag-management.md) | P0 | Draft |
-| F-018 | タグフィルタ・検索 | [F-018-tag-filter.md](./tag/F-018-tag-filter.md) | P0 | Draft |
+| F-017 | タグ管理 | [F-017-tag-management.md](./tag/F-017-tag-management.md) | P0 | Implemented |
+| F-018 | タグフィルタ・検索 | [F-018-tag-filter.md](./tag/F-018-tag-filter.md) | P0 | Implemented |
 
 ### review（学習・復習機能）
 
 | ID | 機能名 | ファイル | 優先度 | ステータス |
 |----|-------|---------|-------|----------|
-| F-020 | 今日の復習カード | [F-020-review-today.md](./review/F-020-review-today.md) | P0 | Draft |
-| F-021 | カード学習 | [F-021-card-study.md](./review/F-021-card-study.md) | P0 | Draft |
-| F-022 | 記憶度自己評価 | [F-022-self-assessment.md](./review/F-022-self-assessment.md) | P0 | Draft |
-| F-023 | 固定間隔スケジューリング | [F-023-interval-scheduling.md](./review/F-023-interval-scheduling.md) | P0 | Draft |
+| F-020 | 今日の復習カード | [F-020-review-today.md](./review/F-020-review-today.md) | P0 | Implemented |
+| F-021 | カード学習 | [F-021-card-study.md](./review/F-021-card-study.md) | P0 | Implemented |
+| F-022 | 記憶度自己評価 | [F-022-self-assessment.md](./review/F-022-self-assessment.md) | P0 | Implemented |
+| F-023 | 固定間隔スケジューリング | [F-023-interval-scheduling.md](./review/F-023-interval-scheduling.md) | P0 | Implemented |
 
 ### stats（進捗・統計）
 
 | ID | 機能名 | ファイル | 優先度 | ステータス |
 |----|-------|---------|-------|----------|
-| F-030 | 日別学習統計 | [F-030-daily-stats.md](./stats/F-030-daily-stats.md) | P0 | Draft |
+| F-030 | 日別学習統計 | [F-030-daily-stats.md](./stats/F-030-daily-stats.md) | P0 | Implemented |
 
 ### sync（データ同期）
 
 | ID | 機能名 | ファイル | 優先度 | ステータス |
 |----|-------|---------|-------|----------|
-| F-050 | Web/Mobile自動同期 | [F-050-data-sync.md](./sync/F-050-data-sync.md) | P0 | Draft |
+| F-050 | Web/Mobile自動同期 | [F-050-data-sync.md](./sync/F-050-data-sync.md) | P0 | Implemented |
 
 ## 機能間の依存関係
 
