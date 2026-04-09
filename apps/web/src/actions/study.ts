@@ -127,6 +127,7 @@ export async function submitAssessment(
     userId: updatedCard.user_id,
     front: updatedCard.front,
     back: updatedCard.back,
+    sourceUrl: updatedCard.source_url,
     schedule: updatedCard.schedule,
     currentStep: updatedCard.current_step,
     nextReviewAt: updatedCard.next_review_at,

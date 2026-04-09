@@ -9,6 +9,7 @@ import {
   deleteCard,
   getHomeCards,
   getHomeDueCards,
+  getHomeDueCount,
   getHomeLearningCards,
   resetCardToUnlearned,
   updateCard,
@@ -145,7 +146,15 @@ function getTotalFromInfiniteData(data: InfiniteData<HomeCardsPage> | undefined)
 
 export { getTotalFromInfiniteData };
 
-export function useHomeDueCards() {
+export function useHomeDueCount() {
+  return useQuery<number>({
+    queryKey: homeCardKeys.dueCount(),
+    queryFn: getHomeDueCount,
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+export function useHomeDueCards(options?: { enabled?: boolean }) {
   return useInfiniteQuery<HomeCardsPage>({
     queryKey: homeCardKeys.tab('due'),
     queryFn: ({ pageParam }) =>
@@ -156,6 +165,7 @@ export function useHomeDueCards() {
         ? lastPage.pagination.offset + lastPage.pagination.limit
         : undefined,
     staleTime: 5 * 60 * 1000,
+    enabled: options?.enabled ?? true,
   });
 }
 
@@ -188,6 +198,7 @@ export function useHomeCreateCard() {
         id: `temp-${Date.now()}`,
         front: input.front,
         back: input.back ?? '',
+        sourceUrl: input.sourceUrl ?? null,
         schedule: DEFAULT_INTERVALS,
         currentStep: 0,
         nextReviewAt: null,

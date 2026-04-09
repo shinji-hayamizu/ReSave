@@ -9,6 +9,7 @@ export interface Database {
           user_id: string;
           front: string;
           back: string;
+          source_url: string | null;
           schedule: number[];
           current_step: number;
           next_review_at: string | null;
@@ -22,6 +23,7 @@ export interface Database {
           user_id: string;
           front: string;
           back: string;
+          source_url?: string | null;
           schedule?: number[];
           current_step?: number;
           next_review_at?: string | null;
@@ -35,6 +37,7 @@ export interface Database {
           user_id?: string;
           front?: string;
           back?: string;
+          source_url?: string | null;
           schedule?: number[];
           current_step?: number;
           next_review_at?: string | null;

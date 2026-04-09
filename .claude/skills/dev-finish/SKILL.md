@@ -26,7 +26,38 @@ gh pr view --json number,url,baseRefName,title
 
 対象PRの番号とURLを確認する。PRがない場合は中断する。
 
-### Step 2: PRをマージ
+### Step 2: 品質チェック（マージ前）
+
+以下を順番に実行し、**失敗した場合はマージを中断してユーザーに報告する**。
+
+#### 2-1: ユニットテスト
+
+```bash
+pnpm --filter web test -- --run
+```
+
+失敗した場合: 「テストが失敗しています。修正してから再度 /dev-finish を実行してください。」と報告して中断。
+
+#### 2-2: E2Eテスト
+
+devサーバーが起動していることを確認する:
+
+```bash
+lsof -ti:3000 || lsof -ti:3002 || lsof -ti:3003
+```
+
+起動していない場合はバックグラウンドで起動してから実行:
+
+```bash
+# 起動中のポートを使ってE2Eを実行
+BASE_URL=http://localhost:<port> pnpm --filter web test:e2e
+```
+
+失敗した場合: 「E2Eテストが失敗しています。スクリーンショットを確認して修正後、再度 /dev-finish を実行してください。」と失敗したテスト名とともに報告して中断。
+
+両方のテストが通った場合のみ次のステップへ進む。
+
+### Step 3: PRをマージ
 
 ```bash
 gh pr merge <PR番号> --merge --delete-branch
@@ -34,13 +65,16 @@ gh pr merge <PR番号> --merge --delete-branch
 
 `--delete-branch` でリモートブランチを自動削除。
 
-### Step 3: devサーバーを停止
+### Step 4: devサーバーを停止
 
-起動中のdevサーバー（3000・3002番）を停止する:
+worktreeに記録されたPIDファイルからdevサーバーを停止する:
 
 ```bash
-lsof -ti:3000 | xargs kill -9 2>/dev/null || true
-lsof -ti:3002 | xargs kill -9 2>/dev/null || true
+PID_FILE="/Users/haya/development/myApps/job/ReSave/.claude/worktrees/<name>/.dev-server-pid"
+if [ -f "$PID_FILE" ]; then
+  kill $(cat "$PID_FILE") 2>/dev/null || true
+  rm "$PID_FILE"
+fi
 ```
 
 ### Step 4: worktreeとローカルブランチを削除

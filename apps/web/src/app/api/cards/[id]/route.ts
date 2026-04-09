@@ -6,6 +6,8 @@ import { updateCardSchema } from '@/validations/card';
 
 type Params = Promise<{ id: string }>;
 
+
+
 export async function GET(request: NextRequest, { params }: { params: Params }) {
   try {
     const auth = await authenticateRequest(request);

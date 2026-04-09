@@ -22,6 +22,7 @@ interface SupabaseCardRow {
   user_id: string;
   front: string;
   back: string;
+  source_url: string | null;
   schedule: number[];
   current_step: number;
   next_review_at: string | null;
@@ -38,6 +39,7 @@ function mapCardRow(card: SupabaseCardRow): CardWithTags {
     userId: card.user_id,
     front: card.front,
     back: card.back,
+    sourceUrl: card.source_url,
     schedule: card.schedule,
     currentStep: card.current_step,
     nextReviewAt: card.next_review_at,
@@ -76,6 +78,7 @@ export async function createCard(input: CreateCardInput): Promise<Card> {
       user_id: user.id,
       front: validated.front,
       back: validated.back,
+      source_url: validated.sourceUrl || null,
       schedule,
       current_step: 0,
       next_review_at: null,
@@ -110,6 +113,7 @@ export async function createCard(input: CreateCardInput): Promise<Card> {
     userId: card.user_id,
     front: card.front,
     back: card.back,
+    sourceUrl: card.source_url,
     schedule: card.schedule,
     currentStep: card.current_step,
     nextReviewAt: card.next_review_at,
@@ -138,6 +142,7 @@ export async function updateCard(id: string, input: UpdateCardInput): Promise<Ca
     .update({
       front: validated.front,
       back: validated.back,
+      source_url: validated.sourceUrl !== undefined ? (validated.sourceUrl || null) : undefined,
       updated_at: new Date().toISOString(),
     })
     .eq('id', id)
@@ -182,6 +187,7 @@ export async function updateCard(id: string, input: UpdateCardInput): Promise<Ca
     userId: card.user_id,
     front: card.front,
     back: card.back,
+    sourceUrl: card.source_url,
     schedule: card.schedule,
     currentStep: card.current_step,
     nextReviewAt: card.next_review_at,
@@ -360,6 +366,7 @@ export async function resetCardToUnlearned(id: string): Promise<Card> {
     userId: card.user_id,
     front: card.front,
     back: card.back,
+    sourceUrl: card.source_url,
     schedule: card.schedule,
     currentStep: card.current_step,
     nextReviewAt: card.next_review_at,
@@ -521,6 +528,30 @@ export async function getHomeCards(): Promise<HomeCardsData> {
   )];
 
   return { cards, todayStudiedCardIds, fetchedAt: new Date().toISOString() };
+}
+
+/**
+ * ホーム画面: 未学習(status='new')カードの件数のみ取得（バッジ表示用）
+ */
+export async function getHomeDueCount(): Promise<number> {
+  const supabase = await createClient();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    throw new Error('Unauthorized');
+  }
+
+  const { count, error } = await supabase
+    .from('cards')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', user.id)
+    .eq('status', 'new');
+
+  if (error) {
+    throw new Error(`Failed to fetch due count: ${error.message}`);
+  }
+
+  return count ?? 0;
 }
 
 /**

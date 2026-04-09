@@ -6,6 +6,7 @@ export type Card = {
   userId: string;
   front: string;
   back: string;
+  sourceUrl: string | null;
   schedule: number[];
   currentStep: number;
   nextReviewAt: string | null;
@@ -24,12 +25,14 @@ export type CardListResponse = ListResponse<CardWithTags>;
 export type CreateCardInput = {
   front: string;
   back?: string;
+  sourceUrl?: string;
   tagIds?: string[];
 };
 
 export type UpdateCardInput = {
   front?: string;
   back?: string;
+  sourceUrl?: string;
   tagIds?: string[];
 };
 
