@@ -33,7 +33,7 @@ export function EditCardDialog({ card, open, onOpenChange }: EditCardDialogProps
         input: {
           front: data.front,
           back: data.back || undefined,
-          sourceUrl: data.sourceUrl || undefined,
+          sourceUrl: data.sourceUrl,
           tagIds: data.tagIds.length > 0 ? data.tagIds : undefined,
         },
       });
