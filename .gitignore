@@ -69,6 +69,7 @@ e2e/.auth/
 
 # Claude
 .claude/settings.local.json
+.claude/worktrees/
 .mcp.json
 
 # Obsidian
