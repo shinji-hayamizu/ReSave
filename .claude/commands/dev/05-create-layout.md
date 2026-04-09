@@ -1,18 +1,19 @@
 ---
-description: 共通レイアウト（Sidebar, MobileNav, Providers）作成。Web/Mobileのナビゲーション基盤を構築する。
+description: 共通レイアウト（Sidebar, TabBar, Providers）作成。Web/Expoのナビゲーション基盤を構築する。
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash, Task, WebSearch, WebFetch
-argument-hint: [出力先ディレクトリ (例: web)]
+argument-hint: [出力先ディレクトリ (例: web) / 省略で自動検出]
 ---
 
 # 共通レイアウト作成
 
-Sidebar、MobileNav、Providersなど共通レイアウトコンポーネントを作成するよ。
+Sidebar、TabBar、Providersなど共通レイアウトコンポーネントを作成する。
+**Web（Next.js）・Expo どちらにも対応した汎用コマンド。**
 
 ## 前提
 
 以下が完了済みであること:
-- Webセットアップ（`/dev:01-setup-web`）
-- shadcn/ui初期設定
+- Webセットアップ（`/dev:01-setup-web`）またはExpoセットアップ（`/dev:01-setup-mobile`）
+- shadcn/ui初期設定（Webの場合）
 
 **アーキテクチャファイルの場所（優先順）:**
 1. `.kiro/specs/*/design.md` (Kiroスペック)
@@ -43,38 +44,45 @@ UI/UXに精通したフロントエンドエンジニア。
 
 ---
 
-## Step 1: プロジェクト構造の確認
+## Step 0: プロジェクト構成の確認
 
-### 1.1 出力先の特定
+```bash
+# Webアプリ（Next.js）の確認
+ls apps/*/next.config.* 2>/dev/null
 
-引数 `$ARGUMENTS` からプロジェクトルートを特定。
+# Expoアプリの確認
+ls apps/*/app.json 2>/dev/null | xargs -I{} grep -l "expo" {} 2>/dev/null
+```
 
-| 項目 | 確認内容 |
-|------|---------|
-| プロジェクトルート | $ARGUMENTS (例: `web`) |
-| レイアウトコンポーネント | `{root}/src/components/layout/` |
-| Providers | `{root}/src/components/providers.tsx` |
-| ルートレイアウト | `{root}/src/app/layout.tsx` |
+確認した結果から:
+- **`{web_app}`** = Next.jsアプリのディレクトリ名（例: `web`, `admin`）
+- **`{mobile_app}`** = Expoアプリのディレクトリ名（例: `mobile`）
+- **`{app_name}`** = アーキテクチャドキュメントまたはpackage.jsonのname（例: `MyApp`）
+- **`nav_items`** = 画面一覧からナビゲーション項目を決定（アーキテクチャドキュメントから抽出）
 
-### 1.2 ナビゲーション項目の特定
+---
 
-アーキテクチャドキュメントから画面一覧を抽出し、ナビゲーション項目を決定:
+## Step 1: ナビゲーション項目の特定
+
+アーキテクチャドキュメントから画面一覧を抽出し、ナビゲーション項目を決定する。
+以下は参考例（プロジェクトの画面一覧に合わせること）:
 
 | 項目 | パス | アイコン |
 |------|-----|---------|
-| ダッシュボード | / | Home |
-| カード | /cards | Library |
-| 学習 | /study | GraduationCap |
-| 統計 | /stats | BarChart |
+| ホーム | / | Home |
+| {機能1} | /{feature1} | {Icon1} |
+| {機能2} | /{feature2} | {Icon2} |
 | 設定 | /settings | Settings |
 
 ---
 
-## Step 2: Providers作成
+## Step 2: Web Providers作成
+
+**`apps/{web_app}` が存在する場合に実行**
 
 ### 2.1 QueryClient + ThemeProvider
 
-#### {root}/src/components/providers.tsx
+#### `apps/{web_app}/src/components/providers.tsx`
 ```typescript
 'use client'
 
@@ -113,11 +121,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
 ---
 
-## Step 3: ルートレイアウト
+## Step 3: Web ルートレイアウト
 
 ### 3.1 RootLayout更新
 
-#### {root}/src/app/layout.tsx
+#### `apps/{web_app}/src/app/layout.tsx`
 ```typescript
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
@@ -131,10 +139,10 @@ const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: {
-    default: 'ReSave',
-    template: '%s | ReSave',
+    default: '{app_name}',
+    template: '%s | {app_name}',
   },
-  description: '忘却曲線に基づく間隔反復記憶カードアプリ',
+  description: '{アーキテクチャドキュメントからアプリ説明を取得}',
 }
 
 export default function RootLayout({
@@ -157,11 +165,11 @@ export default function RootLayout({
 
 ---
 
-## Step 4: メインレイアウト（認証済みユーザー用）
+## Step 4: Web メインレイアウト（認証済みユーザー用）
 
 ### 4.1 (main) グループレイアウト
 
-#### {root}/src/app/(main)/layout.tsx
+#### `apps/{web_app}/src/app/(main)/layout.tsx`
 ```typescript
 import { redirect } from 'next/navigation'
 
@@ -176,9 +184,7 @@ export default async function MainLayout({
   children: React.ReactNode
 }) {
   const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {
     redirect('/login')
@@ -198,43 +204,29 @@ export default async function MainLayout({
 
 ---
 
-## Step 5: サイドバー（デスクトップ用）
+## Step 5: Web サイドバー（デスクトップ用）
 
 ### 5.1 AppSidebar
 
-#### {root}/src/components/layout/app-sidebar.tsx
+#### `apps/{web_app}/src/components/layout/app-sidebar.tsx`
 ```typescript
 'use client'
 
-import {
-  BarChart,
-  GraduationCap,
-  Home,
-  Library,
-  LogOut,
-  Settings,
-} from 'lucide-react'
+import { Home, Settings, /* アーキテクチャから決定したアイコン */ } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
 import { signOut } from '@/actions/auth'
 import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
+  Sidebar, SidebarContent, SidebarFooter, SidebarGroup,
+  SidebarGroupContent, SidebarHeader, SidebarMenu,
+  SidebarMenuButton, SidebarMenuItem,
 } from '@/components/ui/sidebar'
 
+// アーキテクチャドキュメントの画面一覧から決定する
 const navItems = [
-  { title: 'ダッシュボード', href: '/', icon: Home },
-  { title: 'カード', href: '/cards', icon: Library },
-  { title: '学習', href: '/study', icon: GraduationCap },
-  { title: '統計', href: '/stats', icon: BarChart },
+  { title: 'ホーム', href: '/', icon: Home },
+  // { title: '{機能名}', href: '/{path}', icon: {Icon} },
   { title: '設定', href: '/settings', icon: Settings },
 ]
 
@@ -245,7 +237,7 @@ export function AppSidebar() {
     <Sidebar className="hidden md:flex">
       <SidebarHeader className="border-b p-4">
         <Link className="flex items-center gap-2 font-bold" href="/">
-          <span className="text-xl">ReSave</span>
+          <span className="text-xl">{app_name}</span>
         </Link>
       </SidebarHeader>
       <SidebarContent>
@@ -270,7 +262,6 @@ export function AppSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton onClick={() => signOut()}>
-              <LogOut className="h-4 w-4" />
               <span>ログアウト</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -283,31 +274,24 @@ export function AppSidebar() {
 
 ---
 
-## Step 6: モバイルナビゲーション
+## Step 6: Web モバイルナビゲーション
 
 ### 6.1 MobileNav
 
-#### {root}/src/components/layout/mobile-nav.tsx
+#### `apps/{web_app}/src/components/layout/mobile-nav.tsx`
 ```typescript
 'use client'
 
-import {
-  BarChart,
-  GraduationCap,
-  Home,
-  Library,
-  Settings,
-} from 'lucide-react'
+import { Home, Settings } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
 import { cn } from '@/lib/utils'
 
+// アーキテクチャドキュメントの画面一覧から決定する
 const navItems = [
   { title: 'ホーム', href: '/', icon: Home },
-  { title: 'カード', href: '/cards', icon: Library },
-  { title: '学習', href: '/study', icon: GraduationCap },
-  { title: '統計', href: '/stats', icon: BarChart },
+  // { title: '{機能名}', href: '/{path}', icon: {Icon} },
   { title: '設定', href: '/settings', icon: Settings },
 ]
 
@@ -343,11 +327,11 @@ export function MobileNav() {
 
 ---
 
-## Step 7: ページヘッダー
+## Step 7: Web ページヘッダー・エラー系
 
 ### 7.1 PageHeader
 
-#### {root}/src/components/layout/page-header.tsx
+#### `apps/{web_app}/src/components/layout/page-header.tsx`
 ```typescript
 interface PageHeaderProps {
   title: string
@@ -370,64 +354,35 @@ export function PageHeader({ title, description, action }: PageHeaderProps) {
 }
 ```
 
----
+### 7.2 Loading / Error / NotFound
 
-## Step 8: ローディング・エラー・NotFound
-
-### 8.1 Loading
-
-#### {root}/src/app/(main)/loading.tsx
 ```typescript
-import { Loader2 } from 'lucide-react'
-
+// apps/{web_app}/src/app/(main)/loading.tsx
 export default function Loading() {
   return (
     <div className="flex min-h-[50vh] items-center justify-center">
-      <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
     </div>
   )
 }
-```
 
-### 8.2 Error
-
-#### {root}/src/app/(main)/error.tsx
-```typescript
+// apps/{web_app}/src/app/(main)/error.tsx
 'use client'
-
 import { useEffect } from 'react'
-
 import { Button } from '@/components/ui/button'
 
-export default function Error({
-  error,
-  reset,
-}: {
-  error: Error & { digest?: string }
-  reset: () => void
-}) {
-  useEffect(() => {
-    console.error(error)
-  }, [error])
-
+export default function Error({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
+  useEffect(() => { console.error(error) }, [error])
   return (
     <div className="flex min-h-[50vh] flex-col items-center justify-center gap-4">
       <h2 className="text-xl font-semibold">エラーが発生しました</h2>
-      <p className="text-muted-foreground">
-        問題が解決しない場合は、ページを再読み込みしてください
-      </p>
       <Button onClick={() => reset()}>再試行</Button>
     </div>
   )
 }
-```
 
-### 8.3 NotFound
-
-#### {root}/src/app/not-found.tsx
-```typescript
+// apps/{web_app}/src/app/not-found.tsx
 import Link from 'next/link'
-
 import { Button } from '@/components/ui/button'
 
 export default function NotFound() {
@@ -435,10 +390,134 @@ export default function NotFound() {
     <div className="flex min-h-screen flex-col items-center justify-center gap-4">
       <h2 className="text-4xl font-bold">404</h2>
       <p className="text-muted-foreground">ページが見つかりません</p>
-      <Button asChild>
-        <Link href="/">ホームに戻る</Link>
-      </Button>
+      <Button asChild><Link href="/">ホームに戻る</Link></Button>
     </div>
+  )
+}
+```
+
+---
+
+## Step 8: Expo レイアウト作成
+
+**`apps/{mobile_app}` が存在する場合に実行**
+
+### 8.1 ルートレイアウト（QueryClient + SafeArea）
+
+#### `apps/{mobile_app}/app/_layout.tsx`
+```typescript
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { Stack } from 'expo-router'
+import { SafeAreaProvider } from 'react-native-safe-area-context'
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000,
+      retry: 2,
+    },
+  },
+})
+
+export default function RootLayout() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <SafeAreaProvider>
+        <Stack screenOptions={{ headerShown: false }} />
+      </SafeAreaProvider>
+    </QueryClientProvider>
+  )
+}
+```
+
+### 8.2 タブナビゲーション
+
+#### `apps/{mobile_app}/app/(tabs)/_layout.tsx`
+```typescript
+import { Tabs } from 'expo-router'
+import { View, Text } from 'react-native'
+
+// アーキテクチャドキュメントの画面一覧から決定する
+// アイコンは絵文字テキストで代替（NativeWind className がSVG非対応のため）
+const TAB_ITEMS = [
+  { name: 'index', title: 'ホーム',   icon: '🏠' },
+  // { name: '{screen}', title: '{タブ名}', icon: '{絵文字}' },
+  { name: 'settings', title: '設定',   icon: '⚙️' },
+] as const
+
+export default function TabLayout() {
+  return (
+    <Tabs
+      screenOptions={{
+        headerShown: false,
+        tabBarStyle: {
+          backgroundColor: '#ffffff',
+          borderTopWidth: 1,
+          borderTopColor: '#e5e7eb',
+          height: 64,
+          paddingBottom: 8,
+        },
+        tabBarActiveTintColor: '#2563eb',
+        tabBarInactiveTintColor: '#6b7280',
+      }}
+    >
+      {TAB_ITEMS.map((tab) => (
+        <Tabs.Screen
+          key={tab.name}
+          name={tab.name}
+          options={{
+            title: tab.title,
+            tabBarIcon: ({ color }) => (
+              <Text style={{ fontSize: 20, color }}>{tab.icon}</Text>
+            ),
+          }}
+        />
+      ))}
+    </Tabs>
+  )
+}
+```
+
+### 8.3 スタック画面のヘッダー設定
+
+#### `apps/{mobile_app}/app/(tabs)/{screen}/_layout.tsx`
+```typescript
+import { Stack } from 'expo-router'
+
+export default function ScreenLayout() {
+  return (
+    <Stack>
+      <Stack.Screen
+        name="index"
+        options={{
+          title: '{画面タイトル}',
+          headerStyle: { backgroundColor: '#ffffff' },
+          headerTintColor: '#111827',
+          headerTitleStyle: { fontWeight: '600' },
+        }}
+      />
+    </Stack>
+  )
+}
+```
+
+### 8.4 Expo ホーム画面テンプレート
+
+#### `apps/{mobile_app}/app/(tabs)/index.tsx`
+```typescript
+import { View, Text, ScrollView } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
+
+export default function HomeScreen() {
+  return (
+    <SafeAreaView className="flex-1 bg-gray-50">
+      <ScrollView className="flex-1">
+        <View className="px-4 pt-6 pb-4">
+          <Text className="text-2xl font-bold text-gray-900">{app_name}</Text>
+        </View>
+        {/* コンテンツをここに追加 */}
+      </ScrollView>
+    </SafeAreaView>
   )
 }
 ```
@@ -447,29 +526,40 @@ export default function NotFound() {
 
 ## Step 9: 動作確認
 
-### 9.1 確認項目
-
+### Web
 | 項目 | 確認方法 | 期待結果 |
 |------|---------|---------|
 | デスクトップ表示 | 幅1024px以上 | サイドバー表示 |
 | モバイル表示 | 幅768px未満 | ボトムナビ表示 |
 | ナビゲーション | 各リンクをクリック | 正しいページに遷移 |
 | アクティブ状態 | 現在のページ | ハイライト表示 |
-| ダークモード | テーマ切り替え | 正しく適用 |
-| ローディング | ページ遷移時 | ローディング表示 |
+
+### Expo
+| 項目 | 確認方法 | 期待結果 |
+|------|---------|---------|
+| タブ表示 | シミュレーター起動 | ボトムタブ表示 |
+| タブ遷移 | タブをタップ | 正しいスクリーンに遷移 |
+| アクティブ状態 | 現在のタブ | 色変化 |
+| SafeArea | ノッチ端末で確認 | 適切な余白 |
 
 ---
 
 ## 完了条件
 
+**Web（`apps/{web_app}` 存在時）:**
 - [ ] Providersが作成されている（QueryClient + ThemeProvider）
-- [ ] ルートレイアウトが更新されている
+- [ ] ルートレイアウトが更新されている（アプリ名が正しい）
 - [ ] メインレイアウト（認証済み用）が作成されている
 - [ ] AppSidebarが作成されている
 - [ ] MobileNavが作成されている
 - [ ] PageHeaderが作成されている
 - [ ] Loading/Error/NotFoundが作成されている
-- [ ] レスポンシブ対応している
+
+**Expo（`apps/{mobile_app}` 存在時）:**
+- [ ] `_layout.tsx`（ルート）にQueryClientProviderが設定されている
+- [ ] `(tabs)/_layout.tsx` にタブナビゲーションが設定されている
+- [ ] 各タブ画面の基本レイアウトが作成されている
+- [ ] SafeAreaProviderが設定されている
 
 ---
 
@@ -478,24 +568,24 @@ export default function NotFound() {
 ```
 ## 共通レイアウト作成が完了しました
 
-### 作成されたファイル
-- {root}/src/components/providers.tsx
-- {root}/src/app/layout.tsx（更新）
-- {root}/src/app/(main)/layout.tsx
-- {root}/src/components/layout/app-sidebar.tsx
-- {root}/src/components/layout/mobile-nav.tsx
-- {root}/src/components/layout/page-header.tsx
-- {root}/src/app/(main)/loading.tsx
-- {root}/src/app/(main)/error.tsx
-- {root}/src/app/not-found.tsx
+### プロジェクト構成
+- Web: apps/{web_app}/
+- Expo: apps/{mobile_app}/（存在する場合）
 
-### 動作確認結果
-| 項目 | 状態 |
-|------|------|
-| デスクトップ表示 | [Success/Failed] |
-| モバイル表示 | [Success/Failed] |
-| ナビゲーション | [Success/Failed] |
-| ダークモード | [Success/Failed] |
+### 作成されたファイル
+
+Web:
+- apps/{web_app}/src/components/providers.tsx
+- apps/{web_app}/src/app/layout.tsx
+- apps/{web_app}/src/app/(main)/layout.tsx
+- apps/{web_app}/src/components/layout/app-sidebar.tsx
+- apps/{web_app}/src/components/layout/mobile-nav.tsx
+- apps/{web_app}/src/components/layout/page-header.tsx
+
+Expo:
+- apps/{mobile_app}/app/_layout.tsx
+- apps/{mobile_app}/app/(tabs)/_layout.tsx
+- apps/{mobile_app}/app/(tabs)/index.tsx
 
 ### 次のステップ
 - `/dev:06-implement-auth` - 認証機能実装
