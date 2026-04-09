@@ -246,6 +246,8 @@ export function useUpdateCard() {
       qc.invalidateQueries({ queryKey: cardKeys.today() });
       qc.invalidateQueries({ queryKey: cardKeys.todayCompleted() });
       qc.invalidateQueries({ queryKey: homeCardKeys.tab('completed') });
+      qc.invalidateQueries({ queryKey: homeCardKeys.tab('due'), refetchType: 'all' });
+      qc.invalidateQueries({ queryKey: homeCardKeys.tab('learning'), refetchType: 'all' });
     },
   });
 }
