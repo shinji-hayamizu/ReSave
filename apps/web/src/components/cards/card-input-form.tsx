@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -98,14 +98,20 @@ export function CardInputForm({
   const frontValue = form.watch('front');
   const isSaveDisabled = !frontValue.trim() || isSubmitting;
 
+  const isMounted = useRef(false);
   useEffect(() => {
+    if (!isMounted.current) {
+      isMounted.current = true;
+      return;
+    }
     if (defaultValues) {
       form.reset({
         ...defaultFormValues,
         ...defaultValues,
       });
     }
-  }, [defaultValues, form]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [defaultValues]);
 
   async function handleSubmit(data: CardInputFormValues) {
     await onSubmit(data);
