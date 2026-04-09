@@ -290,8 +290,8 @@ export function useHomeUpdateCard() {
       }
     },
     onSettled: () => {
-      qc.invalidateQueries({ queryKey: homeCardKeys.tab('due') });
-      qc.invalidateQueries({ queryKey: homeCardKeys.tab('learning') });
+      qc.invalidateQueries({ queryKey: homeCardKeys.tab('due'), refetchType: 'all' });
+      qc.invalidateQueries({ queryKey: homeCardKeys.tab('learning'), refetchType: 'all' });
     },
   });
 }
