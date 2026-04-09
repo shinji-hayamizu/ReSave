@@ -1,6 +1,6 @@
 'use client';
 
-import type { QueryKey } from '@tanstack/react-query';
+import type { InfiniteData, QueryKey } from '@tanstack/react-query';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
@@ -22,6 +22,7 @@ import type {
   CardListResponse,
   CardWithTags,
   CreateCardInput,
+  HomeCardsPage,
   UpdateCardInput,
 } from '@/types/card';
 
@@ -156,6 +157,8 @@ type UpdateCardContext = {
   previousNew: CardWithTags[] | undefined;
   previousToday: CardWithTags[] | undefined;
   previousTodayCompleted: CardWithTags[] | undefined;
+  previousHomeDue: InfiniteData<HomeCardsPage> | undefined;
+  previousHomeLearning: InfiniteData<HomeCardsPage> | undefined;
 };
 
 export function useUpdateCard() {
@@ -164,11 +167,15 @@ export function useUpdateCard() {
     mutationFn: ({ id, input }: { id: string; input: UpdateCardInput }) =>
       updateCard(id, input),
     onMutate: async ({ id, input }): Promise<UpdateCardContext> => {
-      await qc.cancelQueries({ queryKey: cardKeys.lists() });
-      await qc.cancelQueries({ queryKey: cardKeys.detail(id) });
-      await qc.cancelQueries({ queryKey: cardKeys.new() });
-      await qc.cancelQueries({ queryKey: cardKeys.today() });
-      await qc.cancelQueries({ queryKey: cardKeys.todayCompleted() });
+      await Promise.all([
+        qc.cancelQueries({ queryKey: cardKeys.lists() }),
+        qc.cancelQueries({ queryKey: cardKeys.detail(id) }),
+        qc.cancelQueries({ queryKey: cardKeys.new() }),
+        qc.cancelQueries({ queryKey: cardKeys.today() }),
+        qc.cancelQueries({ queryKey: cardKeys.todayCompleted() }),
+        qc.cancelQueries({ queryKey: homeCardKeys.tab('due') }),
+        qc.cancelQueries({ queryKey: homeCardKeys.tab('learning') }),
+      ]);
 
       const previousLists = qc.getQueriesData<CardListResponse>({
         queryKey: cardKeys.lists(),
@@ -177,6 +184,8 @@ export function useUpdateCard() {
       const previousNew = qc.getQueryData<CardWithTags[]>(cardKeys.new());
       const previousToday = qc.getQueryData<CardWithTags[]>(cardKeys.today());
       const previousTodayCompleted = qc.getQueryData<CardWithTags[]>(cardKeys.todayCompleted());
+      const previousHomeDue = qc.getQueryData<InfiniteData<HomeCardsPage>>(homeCardKeys.tab('due'));
+      const previousHomeLearning = qc.getQueryData<InfiniteData<HomeCardsPage>>(homeCardKeys.tab('learning'));
 
       const updateCardInList = (card: CardWithTags): CardWithTags =>
         card.id === id
@@ -217,7 +226,27 @@ export function useUpdateCard() {
         );
       }
 
-      return { previousLists, previousDetail, previousNew, previousToday, previousTodayCompleted };
+      if (previousHomeDue) {
+        qc.setQueryData<InfiniteData<HomeCardsPage>>(homeCardKeys.tab('due'), {
+          ...previousHomeDue,
+          pages: previousHomeDue.pages.map((page) => ({
+            ...page,
+            cards: page.cards.map(updateCardInList),
+          })),
+        });
+      }
+
+      if (previousHomeLearning) {
+        qc.setQueryData<InfiniteData<HomeCardsPage>>(homeCardKeys.tab('learning'), {
+          ...previousHomeLearning,
+          pages: previousHomeLearning.pages.map((page) => ({
+            ...page,
+            cards: page.cards.map(updateCardInList),
+          })),
+        });
+      }
+
+      return { previousLists, previousDetail, previousNew, previousToday, previousTodayCompleted, previousHomeDue, previousHomeLearning };
     },
     onError: (_, variables, context) => {
       if (context?.previousLists) {
@@ -237,6 +266,12 @@ export function useUpdateCard() {
       if (context?.previousTodayCompleted) {
         qc.setQueryData(cardKeys.todayCompleted(), context.previousTodayCompleted);
       }
+      if (context?.previousHomeDue) {
+        qc.setQueryData(homeCardKeys.tab('due'), context.previousHomeDue);
+      }
+      if (context?.previousHomeLearning) {
+        qc.setQueryData(homeCardKeys.tab('learning'), context.previousHomeLearning);
+      }
       toast.error('カードの更新に失敗しました');
     },
     onSettled: (_, __, variables) => {
@@ -246,6 +281,8 @@ export function useUpdateCard() {
       qc.invalidateQueries({ queryKey: cardKeys.today() });
       qc.invalidateQueries({ queryKey: cardKeys.todayCompleted() });
       qc.invalidateQueries({ queryKey: homeCardKeys.tab('completed') });
+      qc.invalidateQueries({ queryKey: homeCardKeys.tab('due'), refetchType: 'all' });
+      qc.invalidateQueries({ queryKey: homeCardKeys.tab('learning'), refetchType: 'all' });
     },
   });
 }

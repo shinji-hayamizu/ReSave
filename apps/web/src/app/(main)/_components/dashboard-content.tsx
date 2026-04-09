@@ -200,6 +200,7 @@ export function DashboardContent() {
                     }}
                     schedule={card.schedule}
                     showAgain={card.currentStep > 0}
+                    sourceUrl={card.sourceUrl}
                     tags={card.tags}
                     onEdit={() => handleEdit(card)}
                   />

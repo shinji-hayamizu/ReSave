@@ -110,6 +110,7 @@ const CardItem = memo(function CardItem({
       answer={card.back}
       currentStep={card.currentStep}
       question={card.front}
+      sourceUrl={card.sourceUrl}
       ratingButtons={<ResetButton disabled={isResetting} onReset={handleReset} />}
       tags={tags}
       totalSteps={card.schedule.length}
