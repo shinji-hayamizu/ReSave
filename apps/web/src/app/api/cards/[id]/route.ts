@@ -134,7 +134,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Params }
       );
     }
 
-    const { front, back, tagIds } = validationResult.data;
+    const { front, back, tagIds, sourceUrl } = validationResult.data;
 
     const { data: existingCard, error: existingError } = await supabase
       .from('cards')
@@ -158,6 +158,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Params }
     const updateData: Partial<CardRow> = {};
     if (front !== undefined) updateData.front = front;
     if (back !== undefined) updateData.back = back;
+    if (sourceUrl !== undefined) updateData.source_url = sourceUrl || null;
 
     if (Object.keys(updateData).length > 0) {
       updateData.updated_at = new Date().toISOString();

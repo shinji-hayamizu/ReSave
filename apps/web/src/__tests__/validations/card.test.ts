@@ -12,6 +12,7 @@ describe('cardSchema', () => {
     userId: '123e4567-e89b-12d3-a456-426614174001',
     front: '表面のテキスト',
     back: '裏面のテキスト',
+    sourceUrl: null,
     schedule: [1, 3, 7, 14, 30, 180],
     currentStep: 3,
     nextReviewAt: '2024-01-15T00:00:00.000Z',

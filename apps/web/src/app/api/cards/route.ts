@@ -213,7 +213,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { front, back, tagIds } = validationResult.data;
+    const { front, back, tagIds, sourceUrl } = validationResult.data;
 
     const { data: cardData, error: cardError } = await supabase
       .from('cards')
@@ -221,6 +221,7 @@ export async function POST(request: NextRequest) {
         user_id: user.id,
         front,
         back,
+        source_url: sourceUrl || null,
         schedule: [1, 3, 7, 14, 30, 90],
         current_step: 0,
         next_review_at: null,
