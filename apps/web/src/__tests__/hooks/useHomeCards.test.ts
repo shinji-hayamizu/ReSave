@@ -83,6 +83,7 @@ describe('useHomeSubmitAssessment の onSuccess', () => {
       userId: 'user-1',
       front: 'Q',
       back: 'A',
+      sourceUrl: null,
       schedule: [1, 3, 7, 14, 30, 90],
       currentStep: 0,
       nextReviewAt: null,

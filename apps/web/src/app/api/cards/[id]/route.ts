@@ -17,6 +17,7 @@ function mapRowToCard(row: CardRow): CardWithTags {
     userId: row.user_id,
     front: row.front,
     back: row.back,
+    sourceUrl: row.source_url,
     schedule: row.schedule,
     currentStep: row.current_step,
     nextReviewAt: row.next_review_at,

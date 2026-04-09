@@ -51,6 +51,7 @@ function createCard(overrides: Partial<CardWithTags> = {}): CardWithTags {
     userId: 'user-1',
     front: 'front',
     back: 'back',
+    sourceUrl: null,
     schedule: [1, 3, 7, 14, 30, 180],
     currentStep: 6,
     nextReviewAt: null,

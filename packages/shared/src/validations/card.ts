@@ -7,6 +7,7 @@ export const cardSchema = z.object({
   userId: z.string().uuid(),
   front: z.string().min(1, '必須項目です').max(10000, '10000文字以内で入力してください'),
   back: z.string().min(1, '必須項目です').max(10000, '10000文字以内で入力してください'),
+  sourceUrl: z.string().url().nullable(),
   schedule: z.array(z.number().int().positive()),
   currentStep: z.number().int().min(0),
   nextReviewAt: z.string().datetime().nullable(),
@@ -19,6 +20,7 @@ export const cardSchema = z.object({
 export const createCardSchema = z.object({
   front: z.string().min(1, '必須項目です').max(10000, '10000文字以内で入力してください'),
   back: z.string().max(10000, '10000文字以内で入力してください').optional().default(''),
+  sourceUrl: z.string().url().or(z.literal('')).optional(),
   tagIds: z.array(z.string().uuid()).optional(),
   schedule: z.array(z.number().int().positive()).optional(),
 });

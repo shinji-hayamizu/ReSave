@@ -93,25 +93,22 @@ worktree内で実際のコードを調査しながら以下を行う:
    - 変更対象の既存コンポーネント・ページを Read で読み込む
    - 現在のデザイン（カラー、レイアウト、コンポーネント構造）を把握する
 
-2. **HTMLモックを3パターン生成**
-   - `docs/mocks/<branch-name>/` ディレクトリに以下を出力:
-     - `pattern-1.html` - アプローチ1（説明付き）
-     - `pattern-2.html` - アプローチ2（説明付き）
-     - `pattern-3.html` - アプローチ3（説明付き）
-   - 各HTMLは単体で開けるスタンドアロンHTML（Tailwind CDN使用）
+2. **HTMLモックを1ファイルに3パターンまとめて生成**
+   - `docs/mocks/<branch-name>/mock.html` に3パターンをすべて含む1ファイルを出力
+   - ファイル構成:
+     - セクション区切り（`<hr>` + 見出し）で3パターンを縦並びに配置
+     - 各セクションにパターン名と簡潔な説明を見出しとして含める
+   - スタンドアロンHTML（Tailwind CDN使用）
    - 既存のデザインシステム（カラー、スペーシング）に沿ったスタイルにする
    - UIテキストは日本語で記述する
    - パターンの差別化:
-     - pattern-1: 現状に近いアプローチ（保守的）
-     - pattern-2: 改善提案（推奨案）
-     - pattern-3: 大胆な変更（実験的）
+     - Pattern 1: 現状に近いアプローチ（保守的）
+     - Pattern 2: 改善提案（推奨案）
+     - Pattern 3: 大胆な変更（実験的）
 
-3. **ブラウザで表示してスクリーンショットを会話上に表示**
-   - `docs/mocks/<branch-name>/` ディレクトリでローカルHTTPサーバーを起動する（`python3 -m http.server <port>`、バックグラウンド実行）
-   - `mcp__playwright__browser_navigate` で `http://localhost:<port>/pattern-1.html` 等を開く
-   - `mcp__playwright__browser_take_screenshot` でスクリーンショットを撮影し、会話画面に画像として表示する（3パターン分）
+3. **ブラウザで表示**
+   - `mcp__playwright__browser_navigate` で `file://<worktree-absolute-path>/docs/mocks/<branch-name>/mock.html` を開く（1回だけ）
    - AskUserQuestion で「どのパターンが好みですか？カスタマイズしたい点はありますか？」と質問する
-   - 確認完了後、HTTPサーバーを停止する
 
 4. **承認後に実装方針を確定**
    - ユーザーが選んだパターンを実装方針に反映する
@@ -163,17 +160,69 @@ gh issue create \
 ユーザーの依頼内容に従って実装を行う。
 実装完了後、テストを作成・実行する（`/testing` スキルを使用）。
 
-### Step 8: コミット・push・PR作成
+### Step 8: コミット・push
 
 ```
 Skill(convenience:commit)
 ```
 
-コミット後、pushしてPRを作成する:
+コミット後、pushする:
 
 ```bash
 git push origin <branch>
 ```
+
+### Step 9: devサーバー起動 + スクショ撮影
+
+#### 9-1: devサーバー起動
+
+3000番ポートが使用中かチェックし、空いていれば3000、使用中なら3002で起動する:
+
+```bash
+# ポート確認
+lsof -ti:3000 && echo "IN_USE" || echo "FREE"
+```
+
+空いている場合:
+```bash
+cd apps/web && pnpm next dev -p 3000 &
+echo $! > /Users/haya/development/myApps/job/ReSave/.claude/worktrees/<name>/.dev-server-pid
+```
+
+使用中の場合:
+```bash
+cd apps/web && pnpm next dev -p 3002 &
+echo $! > /Users/haya/development/myApps/job/ReSave/.claude/worktrees/<name>/.dev-server-pid
+```
+
+バックグラウンドで起動し、PIDをworktree内の `.dev-server-pid` に記録する。
+
+#### 9-2: サーバー起動待機
+
+サーバーが応答するまで待機する:
+
+```bash
+for i in $(seq 1 30); do curl -s -o /dev/null -w "%{http_code}" http://localhost:<port> | grep -q "200\|307" && echo "READY" && break || sleep 2; done
+```
+
+#### 9-3: スクショ撮影
+
+Playwrightで変更に関連する画面のスクリーンショットを撮影する:
+
+1. `mcp__playwright__browser_navigate` で `http://localhost:<port>` （ホーム画面等、変更に最も関連するページ）にアクセス
+2. `mcp__playwright__browser_take_screenshot` でスクリーンショットを撮影
+   - 保存先: `docs/screenshots/<branch-name>.png`
+   - フルページではなくビューポートのみ（実際のユーザー体験に近い表示）
+
+#### 9-4: スクショをコミット・push
+
+```bash
+git add docs/screenshots/<branch-name>.png
+git commit -m "docs: add screenshot for PR"
+git push origin <branch>
+```
+
+### Step 10: PR作成
 
 ```
 Skill(convenience:create-pr)
@@ -183,6 +232,15 @@ PR設定:
 - ベースブランチ: `develop`
 - タイトル・本文: コミット内容から自動生成
 - **本文に `Closes #<issue番号>` を必ず含める**（Step 6で取得したIssue番号）
+- **本文にスクショのMarkdown画像リンクを含める**:
+
+```markdown
+## スクリーンショット
+
+![screenshot](https://raw.githubusercontent.com/<owner>/<repo>/<branch>/docs/screenshots/<branch-name>.png)
+```
+
+`<owner>/<repo>` は `gh repo view --json nameWithOwner -q '.nameWithOwner'` で取得する。
 
 `convenience:create-pr` でPRを作成した後、以下を自動で設定する:
 
@@ -203,28 +261,7 @@ gh pr edit --add-label "enhancement"  # または "bug"
 
 ラベルが存在しない場合はラベル設定をスキップする（エラー無視）。
 
-### Step 9: devサーバー起動
-
-3000番ポートが使用中かチェックし、空いていれば3000、使用中なら3002で起動する:
-
-```bash
-# ポート確認
-lsof -ti:3000 && echo "IN_USE" || echo "FREE"
-```
-
-空いている場合:
-```bash
-cd apps/web && pnpm next dev -p 3000
-```
-
-使用中の場合:
-```bash
-cd apps/web && pnpm next dev -p 3002
-```
-
-バックグラウンドで起動し、起動確認後にURLを表示する。
-
-### Step 10: 完了案内
+### Step 11: 完了案内
 
 ```
 完了しました。

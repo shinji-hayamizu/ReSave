@@ -198,6 +198,7 @@ export function useHomeCreateCard() {
         id: `temp-${Date.now()}`,
         front: input.front,
         back: input.back ?? '',
+        sourceUrl: input.sourceUrl ?? null,
         schedule: DEFAULT_INTERVALS,
         currentStep: 0,
         nextReviewAt: null,
