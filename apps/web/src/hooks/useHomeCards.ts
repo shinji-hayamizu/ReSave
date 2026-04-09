@@ -210,10 +210,19 @@ export function useHomeCreateCard() {
         tags: [],
       };
 
-      qc.setQueryData<InfiniteData<HomeCardsPage>>(homeCardKeys.tab('due'), (old) => {
-        if (!old) return old;
-        return prependCardToInfiniteData(old, optimisticCard);
-      });
+      const emptyInfiniteData: InfiniteData<HomeCardsPage> = {
+        pages: [{
+          cards: [],
+          todayStudiedCardIds: [],
+          fetchedAt: new Date().toISOString(),
+          pagination: { total: 0, limit: HOME_PAGE_SIZE, offset: 0, hasMore: false },
+        }],
+        pageParams: [0],
+      };
+
+      qc.setQueryData<InfiniteData<HomeCardsPage>>(homeCardKeys.tab('due'), (old) =>
+        prependCardToInfiniteData(old ?? emptyInfiniteData, optimisticCard)
+      );
 
       return context;
     },
@@ -226,7 +235,8 @@ export function useHomeCreateCard() {
     onSuccess: (newCard) => {
       qc.setQueryData<InfiniteData<HomeCardsPage>>(homeCardKeys.tab('due'), (old) => {
         if (!old) return old;
-        return updateCardInInfiniteData(old, old.pages[0]?.cards.find((c) => c.id.startsWith('temp-'))?.id ?? '', () => ({
+        const tempId = old.pages[0]?.cards.find((c) => c.id.startsWith('temp-'))?.id ?? '';
+        return updateCardInInfiniteData(old, tempId, () => ({
           ...newCard,
           tags: [],
           status: newCard.status as CardWithTags['status'],
