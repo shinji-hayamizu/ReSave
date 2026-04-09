@@ -30,6 +30,10 @@ Task tool を使用して以下を並列実行:
 - TagBadge 作成（Web）
 - StudyCard 作成（Web）
 - EmptyState 作成（Web）
+- Button 作成（Mobile）
+- RatingButtons 作成（Mobile）
+- StudyCard 作成（Mobile）
+- EmptyState 作成（Mobile）
 ```
 
 各サブエージェントには以下を指示:
@@ -310,33 +314,35 @@ export function TagBadge({ children, className }: TagBadgeProps) {
 
 ---
 
-## Step 3: Mobile用コンポーネント作成（オプション）
+## Step 3: Mobile用コンポーネント作成
 
-**`apps/mobile` が存在し、NativeWind が設定されている場合のみ実行**
+**`apps/mobile` が存在する場合は必ず実行すること**
 
 ### 3.1 ディレクトリ構成
 
 ```
 apps/mobile/components/
 ├── ui/
-│   ├── Button.tsx
-│   ├── Input.tsx
-│   ├── PasswordInput.tsx
-│   ├── RatingButtons.tsx
-│   ├── TagBadge.tsx
-│   ├── StudyCard.tsx
-│   └── EmptyState.tsx
-└── layout/
-    ├── TabBar.tsx
-    └── Header.tsx
+│   ├── Button.tsx         # Pressable + variantStyles（6バリアント・4サイズ）
+│   ├── Input.tsx          # TextInput + label/error表示
+│   ├── PasswordInput.tsx  # Input拡張 + 表示切替（useState）
+│   ├── RatingButtons.tsx  # Pressable × 3ボタン（ok/learned/again）
+│   ├── TagBadge.tsx       # View + Text（sky-100背景）
+│   ├── StudyCard.tsx      # フリップカード（Q&A表示）
+│   ├── ProgressBar.tsx    # View with width style
+│   ├── EmptyState.tsx     # View + Text + optional action
+│   ├── FormAlert.tsx      # variant対応アラート
+│   └── index.ts           # named export集約
+└── cards/
+    └── MobileCardList.tsx # FlatList 最適化版
 ```
 
 ### 3.2 Mobile実装規約
 
 ```typescript
 // React Native + NativeWind
-import { View, Text, Pressable } from 'react-native'
-import { cn } from '@/lib/cn'
+import { View, Text, Pressable, TextInput, ActivityIndicator } from 'react-native'
+import { cn } from '@/lib/cn'  // Web は '@/lib/utils'、Mobile は '@/lib/cn'
 
 interface ComponentNameProps {
   className?: string
@@ -347,6 +353,123 @@ export function ComponentName({ className }: ComponentNameProps) {
     <View className={cn('base-classes', className)}>
       <Text>Content</Text>
     </View>
+  )
+}
+```
+
+**Mobile実装の注意点:**
+- `div` → `View`、`span`/`p` → `Text`、`button` → `Pressable`、`input` → `TextInput`
+- アイコンは絵文字テキストで代替（SVGはNativeWindの `className` 非対応のため）
+- パスエイリアス: `@/*` → `./*`（tsconfig.json）
+- Web の `hover:` クラスは Mobile では `active:` クラスに置き換える
+- `style` プロパティではなく `className` でNativeWindスタイリングする
+
+### 3.3 主要コンポーネント実装パターン
+
+#### Button
+```typescript
+import { Pressable, Text, ActivityIndicator, type PressableProps } from 'react-native'
+import { cn } from '@/lib/cn'
+
+type ButtonVariant = 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link'
+type ButtonSize = 'default' | 'sm' | 'lg' | 'icon'
+
+interface ButtonProps extends Omit<PressableProps, 'children'> {
+  children: React.ReactNode
+  variant?: ButtonVariant
+  size?: ButtonSize
+  className?: string
+  textClassName?: string
+  loading?: boolean
+}
+
+const variantStyles: Record<ButtonVariant, { container: string; text: string }> = {
+  default:     { container: 'bg-blue-600 active:bg-blue-700', text: 'text-white' },
+  destructive: { container: 'bg-red-500 active:bg-red-600',   text: 'text-white' },
+  outline:     { container: 'border border-gray-300 bg-white active:bg-gray-100', text: 'text-gray-900' },
+  secondary:   { container: 'bg-gray-100 active:bg-gray-200', text: 'text-gray-900' },
+  ghost:       { container: 'active:bg-gray-100',             text: 'text-gray-900' },
+  link:        { container: '',                               text: 'text-blue-600' },
+}
+
+export function Button({ children, variant = 'default', size = 'default', loading = false, disabled, className, textClassName, ...props }: ButtonProps) {
+  const isDisabled = disabled || loading
+  return (
+    <Pressable
+      className={cn('flex-row items-center justify-center rounded-lg h-11 px-5 py-2.5',
+        variantStyles[variant].container, isDisabled && 'opacity-50', className)}
+      disabled={isDisabled}
+      {...props}
+    >
+      {loading ? (
+        <ActivityIndicator size="small" color={variant === 'default' || variant === 'destructive' ? '#ffffff' : '#374151'} />
+      ) : typeof children === 'string' ? (
+        <Text className={cn('font-medium text-center text-base', variantStyles[variant].text, textClassName)}>
+          {children}
+        </Text>
+      ) : children}
+    </Pressable>
+  )
+}
+```
+
+#### RatingButtons
+```typescript
+import { View, Text, Pressable } from 'react-native'
+import { cn } from '@/lib/cn'
+
+type Rating = 'ok' | 'learned' | 'again'
+
+interface RatingButtonsProps {
+  onRate: (rating: Rating) => void
+  intervals?: { ok?: string; again?: string }
+  disabled?: boolean
+  className?: string
+}
+
+const ratingConfig = {
+  ok:      { label: 'OK',       bgClass: 'bg-emerald-100', textClass: 'text-emerald-600' },
+  learned: { label: '覚えた',   bgClass: 'bg-blue-100',    textClass: 'text-blue-600' },
+  again:   { label: 'もう一度', bgClass: 'bg-red-100',     textClass: 'text-red-500' },
+} as const
+
+export function RatingButtons({ onRate, intervals, disabled, className }: RatingButtonsProps) {
+  return (
+    <View className={cn('flex-row gap-1.5', className)}>
+      {(['ok', 'learned', 'again'] as const).map((rating) => (
+        <Pressable key={rating} disabled={disabled}
+          className={cn('flex-row items-center gap-1.5 px-3.5 py-2 rounded-lg',
+            ratingConfig[rating].bgClass, disabled && 'opacity-50')}
+          onPress={() => onRate(rating)}
+        >
+          <Text className={cn('text-sm font-semibold', ratingConfig[rating].textClass)}>
+            {ratingConfig[rating].label}
+          </Text>
+          <Text className={cn('text-xs opacity-85', ratingConfig[rating].textClass)}>
+            {rating === 'learned' ? '完了' : intervals?.[rating as 'ok' | 'again']}
+          </Text>
+        </Pressable>
+      ))}
+    </View>
+  )
+}
+```
+
+#### TagBadge
+```typescript
+import { Text } from 'react-native'
+import { cn } from '@/lib/cn'
+
+interface TagBadgeProps {
+  children: React.ReactNode
+  className?: string
+}
+
+export function TagBadge({ children, className }: TagBadgeProps) {
+  return (
+    <Text className={cn('px-3 py-1 bg-sky-100 text-sky-700 text-xs font-medium rounded-full', className)}>
+      {children}
+    </Text>
   )
 }
 ```
@@ -413,6 +536,7 @@ export default {
 
 ### index.ts でまとめてエクスポート
 
+**Web:**
 ```typescript
 // apps/web/src/components/ui/index.ts
 export { Button } from './button'
@@ -425,6 +549,37 @@ export { SummaryCard } from './summary-card'
 export { ProgressBar } from './progress-bar'
 export { EmptyState } from './empty-state'
 export { FormAlert } from './form-alert'
+```
+
+**Mobile:**
+```typescript
+// apps/mobile/components/ui/index.ts
+export { Button } from './Button'
+export type { ButtonProps, ButtonVariant, ButtonSize } from './Button'
+
+export { Input } from './Input'
+export type { InputProps } from './Input'
+
+export { PasswordInput } from './PasswordInput'
+export type { PasswordInputProps } from './PasswordInput'
+
+export { RatingButtons } from './RatingButtons'
+export type { Rating, RatingButtonsProps } from './RatingButtons'
+
+export { TagBadge } from './TagBadge'
+export type { TagBadgeProps } from './TagBadge'
+
+export { StudyCard } from './StudyCard'
+export type { StudyCardProps } from './StudyCard'
+
+export { ProgressBar } from './ProgressBar'
+export type { ProgressBarProps } from './ProgressBar'
+
+export { EmptyState } from './EmptyState'
+export type { EmptyStateProps } from './EmptyState'
+
+export { FormAlert } from './FormAlert'
+export type { FormAlertProps, AlertVariant } from './FormAlert'
 ```
 
 ---
@@ -441,9 +596,13 @@ export { FormAlert } from './form-alert'
   - [ ] FormAlert
   - [ ] ProgressBar
 - [ ] TypeScript型定義が適切
-- [ ] `use client` が必要なコンポーネントにのみ付与
-- [ ] index.ts でエクスポート設定完了
+- [ ] `use client` が必要なコンポーネントにのみ付与（Web）
+- [ ] `apps/web/src/components/ui/index.ts` でエクスポート設定完了
 - [ ] （Mobile存在時）Mobile用コンポーネントも作成
+  - [ ] `Pressable` / `TextInput` / `View` / `Text` を適切に使用
+  - [ ] NativeWindの `className` でスタイリング（`style` プロパティ直書き禁止）
+  - [ ] Web の `hover:` → Mobile では `active:` に置き換え
+  - [ ] `apps/mobile/components/ui/index.ts` でエクスポート設定完了
 
 ---
 
@@ -456,11 +615,15 @@ export { FormAlert } from './form-alert'
 
 | コンポーネント | Web | Mobile | 説明 |
 |--------------|-----|--------|------|
-| PasswordInput | o | o/x | パスワード表示切替 |
-| RatingButtons | o | o/x | OK/覚えた/もう一度 |
-| TagBadge | o | o/x | タグバッジ |
-| StudyCard | o | o/x | 学習カード |
-| EmptyState | o | o/x | 空状態表示 |
+| Button | o | o | 複数バリアント・サイズ |
+| Input | o | o | テキスト入力 |
+| PasswordInput | o | o | パスワード表示切替 |
+| RatingButtons | o | o | OK/覚えた/もう一度 |
+| TagBadge | o | o | タグバッジ |
+| StudyCard | o | o | 学習カード（フリップ） |
+| ProgressBar | o | o | 進捗バー |
+| EmptyState | o | o | 空状態表示 |
+| FormAlert | o | o | フォームアラート |
 
 ### 更新したファイル
 - apps/web/src/app/globals.css
