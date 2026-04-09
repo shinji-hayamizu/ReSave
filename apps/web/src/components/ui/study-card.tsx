@@ -1,7 +1,7 @@
 'use client'
 
 import { memo, useCallback, useEffect, useRef, useState } from 'react'
-import { Check, Eye, EyeOff, Pencil, SquarePen, Trash2, X } from 'lucide-react'
+import { Check, Eye, EyeOff, ExternalLink, Link, Pencil, SquarePen, Trash2, X } from 'lucide-react'
 import TextareaAutosize from 'react-textarea-autosize'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -13,6 +13,7 @@ interface StudyCardProps {
   ratingButtons?: React.ReactNode
   currentStep?: number
   totalSteps?: number
+  sourceUrl?: string | null
   onEdit?: () => void
   onDelete?: () => void
   onSave?: (data: { front?: string; back?: string }) => void
@@ -27,6 +28,7 @@ export const StudyCard = memo(function StudyCard({
   ratingButtons,
   currentStep,
   totalSteps,
+  sourceUrl,
   onEdit,
   onDelete,
   onSave,
@@ -351,6 +353,28 @@ export const StudyCard = memo(function StudyCard({
           )}
         </div>
       )}
+
+      {sourceUrl && (() => {
+        let hostname = sourceUrl
+        try { hostname = new URL(sourceUrl).hostname } catch {}
+        return (
+          <div className="px-4 pb-3 bg-card">
+            <div className="border-t border-border pt-2">
+              <a
+                href={sourceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <Link className="h-3 w-3 flex-shrink-0" />
+                <span>{hostname}</span>
+                <ExternalLink className="h-3 w-3 flex-shrink-0" />
+              </a>
+            </div>
+          </div>
+        )
+      })()}
     </div>
   )
 })
