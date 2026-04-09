@@ -12,8 +12,6 @@ interface MobileCardListProps {
   isLoading?: boolean;
   emptyMessage?: string;
   onCardPress?: (card: CardWithTags) => void;
-  onRefresh?: () => void;
-  refreshing?: boolean;
   className?: string;
 }
 
@@ -73,8 +71,6 @@ export const MobileCardList = memo(function MobileCardList({
   isLoading,
   emptyMessage = 'カードがありません',
   onCardPress,
-  onRefresh,
-  refreshing = false,
   className,
 }: MobileCardListProps) {
   const renderItem = useCallback(
@@ -115,8 +111,6 @@ export const MobileCardList = memo(function MobileCardList({
         initialNumToRender={10}
         keyExtractor={keyExtractor}
         maxToRenderPerBatch={5}
-        onRefresh={onRefresh}
-        refreshing={refreshing}
         removeClippedSubviews
         renderItem={renderItem}
         showsVerticalScrollIndicator={false}
