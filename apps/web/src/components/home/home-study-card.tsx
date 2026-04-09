@@ -154,7 +154,7 @@ export const HomeStudyCard = memo(function HomeStudyCard({
             tags.length > 0 ? (
               <>
                 {tags.map((tag) => (
-                  <TagBadge key={tag.id}>{tag.name}</TagBadge>
+                  <TagBadge key={tag.id} color={tag.color}>{tag.name}</TagBadge>
                 ))}
               </>
             ) : undefined
