@@ -1,32 +1,14 @@
-import { View, Text, StyleSheet } from "react-native";
-import { StatusBar } from "expo-status-bar";
+import { Redirect } from 'expo-router';
+import { useAuthContext } from '@/lib/auth/AuthProvider';
 
-export default function Home() {
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>BBS Mobile</Text>
-      <Text style={styles.subtitle}>モバイルアプリケーション</Text>
-      <StatusBar style="auto" />
-    </View>
-  );
+export default function IndexRedirect() {
+  const { user, loading } = useAuthContext();
+
+  if (loading) return null;
+
+  if (user) {
+    return <Redirect href="/(tabs)" />;
+  }
+
+  return <Redirect href="/(auth)/login" />;
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: "bold",
-    color: "#10b981",
-  },
-  subtitle: {
-    marginTop: 16,
-    fontSize: 16,
-    color: "#6b7280",
-  },
-});
-
