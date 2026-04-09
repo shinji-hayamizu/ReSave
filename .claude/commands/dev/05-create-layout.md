@@ -80,15 +80,19 @@ ls apps/*/app.json 2>/dev/null | xargs -I{} grep -l "expo" {} 2>/dev/null
 
 **`apps/{web_app}` が存在する場合に実行**
 
-### 2.1 QueryClient + ThemeProvider
+### 2.1 QueryClient（+ オプション: ThemeProvider）
+
+**必須:** `@tanstack/react-query`
+**任意:** `next-themes`（ダークモード対応する場合のみ）、`@tanstack/react-query-devtools`（開発時のみ）
 
 #### `apps/{web_app}/src/components/providers.tsx`
 ```typescript
 'use client'
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
-import { ThemeProvider } from 'next-themes'
+// next-themes を導入済みの場合のみ追加:
+// import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+// import { ThemeProvider } from 'next-themes'
 import { useState } from 'react'
 
 export function Providers({ children }: { children: React.ReactNode }) {
@@ -105,15 +109,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider
-        disableTransitionOnChange
-        enableSystem
-        attribute="class"
-        defaultTheme="system"
-      >
-        {children}
-      </ThemeProvider>
-      <ReactQueryDevtools initialIsOpen={false} />
+      {/* next-themes 導入済みの場合: ThemeProvider でラップ */}
+      {children}
+      {/* 開発環境のみ: <ReactQueryDevtools initialIsOpen={false} /> */}
     </QueryClientProvider>
   )
 }
@@ -131,7 +129,8 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 
 import { Providers } from '@/components/providers'
-import { Toaster } from '@/components/ui/sonner'
+// sonner を導入済みの場合のみ追加:
+// import { Toaster } from '@/components/ui/sonner'
 
 import './globals.css'
 
@@ -155,7 +154,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <Providers>
           {children}
-          <Toaster />
+          {/* sonner 導入済みの場合のみ: <Toaster /> */}
         </Providers>
       </body>
     </html>
@@ -169,12 +168,16 @@ export default function RootLayout({
 
 ### 4.1 (main) グループレイアウト
 
+**注意:** 以下は shadcn/ui の `sidebar` コンポーネントを使用するパターン。
+shadcn/ui 未使用の場合は `SidebarProvider` / `SidebarInset` を除去し、`<div>` ベースのレイアウトに変更すること。
+
 #### `apps/{web_app}/src/app/(main)/layout.tsx`
 ```typescript
 import { redirect } from 'next/navigation'
 
 import { AppSidebar } from '@/components/layout/app-sidebar'
 import { MobileNav } from '@/components/layout/mobile-nav'
+// shadcn/ui sidebar を導入済みの場合のみ:
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import { createClient } from '@/lib/supabase/server'
 
@@ -237,7 +240,8 @@ export function AppSidebar() {
     <Sidebar className="hidden md:flex">
       <SidebarHeader className="border-b p-4">
         <Link className="flex items-center gap-2 font-bold" href="/">
-          <span className="text-xl">{app_name}</span>
+          {/* アーキテクチャドキュメントの {app_name} に合わせてアプリ名を記載 */}
+          <span className="text-xl">アプリ名</span>
         </Link>
       </SidebarHeader>
       <SidebarContent>
@@ -513,7 +517,8 @@ export default function HomeScreen() {
     <SafeAreaView className="flex-1 bg-gray-50">
       <ScrollView className="flex-1">
         <View className="px-4 pt-6 pb-4">
-          <Text className="text-2xl font-bold text-gray-900">{app_name}</Text>
+          {/* アーキテクチャドキュメントの {app_name} に合わせてアプリ名を記載 */}
+          <Text className="text-2xl font-bold text-gray-900">アプリ名</Text>
         </View>
         {/* コンテンツをここに追加 */}
       </ScrollView>

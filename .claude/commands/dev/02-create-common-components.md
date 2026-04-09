@@ -214,9 +214,11 @@ import { cn } from '{web_utils}'
 
 interface PasswordInputProps extends React.ComponentProps<typeof Input> {
   showToggle?: boolean
+  showLabel?: string   // デフォルト: 'Show password'
+  hideLabel?: string   // デフォルト: 'Hide password'
 }
 
-export function PasswordInput({ className, showToggle = true, ...props }: PasswordInputProps) {
+export function PasswordInput({ className, showToggle = true, showLabel = 'Show password', hideLabel = 'Hide password', ...props }: PasswordInputProps) {
   const [isVisible, setIsVisible] = useState(false)
 
   return (
@@ -240,7 +242,7 @@ export function PasswordInput({ className, showToggle = true, ...props }: Passwo
             <Eye className="h-4 w-4 text-muted-foreground" />
           )}
           <span className="sr-only">
-            {isVisible ? 'パスワードを隠す' : 'パスワードを表示'}
+            {isVisible ? hideLabel : showLabel}
           </span>
         </Button>
       )}
@@ -263,7 +265,8 @@ export function TagBadge({ children, className }: TagBadgeProps) {
     <span
       className={cn(
         'inline-flex items-center px-3 py-1',
-        'bg-sky-100 text-sky-700 border border-sky-200',
+        // デフォルトカラーはモックのデザイントークンに合わせて変更すること
+        'bg-primary/10 text-primary border border-primary/20',
         'text-xs font-medium rounded-full',
         className
       )}
@@ -444,7 +447,8 @@ interface TagBadgeProps {
 export function TagBadge({ children, className }: TagBadgeProps) {
   return (
     <Text className={cn(
-      'px-3 py-1 bg-sky-100 text-sky-700 text-xs font-medium rounded-full',
+      // デフォルトカラーはプロジェクトのデザイントークンに合わせて変更すること
+      'px-3 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full',
       className
     )}>
       {children}
