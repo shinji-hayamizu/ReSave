@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Settings, ChevronDown } from 'lucide-react';
+import { X } from 'lucide-react';
 import TextareaAutosize from 'react-textarea-autosize';
 
 import { Button } from '@/components/ui/button';
@@ -18,11 +18,6 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '@/components/ui/collapsible';
 import { TagSelector } from '@/components/cards/tag-selector';
 import { cn } from '@/lib/utils';
 
@@ -92,7 +87,6 @@ export function CardInputForm({
   isSubmitting = false,
   formId,
 }: CardInputFormProps) {
-  const [optionsOpen, setOptionsOpen] = useState(false);
   const form = useForm<CardInputFormValues>({
     resolver: zodResolver(cardInputSchema),
     defaultValues: {
@@ -221,60 +215,44 @@ export function CardInputForm({
             />
           </div>
 
-          {/* Optional Settings (Collapsible) */}
-          <Collapsible open={optionsOpen} onOpenChange={setOptionsOpen}>
-            <CollapsibleTrigger asChild>
-              <button
-                type="button"
-                className={cn(
-                  'w-full flex items-center justify-between px-5 py-4',
-                  'bg-muted/40 border-t',
-                  'transition-colors hover:bg-muted/60',
-                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:ring-inset'
-                )}
-              >
-                <span className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                  <Settings className="h-4 w-4" />
-                  詳細設定
-                </span>
-                <ChevronDown
-                  className={cn(
-                    'h-5 w-5 text-muted-foreground transition-transform duration-200',
-                    optionsOpen && 'rotate-180'
-                  )}
-                />
-              </button>
-            </CollapsibleTrigger>
-            <CollapsibleContent>
-              <div className="px-5 py-5 space-y-5 bg-muted/40 border-t">
-                {/* Source URL */}
-                <FormField
-                  control={form.control}
-                  name="sourceUrl"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-sm font-medium mb-2 block">
-                        ソースURL
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          type="url"
-                          placeholder="https://example.com"
-                          className="h-11"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormDescription className="text-[13px] mt-2">
-                        参照元のURLを記録できます
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-              </div>
-            </CollapsibleContent>
-          </Collapsible>
+          {/* Source URL */}
+          <div className="px-5 pb-5">
+            <FormField
+              control={form.control}
+              name="sourceUrl"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-sm font-medium mb-2 block">
+                    ソースURL
+                  </FormLabel>
+                  <FormControl>
+                    <div className="relative flex items-center">
+                      <Input
+                        type="url"
+                        placeholder="https://example.com"
+                        className="h-11 pr-10"
+                        {...field}
+                      />
+                      {field.value && (
+                        <button
+                          type="button"
+                          className="absolute right-2 text-muted-foreground hover:text-foreground transition-colors"
+                          onClick={() => field.onChange('')}
+                          title="クリア"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      )}
+                    </div>
+                  </FormControl>
+                  <FormDescription className="text-[13px] mt-2">
+                    参照元のURLを記録できます
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
         </div>
 
         {/* Submit Button - Desktop only, mobile uses sticky footer in parent */}

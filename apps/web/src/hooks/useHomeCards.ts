@@ -289,6 +289,10 @@ export function useHomeUpdateCard() {
         });
       }
     },
+    onSettled: () => {
+      qc.invalidateQueries({ queryKey: homeCardKeys.tab('due') });
+      qc.invalidateQueries({ queryKey: homeCardKeys.tab('learning') });
+    },
   });
 }
 
