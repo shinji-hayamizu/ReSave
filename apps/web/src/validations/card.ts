@@ -23,7 +23,11 @@ export const createCardSchema = z.object({
   schedule: z.array(z.number().int().positive()).optional(),
 });
 
-export const updateCardSchema = createCardSchema.partial();
+export const updateCardSchema = z.object({
+  front: z.string().min(1, '必須項目です').max(10000, '10000文字以内で入力してください').optional(),
+  back: z.string().max(10000, '10000文字以内で入力してください').optional(),
+  tagIds: z.array(z.string().uuid()).optional(),
+});
 
 export const cardQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(100).default(20),
