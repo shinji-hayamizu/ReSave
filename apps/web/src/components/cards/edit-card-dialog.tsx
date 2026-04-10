@@ -1,5 +1,6 @@
 'use client';
 
+import { useMemo } from 'react';
 import { Check, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -44,14 +45,19 @@ export function EditCardDialog({ card, open, onOpenChange }: EditCardDialogProps
     }
   };
 
-  const defaultValues: Partial<CardInputFormValues> | undefined = card
-    ? {
-        front: card.front,
-        back: card.back || '',
-        sourceUrl: card.sourceUrl || '',
-        tagIds: card.tags.map((tag) => tag.id),
-      }
-    : undefined;
+  const defaultValues = useMemo<Partial<CardInputFormValues> | undefined>(
+    () =>
+      card
+        ? {
+            front: card.front,
+            back: card.back || '',
+            sourceUrl: card.sourceUrl || '',
+            tagIds: card.tags.map((tag) => tag.id),
+          }
+        : undefined,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [card?.id, card?.front, card?.back, card?.sourceUrl, card?.tags]
+  );
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
