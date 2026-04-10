@@ -1,7 +1,8 @@
 ---
 name: dev:finish
 description: |
-  ReSaveの機能実装を完了し、developブランチにPR経由でマージするスキル。
+  ReSaveの機能実装を完了し、PR経由でマージするスキル。
+  ネストworktree（--from で派生したブランチ）の場合は親ブランチに向けてPR作成。
   テスト → コミット → PR作成 → マージ → worktreeクリーンアップ。
 allowed-tools: Bash, Skill
 ---
@@ -16,7 +17,7 @@ allowed-tools: Bash, Skill
 
 ## フロー
 
-### Step 1: ブランチ確認
+### Step 1: ブランチ確認 + PRベース判定
 
 ```bash
 git branch --show-current
@@ -26,6 +27,17 @@ git branch --show-current
 `develop` または `master` ブランチの場合は中断し、`feature/*` ブランチで実行するよう案内する。
 
 現在のブランチ名から worktree 名（`feature/` を除いた部分）を取得する。
+
+**PRのベースブランチを判定する:**
+
+```bash
+# .base-branch ファイルが存在する場合 → ネストworktree（親ブランチへのPR）
+BASE_BRANCH=$(cat .base-branch 2>/dev/null || echo "develop")
+echo "PRベース: $BASE_BRANCH"
+```
+
+- `.base-branch` が存在する → **ネストフロー**: そのブランチに向けてPR作成
+- `.base-branch` が存在しない → **通常フロー**: `develop` に向けてPR作成
 
 ### Step 2: 未コミット変更をコミット
 
@@ -43,55 +55,62 @@ Skill(convenience:commit)
 
 変更がない場合はこのステップをスキップ。
 
-### Step 4: ブランチをpush
+### Step 3: ブランチをpush
 
 ```bash
-git push origin feature/<name>
+git push origin <current-branch>
 ```
 
-### Step 5: PR作成
+### Step 4: PR作成
 
 ```
 Skill(convenience:create-pr)
 ```
 
 **PR設定:**
-- ベースブランチ: `develop`
+- ベースブランチ: `$BASE_BRANCH`（通常は `develop`、ネスト時は親ブランチ）
 - タイトル: コミット内容から自動生成
 - 本文: 変更内容のサマリー
 
+ネストフローの場合は本文に以下を追記する:
+```
+> このPRは `<base-branch>` ブランチへのマージを対象としています。
+> マージ順序: このブランチ → `<base-branch>` → develop
+```
+
 PR URLを表示する。
 
-### Step 6: マージ or 終了
+### Step 5: マージ or 終了
 
 `--no-merge` 引数がある場合はここで終了し、PRのURLを表示する。
 
-`--no-merge` がない場合はそのまま Step 7 へ進む（確認不要）。
+`--no-merge` がない場合はそのまま Step 6 へ進む（確認不要）。
 
-### Step 7: PRをマージ
+### Step 6: PRをマージ
 
 ```bash
-gh pr merge <PR番号> --merge --delete-branch
+gh pr merge --merge --delete-branch
 ```
 
 `--delete-branch` でリモートブランチを自動削除。
 
-### Step 8: worktreeとローカルブランチを削除
+### Step 7: worktreeとローカルブランチを削除
 
 ```bash
-# developに戻る
-git checkout develop
-git pull origin develop
+# ベースブランチに戻る
+git checkout $BASE_BRANCH
+git pull origin $BASE_BRANCH 2>/dev/null || true
 
 # worktreeを削除
 git worktree remove .claude/worktrees/<name> --force
 
 # ローカルブランチを削除
-git branch -D feature/<name> 2>/dev/null || true
+git branch -D <current-branch> 2>/dev/null || true
 ```
 
-### Step 9: 完了報告
+### Step 8: 完了報告
 
+**通常フロー:**
 ```
 完了しました。
 
@@ -103,8 +122,21 @@ git branch -D feature/<name> 2>/dev/null || true
 - /dev:new-feature  次の機能開発を開始
 ```
 
+**ネストフロー:**
+```
+完了しました。
+
+マージ先: <base-branch>（親ブランチ）
+削除したブランチ: feature/<name>
+
+次のアクション:
+- <base-branch> のPRをマージして develop に取り込む
+- /dev:new-feature --from <base-branch>  さらに派生ブランチを作成
+```
+
 ## 注意事項
 
 - マージ後のクリーンアップは自動で行われる
 - `--no-merge` を使用した場合、worktreeとブランチは手動で削除する必要がある
 - PRのレビューが必要な場合は `--no-merge` を使用してレビュワーを追加してからマージする
+- ネストworktreeのPRは親ブランチに向く（`.base-branch` ファイルで判定）
