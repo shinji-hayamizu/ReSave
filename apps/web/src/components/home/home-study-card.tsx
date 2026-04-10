@@ -31,8 +31,10 @@ interface HomeStudyCardProps {
   schedule?: number[];
   intervals?: { ok?: string; again?: string };
   showAgain?: boolean;
+  isDisabled?: boolean;
   onAssessmentComplete?: () => void;
   onEdit?: () => void;
+  onEditingChange?: (isEditing: boolean) => void;
   className?: string;
 }
 
@@ -53,8 +55,10 @@ export const HomeStudyCard = memo(function HomeStudyCard({
   schedule,
   intervals,
   showAgain = true,
+  isDisabled = false,
   onAssessmentComplete,
   onEdit,
+  onEditingChange,
   className,
 }: HomeStudyCardProps) {
   const [isRemoving, setIsRemoving] = useState(false);
@@ -94,6 +98,7 @@ export const HomeStudyCard = memo(function HomeStudyCard({
 
   const handleSave = useCallback(
     async (data: { front?: string; back?: string }) => {
+      onEditingChange?.(true);
       try {
         await updateCard.mutateAsync({
           id,
@@ -102,9 +107,11 @@ export const HomeStudyCard = memo(function HomeStudyCard({
         toast.success('カードを更新しました');
       } catch {
         toast.error('カードの更新に失敗しました');
+      } finally {
+        onEditingChange?.(false);
       }
     },
-    [id, updateCard]
+    [id, updateCard, onEditingChange]
   );
 
   const handleDeleteClick = useCallback(() => {
@@ -141,6 +148,7 @@ export const HomeStudyCard = memo(function HomeStudyCard({
           answer={back}
           className={className}
           currentStep={currentStep}
+          isSaving={updateCard.isPending || isDisabled}
           question={front}
           ratingButtons={
             <RatingButtons

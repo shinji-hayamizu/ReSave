@@ -46,6 +46,7 @@ export function DashboardContent() {
   const [userSelectedTab, setUserSelectedTab] = useState<CardTabValue | null>(null);
   const [editingCard, setEditingCard] = useState<CardWithTags | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [inlineEditingCardId, setInlineEditingCardId] = useState<string | null>(null);
   const { data, isLoading } = useHomeCards();
 
   const categorizedCards = useMemo(() => {
@@ -105,6 +106,10 @@ export function DashboardContent() {
     setUserSelectedTab('due');
   }, []);
 
+  const handleInlineEditingChange = useCallback((cardId: string, isEditing: boolean) => {
+    setInlineEditingCardId(isEditing ? cardId : null);
+  }, []);
+
   const activeCards = categorizedCards[activeTab];
 
   return (
@@ -140,10 +145,12 @@ export function DashboardContent() {
                   ok: getNextInterval(card.schedule, card.currentStep, card.status === 'new'),
                   again: `${card.schedule[0]}日後`,
                 }}
+                isDisabled={inlineEditingCardId !== null && inlineEditingCardId !== card.id}
                 schedule={card.schedule}
                 showAgain={card.currentStep > 0}
                 tags={card.tags}
                 onEdit={() => handleEdit(card)}
+                onEditingChange={(isEditing) => handleInlineEditingChange(card.id, isEditing)}
               />
             ))}
           </div>

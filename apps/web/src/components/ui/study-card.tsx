@@ -13,6 +13,7 @@ interface StudyCardProps {
   ratingButtons?: React.ReactNode
   currentStep?: number
   totalSteps?: number
+  isSaving?: boolean
   onEdit?: () => void
   onDelete?: () => void
   onSave?: (data: { front?: string; back?: string }) => void
@@ -27,6 +28,7 @@ export const StudyCard = memo(function StudyCard({
   ratingButtons,
   currentStep,
   totalSteps,
+  isSaving = false,
   onEdit,
   onDelete,
   onSave,
@@ -35,10 +37,13 @@ export const StudyCard = memo(function StudyCard({
 }: StudyCardProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen)
   const [editingField, setEditingField] = useState<'front' | 'back' | null>(null)
-  const [editValue, setEditValue] = useState('')
+  const [frontValue, setFrontValue] = useState('')
+  const [backValue, setBackValue] = useState('')
   const [isWritingAnswer, setIsWritingAnswer] = useState(false)
+  const [writeAnswerValue, setWriteAnswerValue] = useState('')
   const cardRef = useRef<HTMLDivElement>(null)
-  const textareaRef = useRef<HTMLTextAreaElement | null>(null)
+  const frontTextareaRef = useRef<HTMLTextAreaElement | null>(null)
+  const backTextareaRef = useRef<HTMLTextAreaElement | null>(null)
   const writeAnswerRef = useRef<HTMLTextAreaElement | null>(null)
   const scrollTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
@@ -63,46 +68,55 @@ export const StudyCard = memo(function StudyCard({
     } else {
       if (editingField === 'back') {
         setEditingField(null)
+        setBackValue('')
       }
     }
   }
 
   const startEdit = useCallback((field: 'front' | 'back') => {
+    if (isSaving) return
     if (field === 'back' && !isOpen) return
     setEditingField(field)
-    setEditValue(field === 'front' ? question : (answer ?? ''))
-  }, [isOpen, question, answer])
+    if (field === 'front') {
+      setFrontValue(question)
+    } else {
+      setBackValue(answer ?? '')
+    }
+  }, [isSaving, isOpen, question, answer])
 
   const cancelEdit = useCallback(() => {
     setEditingField(null)
-    setEditValue('')
+    setFrontValue('')
+    setBackValue('')
   }, [])
 
   const startWriteAnswer = useCallback(() => {
+    if (isSaving) return
     setIsWritingAnswer(true)
-    setEditValue('')
-  }, [])
+    setWriteAnswerValue('')
+  }, [isSaving])
 
   const cancelWriteAnswer = useCallback(() => {
     setIsWritingAnswer(false)
-    setEditValue('')
+    setWriteAnswerValue('')
   }, [])
 
   const saveWriteAnswer = useCallback(() => {
     if (!onSave) return
-    const trimmed = editValue.trim()
+    const trimmed = writeAnswerValue.trim()
     if (!trimmed) {
       cancelWriteAnswer()
       return
     }
     onSave({ back: trimmed })
     setIsWritingAnswer(false)
-    setEditValue('')
-  }, [editValue, onSave, cancelWriteAnswer])
+    setWriteAnswerValue('')
+  }, [writeAnswerValue, onSave, cancelWriteAnswer])
 
   const saveEdit = useCallback(() => {
     if (!editingField || !onSave) return
-    const trimmed = editValue.trim()
+    const value = editingField === 'front' ? frontValue : backValue
+    const trimmed = value.trim()
     if (!trimmed) {
       cancelEdit()
       return
@@ -113,13 +127,17 @@ export const StudyCard = memo(function StudyCard({
       onSave({ back: trimmed })
     }
     setEditingField(null)
-    setEditValue('')
-  }, [editingField, editValue, onSave, cancelEdit])
+    setFrontValue('')
+    setBackValue('')
+  }, [editingField, frontValue, backValue, onSave, cancelEdit])
 
   useEffect(() => {
-    if (editingField && textareaRef.current) {
-      textareaRef.current.focus()
-      textareaRef.current.select()
+    if (editingField === 'front' && frontTextareaRef.current) {
+      frontTextareaRef.current.focus()
+      frontTextareaRef.current.select()
+    } else if (editingField === 'back' && backTextareaRef.current) {
+      backTextareaRef.current.focus()
+      backTextareaRef.current.select()
     }
   }, [editingField])
 
@@ -145,7 +163,7 @@ export const StudyCard = memo(function StudyCard({
   }, [editingField, cancelEdit, isWritingAnswer, cancelWriteAnswer])
 
   const showReviewInfo = currentStep !== undefined && totalSteps !== undefined && totalSteps > 0
-  const canInlineEdit = Boolean(onSave)
+  const canInlineEdit = Boolean(onSave) && !isSaving
 
   return (
     <div
@@ -173,9 +191,9 @@ export const StudyCard = memo(function StudyCard({
         {editingField === 'front' ? (
           <div className="flex gap-3 items-start">
             <TextareaAutosize
-              ref={textareaRef}
-              value={editValue}
-              onChange={(e) => setEditValue(e.target.value)}
+              ref={frontTextareaRef}
+              value={frontValue}
+              onChange={(e) => setFrontValue(e.target.value)}
               minRows={2}
               className="flex-1 p-3 text-base text-foreground leading-relaxed border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
             />
@@ -183,14 +201,16 @@ export const StudyCard = memo(function StudyCard({
               <button
                 type="button"
                 onClick={saveEdit}
-                className="h-10 w-10 rounded-lg bg-success/10 text-success inline-flex items-center justify-center hover:bg-success/20 transition-colors"
+                disabled={isSaving}
+                className="h-10 w-10 rounded-lg bg-success/10 text-success inline-flex items-center justify-center hover:bg-success/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Check className="h-5 w-5" />
               </button>
               <button
                 type="button"
                 onClick={cancelEdit}
-                className="h-10 w-10 rounded-lg bg-destructive/10 text-destructive inline-flex items-center justify-center hover:bg-destructive/20 transition-colors"
+                disabled={isSaving}
+                className="h-10 w-10 rounded-lg bg-destructive/10 text-destructive inline-flex items-center justify-center hover:bg-destructive/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -268,9 +288,9 @@ export const StudyCard = memo(function StudyCard({
                 {editingField === 'back' ? (
                   <div className="flex gap-3 items-start">
                     <TextareaAutosize
-                      ref={textareaRef}
-                      value={editValue}
-                      onChange={(e) => setEditValue(e.target.value)}
+                      ref={backTextareaRef}
+                      value={backValue}
+                      onChange={(e) => setBackValue(e.target.value)}
                       minRows={3}
                       className="flex-1 p-3 text-base text-foreground leading-relaxed bg-amber-50 border border-amber-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
                     />
@@ -278,14 +298,16 @@ export const StudyCard = memo(function StudyCard({
                       <button
                         type="button"
                         onClick={saveEdit}
-                        className="h-10 w-10 rounded-lg bg-success/10 text-success inline-flex items-center justify-center hover:bg-success/20 transition-colors"
+                        disabled={isSaving}
+                        className="h-10 w-10 rounded-lg bg-success/10 text-success inline-flex items-center justify-center hover:bg-success/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         <Check className="h-5 w-5" />
                       </button>
                       <button
                         type="button"
                         onClick={cancelEdit}
-                        className="h-10 w-10 rounded-lg bg-destructive/10 text-destructive inline-flex items-center justify-center hover:bg-destructive/20 transition-colors"
+                        disabled={isSaving}
+                        className="h-10 w-10 rounded-lg bg-destructive/10 text-destructive inline-flex items-center justify-center hover:bg-destructive/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         <X className="h-5 w-5" />
                       </button>
@@ -314,8 +336,8 @@ export const StudyCard = memo(function StudyCard({
             <div className="flex gap-3 items-start">
               <TextareaAutosize
                 ref={writeAnswerRef}
-                value={editValue}
-                onChange={(e) => setEditValue(e.target.value)}
+                value={writeAnswerValue}
+                onChange={(e) => setWriteAnswerValue(e.target.value)}
                 minRows={3}
                 className="flex-1 p-3 text-base text-foreground leading-relaxed bg-amber-50 border border-amber-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
                 placeholder="答えを入力..."
@@ -324,14 +346,16 @@ export const StudyCard = memo(function StudyCard({
                 <button
                   type="button"
                   onClick={saveWriteAnswer}
-                  className="h-10 w-10 rounded-lg bg-success/10 text-success inline-flex items-center justify-center hover:bg-success/20 transition-colors"
+                  disabled={isSaving}
+                  className="h-10 w-10 rounded-lg bg-success/10 text-success inline-flex items-center justify-center hover:bg-success/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Check className="h-5 w-5" />
                 </button>
                 <button
                   type="button"
                   onClick={cancelWriteAnswer}
-                  className="h-10 w-10 rounded-lg bg-destructive/10 text-destructive inline-flex items-center justify-center hover:bg-destructive/20 transition-colors"
+                  disabled={isSaving}
+                  className="h-10 w-10 rounded-lg bg-destructive/10 text-destructive inline-flex items-center justify-center hover:bg-destructive/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <X className="h-5 w-5" />
                 </button>
