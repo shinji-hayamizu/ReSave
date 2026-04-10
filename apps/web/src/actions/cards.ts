@@ -137,14 +137,16 @@ export async function updateCard(id: string, input: UpdateCardInput): Promise<Ca
 
   const validated = updateCardSchema.parse(input);
 
+  const updateFields: Record<string, unknown> = {
+    updated_at: new Date().toISOString(),
+  };
+  if (validated.front !== undefined) updateFields.front = validated.front;
+  if (validated.back !== undefined) updateFields.back = validated.back;
+  if (validated.sourceUrl !== undefined) updateFields.source_url = validated.sourceUrl || null;
+
   const { data: card, error } = await supabase
     .from('cards')
-    .update({
-      front: validated.front,
-      back: validated.back,
-      source_url: validated.sourceUrl !== undefined ? (validated.sourceUrl || null) : undefined,
-      updated_at: new Date().toISOString(),
-    })
+    .update(updateFields)
     .eq('id', id)
     .eq('user_id', user.id)
     .select()

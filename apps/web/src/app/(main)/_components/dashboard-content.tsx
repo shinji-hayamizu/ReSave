@@ -54,6 +54,7 @@ export function DashboardContent() {
   const [editingCard, setEditingCard] = useState<CardWithTags | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDueUserEnabled, setIsDueUserEnabled] = useState(false);
+  const [inlineEditingCardId, setInlineEditingCardId] = useState<string | null>(null);
 
   const dueCountQuery = useHomeDueCount();
   const learningQuery = useHomeLearningCards();
@@ -148,6 +149,10 @@ export function DashboardContent() {
     setUserSelectedTab('due');
   }, []);
 
+  const handleInlineEditingChange = useCallback((cardId: string, isEditing: boolean) => {
+    setInlineEditingCardId(isEditing ? cardId : null);
+  }, []);
+
   const isMobile = useIsMobile();
 
   return (
@@ -198,11 +203,13 @@ export function DashboardContent() {
                       ok: getNextInterval(card.schedule, card.currentStep, card.status === 'new'),
                       again: `${card.schedule[0]}日後`,
                     }}
+                    isDisabled={inlineEditingCardId !== null && inlineEditingCardId !== card.id}
                     schedule={card.schedule}
                     showAgain={card.currentStep > 0}
                     sourceUrl={card.sourceUrl}
                     tags={card.tags}
                     onEdit={() => handleEdit(card)}
+                    onEditingChange={(isEditing) => handleInlineEditingChange(card.id, isEditing)}
                   />
                   {index === activeCards.length - 2 && (
                     <div ref={triggerRef} aria-hidden="true" />
