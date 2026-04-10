@@ -29,6 +29,7 @@ interface HomeStudyCardProps {
   tags?: Tag[];
   currentStep?: number;
   schedule?: number[];
+  sourceUrl?: string | null;
   intervals?: { ok?: string; again?: string };
   showAgain?: boolean;
   isDisabled?: boolean;
@@ -53,6 +54,7 @@ export const HomeStudyCard = memo(function HomeStudyCard({
   tags = [],
   currentStep,
   schedule,
+  sourceUrl,
   intervals,
   showAgain = true,
   isDisabled = false,
@@ -150,6 +152,7 @@ export const HomeStudyCard = memo(function HomeStudyCard({
           currentStep={currentStep}
           isSaving={updateCard.isPending || isDisabled}
           question={front}
+          sourceUrl={sourceUrl}
           ratingButtons={
             <RatingButtons
               disabled={submitAssessment.isPending || isRemoving}
@@ -162,7 +165,7 @@ export const HomeStudyCard = memo(function HomeStudyCard({
             tags.length > 0 ? (
               <>
                 {tags.map((tag) => (
-                  <TagBadge key={tag.id}>{tag.name}</TagBadge>
+                  <TagBadge key={tag.id} color={tag.color}>{tag.name}</TagBadge>
                 ))}
               </>
             ) : undefined

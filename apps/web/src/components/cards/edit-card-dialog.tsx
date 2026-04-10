@@ -33,6 +33,7 @@ export function EditCardDialog({ card, open, onOpenChange }: EditCardDialogProps
         input: {
           front: data.front,
           back: data.back || undefined,
+          sourceUrl: data.sourceUrl,
           tagIds: data.tagIds.length > 0 ? data.tagIds : undefined,
         },
       });
@@ -47,6 +48,7 @@ export function EditCardDialog({ card, open, onOpenChange }: EditCardDialogProps
     ? {
         front: card.front,
         back: card.back || '',
+        sourceUrl: card.sourceUrl || '',
         tagIds: card.tags.map((tag) => tag.id),
       }
     : undefined;

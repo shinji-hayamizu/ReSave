@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 
-import type { Card, CardWithTags, CreateCardInput, UpdateCardInput, CardFilters, CardListResponse, HomeCardsData } from '@/types/card';
+import type { Card, CardWithTags, CreateCardInput, UpdateCardInput, CardFilters, CardListResponse, HomeCardsData, HomeCardsPage, CompletedCardsPage } from '@/types/card';
 import { DEFAULT_INTERVALS } from '@/types/review-schedule';
 import { createCardSchema, updateCardSchema } from '@/validations/card';
 import { createClient } from '@/lib/supabase/server';
@@ -22,6 +22,7 @@ interface SupabaseCardRow {
   user_id: string;
   front: string;
   back: string;
+  source_url: string | null;
   schedule: number[];
   current_step: number;
   next_review_at: string | null;
@@ -38,6 +39,7 @@ function mapCardRow(card: SupabaseCardRow): CardWithTags {
     userId: card.user_id,
     front: card.front,
     back: card.back,
+    sourceUrl: card.source_url,
     schedule: card.schedule,
     currentStep: card.current_step,
     nextReviewAt: card.next_review_at,
@@ -76,6 +78,7 @@ export async function createCard(input: CreateCardInput): Promise<Card> {
       user_id: user.id,
       front: validated.front,
       back: validated.back,
+      source_url: validated.sourceUrl || null,
       schedule,
       current_step: 0,
       next_review_at: null,
@@ -110,6 +113,7 @@ export async function createCard(input: CreateCardInput): Promise<Card> {
     userId: card.user_id,
     front: card.front,
     back: card.back,
+    sourceUrl: card.source_url,
     schedule: card.schedule,
     currentStep: card.current_step,
     nextReviewAt: card.next_review_at,
@@ -138,6 +142,7 @@ export async function updateCard(id: string, input: UpdateCardInput): Promise<Ca
   };
   if (validated.front !== undefined) updateFields.front = validated.front;
   if (validated.back !== undefined) updateFields.back = validated.back;
+  if (validated.sourceUrl !== undefined) updateFields.source_url = validated.sourceUrl || null;
 
   const { data: card, error } = await supabase
     .from('cards')
@@ -184,6 +189,7 @@ export async function updateCard(id: string, input: UpdateCardInput): Promise<Ca
     userId: card.user_id,
     front: card.front,
     back: card.back,
+    sourceUrl: card.source_url,
     schedule: card.schedule,
     currentStep: card.current_step,
     nextReviewAt: card.next_review_at,
@@ -333,28 +339,16 @@ export async function resetCardToUnlearned(id: string): Promise<Card> {
     throw new Error('Unauthorized');
   }
 
-  const { data: existingCard, error: fetchError } = await supabase
-    .from('cards')
-    .select('schedule')
-    .eq('id', id)
-    .eq('user_id', user.id)
-    .single();
-
-  if (fetchError || !existingCard) {
-    throw new Error('Card not found');
-  }
-
   const now = new Date();
-  const nextReviewAt = new Date(now);
-  nextReviewAt.setDate(nextReviewAt.getDate() + existingCard.schedule[0]);
 
   const { data: card, error } = await supabase
     .from('cards')
     .update({
       current_step: 0,
-      next_review_at: nextReviewAt.toISOString(),
-      status: 'active',
+      next_review_at: null,
+      status: 'new',
       completed_at: null,
+      created_at: now.toISOString(),
       updated_at: now.toISOString(),
     })
     .eq('id', id)
@@ -374,6 +368,7 @@ export async function resetCardToUnlearned(id: string): Promise<Card> {
     userId: card.user_id,
     front: card.front,
     back: card.back,
+    sourceUrl: card.source_url,
     schedule: card.schedule,
     currentStep: card.current_step,
     nextReviewAt: card.next_review_at,
@@ -386,8 +381,7 @@ export async function resetCardToUnlearned(id: string): Promise<Card> {
 
 /**
  * 完了タブに表示するカードを取得
- * 1. status = 'completed' のカード（復習完了済み）
- * 2. 今日復習したカード（study_logsで今日評価を受けたカード）
+ * status = 'completed' のカードのみ（completed_at 降順）
  */
 export async function getTodayCompletedCards(): Promise<CardWithTags[]> {
   const supabase = await createClient();
@@ -397,72 +391,65 @@ export async function getTodayCompletedCards(): Promise<CardWithTags[]> {
     throw new Error('Unauthorized');
   }
 
-  // 今日の開始時刻（00:00:00）
-  const todayStart = new Date();
-  todayStart.setHours(0, 0, 0, 0);
+  const { data, error } = await supabase
+    .from('cards')
+    .select(`
+      *,
+      card_tags (
+        tag:tags (*)
+      )
+    `)
+    .eq('user_id', user.id)
+    .eq('status', 'completed')
+    .order('completed_at', { ascending: false });
 
-  // 並列で取得: 1. status='completed'のカード 2. 今日評価を受けたカードID
-  const [completedCardsResult, studyLogsResult] = await Promise.all([
-    supabase
-      .from('cards')
-      .select(`
-        *,
-        card_tags (
-          tag:tags (*)
-        )
-      `)
-      .eq('user_id', user.id)
-      .eq('status', 'completed')
-      .order('completed_at', { ascending: false }),
-    supabase
-      .from('study_logs')
-      .select('card_id')
-      .eq('user_id', user.id)
-      .gte('studied_at', todayStart.toISOString()),
-  ]);
-
-  if (completedCardsResult.error) {
-    throw new Error(`Failed to fetch completed cards: ${completedCardsResult.error.message}`);
+  if (error) {
+    throw new Error(`Failed to fetch completed cards: ${error.message}`);
   }
 
-  if (studyLogsResult.error) {
-    throw new Error(`Failed to fetch study logs: ${studyLogsResult.error.message}`);
+  return ((data || []) as unknown as SupabaseCardRow[]).map(mapCardRow);
+}
+
+/**
+ * 完了カードをページネーション取得（completed_at 降順）
+ */
+export async function getCompletedCards({ limit, offset }: { limit: number; offset: number }): Promise<CompletedCardsPage> {
+  const supabase = await createClient();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    throw new Error('Unauthorized');
   }
 
-  const completedCards = completedCardsResult.data || [];
-  const studyLogs = studyLogsResult.data || [];
+  const { data, error, count } = await supabase
+    .from('cards')
+    .select(`
+      *,
+      card_tags (
+        tag:tags (*)
+      )
+    `, { count: 'exact' })
+    .eq('user_id', user.id)
+    .eq('status', 'completed')
+    .order('completed_at', { ascending: false })
+    .range(offset, offset + limit - 1);
 
-  // 今日復習したカードIDを取得（重複除去）
-  const todayStudiedCardIds = [...new Set(studyLogs.map(log => log.card_id))];
-
-  // completedCardsのIDセット（重複チェック用）
-  const completedCardIds = new Set(completedCards.map(card => card.id));
-
-  // 今日復習したがstatus='completed'ではないカードを取得
-  const additionalCardIds = todayStudiedCardIds.filter(id => !completedCardIds.has(id));
-
-  let additionalCards: SupabaseCardRow[] = [];
-  if (additionalCardIds.length > 0) {
-    const { data, error } = await supabase
-      .from('cards')
-      .select(`
-        *,
-        card_tags (
-          tag:tags (*)
-        )
-      `)
-      .eq('user_id', user.id)
-      .in('id', additionalCardIds);
-
-    if (error) {
-      throw new Error(`Failed to fetch additional cards: ${error.message}`);
-    }
-    additionalCards = (data || []) as unknown as SupabaseCardRow[];
+  if (error) {
+    throw new Error(`Failed to fetch completed cards: ${error.message}`);
   }
 
-  const allCards = [...completedCards, ...additionalCards];
+  const cards: CardWithTags[] = ((data || []) as unknown as SupabaseCardRow[]).map(mapCardRow);
+  const total = count ?? 0;
 
-  return (allCards as unknown as SupabaseCardRow[]).map(mapCardRow);
+  return {
+    cards,
+    pagination: {
+      total,
+      limit,
+      offset,
+      hasMore: offset + limit < total,
+    },
+  };
 }
 
 /**
@@ -543,6 +530,144 @@ export async function getHomeCards(): Promise<HomeCardsData> {
   )];
 
   return { cards, todayStudiedCardIds, fetchedAt: new Date().toISOString() };
+}
+
+/**
+ * ホーム画面: 未学習(status='new')カードの件数のみ取得（バッジ表示用）
+ */
+export async function getHomeDueCount(): Promise<number> {
+  const supabase = await createClient();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    throw new Error('Unauthorized');
+  }
+
+  const { count, error } = await supabase
+    .from('cards')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', user.id)
+    .eq('status', 'new');
+
+  if (error) {
+    throw new Error(`Failed to fetch due count: ${error.message}`);
+  }
+
+  return count ?? 0;
+}
+
+/**
+ * ホーム画面: 未学習(status='new')カードをページネーション取得
+ */
+export async function getHomeDueCards({ limit, offset }: { limit: number; offset: number }): Promise<HomeCardsPage> {
+  const supabase = await createClient();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    throw new Error('Unauthorized');
+  }
+
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+
+  const [cardsResult, studyLogsResult] = await Promise.all([
+    supabase
+      .from('cards')
+      .select(`
+        *,
+        card_tags (
+          tag:tags (*)
+        )
+      `, { count: 'exact' })
+      .eq('user_id', user.id)
+      .eq('status', 'new')
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1),
+    supabase
+      .from('study_logs')
+      .select('card_id')
+      .eq('user_id', user.id)
+      .gte('studied_at', todayStart.toISOString()),
+  ]);
+
+  if (cardsResult.error) {
+    throw new Error(`Failed to fetch due cards: ${cardsResult.error.message}`);
+  }
+
+  if (studyLogsResult.error) {
+    throw new Error(`Failed to fetch study logs: ${studyLogsResult.error.message}`);
+  }
+
+  const cards: CardWithTags[] = ((cardsResult.data || []) as unknown as SupabaseCardRow[]).map(mapCardRow);
+  const total = cardsResult.count ?? 0;
+  const todayStudiedCardIds = [...new Set(
+    (studyLogsResult.data || []).map(log => log.card_id)
+  )];
+
+  return {
+    cards,
+    todayStudiedCardIds,
+    fetchedAt: new Date().toISOString(),
+    pagination: { total, limit, offset, hasMore: offset + limit < total },
+  };
+}
+
+/**
+ * ホーム画面: 復習予定(status='active' & next_review_at <= now)カードをページネーション取得
+ */
+export async function getHomeLearningCards({ limit, offset }: { limit: number; offset: number }): Promise<HomeCardsPage> {
+  const supabase = await createClient();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    throw new Error('Unauthorized');
+  }
+
+  const now = new Date().toISOString();
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+
+  const [cardsResult, studyLogsResult] = await Promise.all([
+    supabase
+      .from('cards')
+      .select(`
+        *,
+        card_tags (
+          tag:tags (*)
+        )
+      `, { count: 'exact' })
+      .eq('user_id', user.id)
+      .eq('status', 'active')
+      .lte('next_review_at', now)
+      .order('next_review_at', { ascending: true })
+      .range(offset, offset + limit - 1),
+    supabase
+      .from('study_logs')
+      .select('card_id')
+      .eq('user_id', user.id)
+      .gte('studied_at', todayStart.toISOString()),
+  ]);
+
+  if (cardsResult.error) {
+    throw new Error(`Failed to fetch learning cards: ${cardsResult.error.message}`);
+  }
+
+  if (studyLogsResult.error) {
+    throw new Error(`Failed to fetch study logs: ${studyLogsResult.error.message}`);
+  }
+
+  const cards: CardWithTags[] = ((cardsResult.data || []) as unknown as SupabaseCardRow[]).map(mapCardRow);
+  const total = cardsResult.count ?? 0;
+  const todayStudiedCardIds = [...new Set(
+    (studyLogsResult.data || []).map(log => log.card_id)
+  )];
+
+  return {
+    cards,
+    todayStudiedCardIds,
+    fetchedAt: new Date().toISOString(),
+    pagination: { total, limit, offset, hasMore: offset + limit < total },
+  };
 }
 
 /**
