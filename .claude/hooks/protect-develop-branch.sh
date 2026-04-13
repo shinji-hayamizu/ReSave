@@ -8,7 +8,7 @@ if [[ "$CURRENT_BRANCH" == "develop" || "$CURRENT_BRANCH" == "master" ]]; then
   TOOL_INPUT=$(cat)
   FILE_PATH=$(echo "$TOOL_INPUT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('file_path',''))" 2>/dev/null)
 
-  if [[ "$FILE_PATH" == *"/.claude/"* || "$FILE_PATH" == *"/.claude/skills/"* ]]; then
+  if [[ "$FILE_PATH" == *"/.claude/"* || "$FILE_PATH" == *"/.claude/skills/"* || "$FILE_PATH" == *"/.claude/worktrees/"* ]]; then
     echo '{"decision": "approve"}'
     exit 0
   fi
