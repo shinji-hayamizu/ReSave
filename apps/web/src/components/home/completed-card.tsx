@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 import { StudyCard } from '@/components/ui/study-card';
 import { TagBadge } from '@/components/ui/tag-badge';
 import { cn } from '@/lib/utils';
-import { useHomeResetCard, useHomeUpdateCard } from '@/hooks/useHomeCards';
+import { useHomeResetCard } from '@/hooks/useHomeCards';
 import type { CardWithTags } from '@/types/card';
 
 function formatCompletedDate(dateStr: string): string {
@@ -23,7 +23,6 @@ interface CompletedCardProps {
 }
 
 export const CompletedCard = memo(function CompletedCard({ card }: CompletedCardProps) {
-  const updateCard = useHomeUpdateCard();
   const resetCard = useHomeResetCard();
 
   const tags = useMemo(() => {
@@ -36,18 +35,6 @@ export const CompletedCard = memo(function CompletedCard({ card }: CompletedCard
       </>
     );
   }, [card.tags]);
-
-  const handleSave = useCallback(
-    async (data: { front?: string; back?: string }) => {
-      try {
-        await updateCard.mutateAsync({ id: card.id, input: data });
-        toast.success('カードを更新しました');
-      } catch {
-        toast.error('カードの更新に失敗しました');
-      }
-    },
-    [card.id, updateCard]
-  );
 
   const handleReset = useCallback(async () => {
     try {
@@ -83,7 +70,6 @@ export const CompletedCard = memo(function CompletedCard({ card }: CompletedCard
         ratingButtons={resetButton}
         tags={tags}
         totalSteps={card.schedule.length}
-        onSave={handleSave}
       />
       {card.completedAt && (
         <div className="px-4 py-2 flex items-center justify-end gap-1.5">
