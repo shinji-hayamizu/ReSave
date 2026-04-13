@@ -74,7 +74,7 @@ test.describe('カード編集ページ', () => {
       expect(textValue.length).toBeGreaterThan(0);
     });
 
-    test('詳細設定セクションが存在する', async ({ page }) => {
+    test('ソースURLフィールドが表示される', async ({ page }) => {
       const editButton = page.locator('[data-testid="study-card"]').first().getByRole('button', { name: '編集' });
       const hasEditButton = await editButton.count() > 0;
 
@@ -87,7 +87,7 @@ test.describe('カード編集ページ', () => {
 
       const dialog = page.getByRole('dialog');
       await expect(dialog).toBeVisible();
-      await expect(dialog.getByText('詳細設定')).toBeVisible();
+      await expect(dialog.getByText('ソースURL')).toBeVisible();
     });
   });
 
@@ -184,7 +184,7 @@ test.describe('カード編集ページ', () => {
       await expect(saveButton).toBeEnabled();
     });
 
-    test('詳細設定を開くとソースURLが表示される', async ({ page }) => {
+    test('ソースURLフィールドにURLを入力できる', async ({ page }) => {
       const editButton = page.locator('[data-testid="study-card"]').first().getByRole('button', { name: '編集' });
       const hasEditButton = await editButton.count() > 0;
 
@@ -198,9 +198,10 @@ test.describe('カード編集ページ', () => {
       const dialog = page.getByRole('dialog');
       await expect(dialog).toBeVisible();
 
-      await dialog.getByText('詳細設定').click();
-
       await expect(dialog.getByText('ソースURL')).toBeVisible();
+      const urlInput = dialog.getByPlaceholder('https://example.com');
+      await urlInput.fill('https://example.com');
+      await expect(urlInput).toHaveValue('https://example.com');
     });
   });
 });
