@@ -415,7 +415,7 @@ export function useHomeSubmitAssessment() {
                 return { ...c, currentStep: newStep, status: 'completed' as const, completedAt: new Date().toISOString(), nextReviewAt: null };
               }
               const nextDate = new Date();
-              nextDate.setDate(nextDate.getDate() + c.schedule[newStep]);
+              nextDate.setDate(nextDate.getDate() + c.schedule[c.currentStep]);
               return { ...c, currentStep: newStep, status: 'active' as const, nextReviewAt: nextDate.toISOString() };
             }
 

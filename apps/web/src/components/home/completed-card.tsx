@@ -30,7 +30,7 @@ export const CompletedCard = memo(function CompletedCard({ card }: CompletedCard
     return (
       <>
         {card.tags.map((tag) => (
-          <TagBadge key={tag.id}>{tag.name}</TagBadge>
+          <TagBadge key={tag.id} color={tag.color}>{tag.name}</TagBadge>
         ))}
       </>
     );
