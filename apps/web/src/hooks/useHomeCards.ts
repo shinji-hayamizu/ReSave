@@ -183,9 +183,11 @@ export function useHomeLearningCards() {
   });
 }
 
+type CreateCardMutationContext = HomeCardMutationContext & { tempId: string };
+
 export function useHomeCreateCard() {
   const qc = useQueryClient();
-  return useMutation<Card, Error, CreateCardInput, HomeCardMutationContext>({
+  return useMutation<Card, Error, CreateCardInput, CreateCardMutationContext>({
     mutationFn: (input: CreateCardInput) => createCard(input),
     onMutate: async (input) => {
       await Promise.all([
@@ -194,8 +196,10 @@ export function useHomeCreateCard() {
       ]);
       const context = saveBothTabs(qc);
 
+      const tempId = `temp-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
       const optimisticCard: CardWithTags = {
-        id: `temp-${Date.now()}`,
+        id: tempId,
         front: input.front,
         back: input.back ?? '',
         sourceUrl: input.sourceUrl ?? null,
@@ -224,7 +228,7 @@ export function useHomeCreateCard() {
         prependCardToInfiniteData(old ?? emptyInfiniteData, optimisticCard)
       );
 
-      return context;
+      return { ...context, tempId };
     },
     onError: (_, __, context) => {
       if (context) {
@@ -232,16 +236,18 @@ export function useHomeCreateCard() {
       }
       toast.error('カードの作成に失敗しました');
     },
-    onSuccess: (newCard) => {
+    onSuccess: (newCard, _, context) => {
       qc.setQueryData<InfiniteData<HomeCardsPage>>(homeCardKeys.tab('due'), (old) => {
         if (!old) return old;
-        const tempId = old.pages[0]?.cards.find((c) => c.id.startsWith('temp-'))?.id ?? '';
-        return updateCardInInfiniteData(old, tempId, () => ({
+        return updateCardInInfiniteData(old, context?.tempId ?? '', () => ({
           ...newCard,
           tags: [],
           status: newCard.status as CardWithTags['status'],
         }));
       });
+    },
+    onSettled: () => {
+      qc.invalidateQueries({ queryKey: homeCardKeys.tab('due'), refetchType: 'all' });
     },
   });
 }
