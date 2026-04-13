@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body style="background: hsl(210 40% 98%);">
+  <!--
+    @screen: 完了カード一覧
+    @path: /cards/completed
+    @description: 学習が完了したカードの一覧表示
+    @file: app/(main)/cards/completed/page.tsx
+    @feature: F-021 (カード学習), F-022 (自己評価)
+
+    @state-management:
+      - newCardIds: Set<string> - 新しく追加されたカードID (useState)
+
+    @hooks:
+      - useTodayCompletedCards() - 完了カード取得
+      - useHomeResetCard() - カードリセットmutation
+      - useHomeUpdateCard() - カード更新mutation
+
+    @api-dependencies:
+      - GET /api/cards?status=completed - 完了カード
+      - PATCH /api/cards/:id - カード更新
+      - POST /api/study/reset - カードリセット
+  -->
+
+  <!-- ================================================================
+       @component: CompletedCardsPage
+       @description: 完了カード一覧のルートコンポーネント
+       @file: app/(main)/cards/completed/page.tsx
+       ================================================================ -->
+  <div data-component="CompletedCardsPage">
+
+    <!-- @component: PageHeader with loading bar -->
+    <div class="relative">
+      <!-- @condition: {isFetching && !isLoading && <LoadingBar />} -->
+      <div class="loading-bar" data-show-if="isFetching" style="position: absolute; bottom: 0; left: 0; right: 0; z-index: 10;"></div>
+
+      <div class="page-header" data-component="PageHeader">
+        <div class="page-header__content">
+          <h1>完了</h1>
+          <p class="text-sm text-muted">学習が完了したカード</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- @section: Card List -->
+    <div class="p-4 space-y-4" data-testid="card-list">
+
+      <!-- ================================================================
+           @component: CompletedCard #1
+           @description: 完了済みカード（答え非表示）
+           @file: components/home/completed-card.tsx
+           ================================================================ -->
+      <div style="background: hsl(var(--card)); border-radius: 0.75rem; box-shadow: 0 1px 2px rgba(0,0,0,0.05); overflow: hidden;" data-component="CompletedCard">
+        <div class="study-card" data-component="StudyCard">
+          <!-- @section: Tags -->
+          <div class="study-card__topbar">
+            <div class="study-card__tags">
+              <span class="tag-badge">化学</span>
+            </div>
+          </div>
+
+          <!-- @section: Front (Question) -->
+          <div class="study-card__front">
+            <span class="study-card__question">水の化学式は？</span>
+            <div class="study-card__actions">
+              <!-- @event: onClick={toggleMenu} -->
+              <button class="btn btn--ghost btn--icon" title="メニュー">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- @section: Answer Toggle -->
+          <!-- @event: onClick={toggleAnswer} -->
+          <button class="study-card__toggle" data-action="onClick:toggleAnswer">
+            <!-- @icon: lucide-react Eye -->
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
+            答えを見る
+          </button>
+
+          <!-- @section: Answer (hidden by default) -->
+          <div class="study-card__back" style="display: none;">
+            <div class="study-card__answer">H2O</div>
+            <!-- @section: Rating = Reset Button -->
+            <div style="margin-top: 0.75rem;">
+              <div class="completed-footer">
+                <button class="btn" style="background: hsl(37.7 92.1% 50.2% / 0.1); color: hsl(37.7 92.1% 50.2%); font-weight: 600;" data-action="onClick:handleReset">
+                  <!-- @icon: lucide-react RotateCcw -->
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                  覚え直し
+                </button>
+                <span class="completed-date">
+                  <!-- @icon: lucide-react Check -->
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                  完了: 2024/3/15
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================================================================
+           @component: CompletedCard #2 (open state)
+           @description: 完了済みカード（答え表示中）
+           ================================================================ -->
+      <div style="background: hsl(var(--card)); border-radius: 0.75rem; box-shadow: 0 1px 2px rgba(0,0,0,0.05); overflow: hidden;" data-component="CompletedCard">
+        <div class="study-card open" data-component="StudyCard">
+          <!-- @section: Tags -->
+          <div class="study-card__topbar">
+            <div class="study-card__tags">
+              <span class="tag-badge">物理</span>
+            </div>
+          </div>
+
+          <!-- @section: Front (Question) -->
+          <div class="study-card__front">
+            <span class="study-card__question">光の速度は？</span>
+            <div class="study-card__actions">
+              <button class="btn btn--ghost btn--icon" title="メニュー">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- @section: Answer Toggle (shown as "close") -->
+          <button class="study-card__toggle" data-action="onClick:toggleAnswer">
+            <!-- @icon: lucide-react EyeOff -->
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"/><path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"/><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"/><path d="m2 2 20 20"/></svg>
+            答えを隠す
+          </button>
+
+          <!-- @section: Answer (visible - open state) -->
+          <div class="study-card__back" style="display: block;">
+            <div class="study-card__answer">約30万km/s</div>
+            <!-- @section: Rating = Reset Button -->
+            <div style="margin-top: 0.75rem;">
+              <div class="completed-footer">
+                <button class="btn" style="background: hsl(37.7 92.1% 50.2% / 0.1); color: hsl(37.7 92.1% 50.2%); font-weight: 600;" data-action="onClick:handleReset">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                  覚え直し
+                </button>
+                <span class="completed-date">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                  完了: 2024/3/10
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================================================================
+           @component: CompletedCard #3
+           @description: 完了済みカード（答え非表示）
+           ================================================================ -->
+      <div style="background: hsl(var(--card)); border-radius: 0.75rem; box-shadow: 0 1px 2px rgba(0,0,0,0.05); overflow: hidden;" data-component="CompletedCard">
+        <div class="study-card" data-component="StudyCard">
+          <!-- @section: Tags -->
+          <div class="study-card__topbar">
+            <div class="study-card__tags">
+              <span class="tag-badge">数学</span>
+            </div>
+          </div>
+
+          <!-- @section: Front (Question) -->
+          <div class="study-card__front">
+            <span class="study-card__question">ピタゴラスの定理は？</span>
+            <div class="study-card__actions">
+              <button class="btn btn--ghost btn--icon" title="メニュー">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- @section: Answer Toggle -->
+          <button class="study-card__toggle" data-action="onClick:toggleAnswer">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
+            答えを見る
+          </button>
+
+          <!-- @section: Answer (hidden by default) -->
+          <div class="study-card__back" style="display: none;">
+            <div class="study-card__answer">a^2 + b^2 = c^2</div>
+            <div style="margin-top: 0.75rem;">
+              <div class="completed-footer">
+                <button class="btn" style="background: hsl(37.7 92.1% 50.2% / 0.1); color: hsl(37.7 92.1% 50.2%); font-weight: 600;" data-action="onClick:handleReset">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                  覚え直し
+                </button>
+                <span class="completed-date">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                  完了: 2024/3/5
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <!-- [/section: Card List] -->
+
+    <!-- ================================================================
+         @section: Empty State (hidden - shown when no completed cards)
+         @condition: {!completedCards || completedCards.length === 0}
+         ================================================================ -->
+    <div class="p-4" style="display: none;" data-show-if="empty">
+      <div class="empty-state">
+        <!-- @icon: lucide-react CheckCheck -->
+        <svg class="empty-state__icon" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 7 17l-5-5"/><path d="m22 10-7.5 7.5L13 16"/></svg>
+        <h3 class="empty-state__title">完了済みカードなし</h3>
+        <p class="empty-state__description">カードを学習して「覚えた」と評価すると、ここに表示されます</p>
+      </div>
+    </div>
+
+  </div>
+  <!-- [/Component: CompletedCardsPage] -->
+
+</body>
+</html>

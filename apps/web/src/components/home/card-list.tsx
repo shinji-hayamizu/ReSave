@@ -72,7 +72,7 @@ const CardItem = memo(function CardItem({
   isResetting,
 }: {
   card: CardWithTags;
-  onReset: (id: string) => void;
+  onReset: (card: CardWithTags) => void;
   onEdit: (card: CardWithTags) => void;
   onSave: (id: string, data: { front?: string; back?: string }) => void;
   isResetting: boolean;
@@ -84,15 +84,15 @@ const CardItem = memo(function CardItem({
     return (
       <>
         {card.tags.map((tag) => (
-          <TagBadge key={tag.id}>{tag.name}</TagBadge>
+          <TagBadge key={tag.id} color={tag.color}>{tag.name}</TagBadge>
         ))}
       </>
     );
   }, [card.tags]);
 
   const handleReset = useCallback(() => {
-    onReset(card.id);
-  }, [card.id, onReset]);
+    onReset(card);
+  }, [card, onReset]);
 
   const handleEdit = useCallback(() => {
     onEdit(card);
@@ -110,6 +110,7 @@ const CardItem = memo(function CardItem({
       answer={card.back}
       currentStep={card.currentStep}
       question={card.front}
+      sourceUrl={card.sourceUrl}
       ratingButtons={<ResetButton disabled={isResetting} onReset={handleReset} />}
       tags={tags}
       totalSteps={card.schedule.length}
@@ -129,7 +130,7 @@ const VirtualizedCardList = memo(function VirtualizedCardList({
 }: {
   cards: CardWithTags[];
   className?: string;
-  onReset: (id: string) => void;
+  onReset: (card: CardWithTags) => void;
   onEdit: (card: CardWithTags) => void;
   onSave: (id: string, data: { front?: string; back?: string }) => void;
   isResetting: boolean;
@@ -190,9 +191,9 @@ export const CardList = memo(function CardList({
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   const handleReset = useCallback(
-    async (id: string) => {
+    async (card: CardWithTags) => {
       try {
-        await resetCard.mutateAsync(id);
+        await resetCard.mutateAsync({ id: card.id, card });
         toast.success('カードを未学習に戻しました');
       } catch {
         toast.error('カードのリセットに失敗しました');

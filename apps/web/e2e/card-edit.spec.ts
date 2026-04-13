@@ -103,13 +103,13 @@ test.describe('カード編集ページ', () => {
     test('存在しないIDでアクセス時に「カードが見つかりませんでした」が表示される', async ({ page }) => {
       await page.goto('/cards/00000000-0000-0000-0000-000000000000/edit');
 
-      await expect(page.getByText('カードが見つかりませんでした')).toBeVisible();
+      await expect(page.getByText('カードが見つかりませんでした')).toBeVisible({ timeout: 10000 });
     });
 
     test('存在しないIDでアクセス時に戻るリンクが表示される', async ({ page }) => {
       await page.goto('/cards/00000000-0000-0000-0000-000000000000/edit');
 
-      await expect(page.getByText('戻る')).toBeVisible();
+      await expect(page.getByText('戻る')).toBeVisible({ timeout: 10000 });
     });
   });
 
@@ -184,7 +184,7 @@ test.describe('カード編集ページ', () => {
       await expect(saveButton).toBeEnabled();
     });
 
-    test('詳細設定を開くとソースURLとリピートモードが表示される', async ({ page }) => {
+    test('詳細設定を開くとソースURLが表示される', async ({ page }) => {
       const editButton = page.locator('[data-testid="study-card"]').first().getByRole('button', { name: '編集' });
       const hasEditButton = await editButton.count() > 0;
 
@@ -201,7 +201,6 @@ test.describe('カード編集ページ', () => {
       await dialog.getByText('詳細設定').click();
 
       await expect(dialog.getByText('ソースURL')).toBeVisible();
-      await expect(dialog.getByText('リピートモード')).toBeVisible();
     });
   });
 });

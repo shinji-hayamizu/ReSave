@@ -15,7 +15,7 @@ test.describe('設定画面', () => {
   });
 
   test('通知設定セクションが表示される', async ({ page }) => {
-    await expect(page.getByText('通知設定')).toBeVisible();
+    await expect(page.getByText('通知設定').first()).toBeVisible();
     await expect(page.getByText('プッシュ通知とリマインダーの設定')).toBeVisible();
   });
 

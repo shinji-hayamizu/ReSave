@@ -14,14 +14,13 @@
     @features: F-013 (カード作成), F-021 (カード学習), F-022 (自己評価)
 
     @state-management:
-      - activeTab: 'due' | 'learning' | 'completed' - 現在選択中のタブ (useState)
+      - activeTab: 'due' | 'learning' - 現在選択中のタブ (useState)
       - editingCard: CardWithTags | null - 編集中のカード (useState)
       - isEditDialogOpen: boolean - 編集ダイアログの開閉状態 (useState)
 
     @hooks:
-      - useNewCards() - 未学習カード取得
-      - useTodayCards() - 今日の復習カード取得
-      - useTodayCompletedCards() - 今日完了したカード取得
+      - useHomeDueCards() - 未学習カード取得 (infinite query)
+      - useHomeLearningCards() - 復習中カード取得 (infinite query)
 
     @api-dependencies:
       - GET /api/cards?status=new - 未学習カード
@@ -64,7 +63,8 @@
            - Cmd/Ctrl+Enter on front: focus back
            - Cmd/Ctrl+Enter on back: submit
          ================================================================ -->
-    <div class="quick-input mb-2" data-component="QuickInputForm">
+    <!-- @condition: Mobile only - hidden on mobile, shown on desktop via .mobile-hidden -->
+    <div class="quick-input mb-2 mobile-hidden" data-component="QuickInputForm">
       <form data-action="onSubmit:handleSubmit">
         <!-- @row: 問題入力行 -->
         <div class="quick-input__row">
@@ -147,11 +147,11 @@
          @props:
            - value: CardTabValue - 現在のタブ
            - onChange: (value: CardTabValue) => void
-           - counts: { due: number, learning: number, completed: number }
+           - counts: { due: number, learning: number }
            - className?: string
 
          @types:
-           - CardTabValue = 'due' | 'learning' | 'completed'
+           - CardTabValue = 'due' | 'learning'
          ================================================================ -->
     <div class="tabs" data-component="CardTabs" data-props="value,onChange,counts">
       <!-- @tab: 未学習 -->
@@ -178,16 +178,6 @@
         <span class="tab__count">15</span>
       </button>
 
-      <!-- @tab: 完了 -->
-      <button
-        type="button"
-        class="tab tab--emerald"
-        data-tab="completed"
-        data-action="onClick:onChange('completed')"
-      >
-        <span class="text-xs">完了</span>
-        <span class="tab__count">45</span>
-      </button>
     </div>
     <!-- [/Component: CardTabs] -->
 
@@ -199,14 +189,14 @@
          ================================================================ -->
 
     <!-- ================================================================
-         @component: CardList (未学習/復習中タブ)
-         @file: components/home/card-list.tsx (完了タブ用)
+         @component: CardList
+         @file: components/home/card-list.tsx
          @render: activeCards.map((card) => <HomeStudyCard key={card.id} {...} />)
          ================================================================ -->
-    <div class="card-list" data-component="CardList" data-show-if="activeTab !== 'completed'">
+    <div class="card-list" data-component="CardList">
 
       <!-- ================================================================
-           @component: HomeStudyCard
+           @component: HomeStudyCard (Card 1 - closed)
            @description: 個別の学習カードコンポーネント
            @file: components/home/home-study-card.tsx
            @feature: F-021 (カード学習), F-022 (自己評価)
@@ -227,6 +217,7 @@
            @state:
              - isRemoving: boolean - 削除アニメーション中 (useState)
              - showDeleteDialog: boolean - 削除確認ダイアログ (useState)
+             - isEditing: boolean - インライン編集中 (useState)
 
            @hooks:
              - useSubmitAssessment()
@@ -307,11 +298,16 @@
           </div>
           <!-- [/Component: RatingButtons] -->
 
-          <!-- @component: TagList -->
-          <div class="study-card__tags" data-component="TagList" data-list="tags">
-            <!-- @loop: tags.map(tag => <TagBadge key={tag.id}>{tag.name}</TagBadge>) -->
-            <span class="tag-badge" data-list-item data-key="tag.id">地理</span>
-            <span class="tag-badge" data-list-item>日本</span>
+          <!-- @component: TagList + StepIndicator (right side of topbar) -->
+          <div class="study-card__topbar-right">
+            <div class="study-card__tags" data-component="TagList" data-list="tags">
+              <!-- @loop: tags.map(tag => <TagBadge key={tag.id}>{tag.name}</TagBadge>) -->
+              <span class="tag-badge" data-list-item data-key="tag.id">地理</span>
+              <span class="tag-badge" data-list-item>日本</span>
+            </div>
+            <!-- @component: StepIndicator -->
+            <!-- @prop: currentStep/schedule.length (e.g. "1/6") -->
+            <span class="study-card__step" data-prop="stepIndicator">1/6</span>
           </div>
         </div>
 
@@ -348,6 +344,7 @@
              @state: isOpen - 答え表示状態
              @event: onClick={() => setIsOpen(!isOpen)}
              ================================================================ -->
+        <!-- @implementation-note: Actual React implementation uses a centered pill button with border-2 border-primary rounded-full -->
         <button
           type="button"
           class="study-card__toggle"
@@ -368,7 +365,11 @@
       </div>
       <!-- [/Component: HomeStudyCard] -->
 
-      <!-- @sample: サンプルカード 2 (答え表示状態) -->
+      <!-- ================================================================
+           @sample: Card 2 (答え表示状態 / open)
+           @state: isOpen=true
+           @data: front="「セレンディピティ」の意味は？", step=3/6
+           ================================================================ -->
       <div class="study-card open" data-list-item data-key="card.id" data-state="open">
         <div class="study-card__topbar">
           <div class="rating-buttons">
@@ -385,9 +386,12 @@
               <span class="rating-btn__preview">1日後</span>
             </button>
           </div>
-          <div class="study-card__tags">
-            <span class="tag-badge">英語</span>
-            <span class="tag-badge">語彙</span>
+          <div class="study-card__topbar-right">
+            <div class="study-card__tags">
+              <span class="tag-badge">英語</span>
+              <span class="tag-badge">語彙</span>
+            </div>
+            <span class="study-card__step">3/6</span>
           </div>
         </div>
         <div class="study-card__front">
@@ -401,6 +405,7 @@
             </button>
           </div>
         </div>
+        <!-- @implementation-note: Actual React implementation uses a centered pill button with border-2 border-primary rounded-full -->
         <button type="button" class="study-card__toggle">
           <!-- @icon: EyeOff (答え表示中) -->
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"/><path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"/><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"/><path d="m2 2 20 20"/></svg>
@@ -411,7 +416,10 @@
         </div>
       </div>
 
-      <!-- @sample: サンプルカード 3 -->
+      <!-- ================================================================
+           @sample: Card 3 (closed)
+           @data: front="二分探索の計算量は？", step=4/6
+           ================================================================ -->
       <div class="study-card" data-list-item data-key="card.id">
         <div class="study-card__topbar">
           <div class="rating-buttons">
@@ -428,8 +436,11 @@
               <span class="rating-btn__preview">1日後</span>
             </button>
           </div>
-          <div class="study-card__tags">
-            <span class="tag-badge">アルゴリズム</span>
+          <div class="study-card__topbar-right">
+            <div class="study-card__tags">
+              <span class="tag-badge">アルゴリズム</span>
+            </div>
+            <span class="study-card__step">4/6</span>
           </div>
         </div>
         <div class="study-card__front">
@@ -443,6 +454,7 @@
             </button>
           </div>
         </div>
+        <!-- @implementation-note: Actual React implementation uses a centered pill button with border-2 border-primary rounded-full -->
         <button type="button" class="study-card__toggle">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
           <span>答えを見る</span>
@@ -452,8 +464,95 @@
         </div>
       </div>
 
+      <!-- ================================================================
+           @sample: Card 4 (inline edit mode - front being edited)
+           @state: isEditing=true
+           @description: インライン編集状態の表示例。テキストエリアと保存/キャンセルボタンを表示
+           ================================================================ -->
+      <div class="study-card study-card--editing" data-list-item data-key="card.id" data-state="editing">
+        <div class="study-card__topbar">
+          <div class="rating-buttons">
+            <button type="button" class="rating-btn rating-btn--ok" disabled>
+              <span>OK</span>
+              <span class="rating-btn__preview">30日後</span>
+            </button>
+            <button type="button" class="rating-btn rating-btn--learned" disabled>
+              <span>覚えた</span>
+              <span class="rating-btn__preview">完了</span>
+            </button>
+            <button type="button" class="rating-btn rating-btn--again" disabled>
+              <span>もう一度</span>
+              <span class="rating-btn__preview">1日後</span>
+            </button>
+          </div>
+          <div class="study-card__topbar-right">
+            <div class="study-card__tags">
+              <span class="tag-badge">歴史</span>
+            </div>
+            <span class="study-card__step">5/6</span>
+          </div>
+        </div>
+
+        <!-- @section: インライン編集モード -->
+        <!-- @condition: {isEditing && <InlineEditForm />} -->
+        <div class="study-card__front study-card__front--editing">
+          <div class="study-card__inline-edit" data-component="InlineEditForm">
+            <!-- @component: TextareaAutosize for inline edit -->
+            <!-- @props: value={editFront}, onChange={(e) => setEditFront(e.target.value)} -->
+            <textarea
+              class="study-card__edit-textarea"
+              rows="2"
+              data-prop="editFront"
+              data-action="onChange:setEditFront"
+            >明治維新は何年に起こった？</textarea>
+            <div class="study-card__edit-actions">
+              <!-- @event: onClick={() => handleSave() -->
+              <button
+                type="button"
+                class="btn btn--primary btn--sm"
+                data-action="onClick:handleSave"
+              >
+                <!-- @icon: lucide-react Check -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                保存
+              </button>
+              <!-- @event: onClick={() => setIsEditing(false) -->
+              <button
+                type="button"
+                class="btn btn--ghost btn--sm"
+                data-action="onClick:cancelEdit"
+              >
+                <!-- @icon: lucide-react X -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                キャンセル
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <button type="button" class="study-card__toggle" disabled>
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
+          <span>答えを見る</span>
+        </button>
+        <div class="study-card__back">
+          <p class="study-card__answer">1868年</p>
+        </div>
+      </div>
+
     </div>
     <!-- [/Component: CardList] -->
+
+    <!-- ================================================================
+         @component: LoadMore indicator
+         @description: カード一覧の末尾に表示される件数インジケーター
+         @condition: 全件表示済みの場合に表示
+         ================================================================ -->
+    <div class="load-more load-more--complete" data-component="LoadMoreIndicator">
+      <!-- @icon: lucide-react Check -->
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+      <span>全5件のカードを表示中</span>
+    </div>
+    <!-- [/Component: LoadMoreIndicator] -->
 
     <!-- ================================================================
          @component: EmptyState
@@ -490,6 +589,30 @@
 
   </div>
   <!-- [/Component: DashboardPage] -->
+
+  <!-- ================================================================
+       @component: MobileCardCreate (FAB + CreateCardDialog)
+       @description: モバイル用カード作成ボタン。タップでフルスクリーンダイアログを開く
+       @file: components/home/mobile-card-create.tsx
+       @condition: Mobile only (<768px)
+
+       @behavior:
+         - FABタップ → CreateCardDialog (フルスクリーン) を開く
+         - ダイアログ表示中はFABのPlusアイコンが45度回転
+         - ボトムシートではなくフルスクリーンダイアログを使用
+
+       @components:
+         - FabButton: 固定位置の丸ボタン (bottom-20 right-4)
+         - CreateCardDialog: フルスクリーンモーダル (100dvh)
+       ================================================================ -->
+  <button class="fab" id="fab-btn" type="button" aria-label="新規カード作成">
+    <!-- @icon: lucide-react Plus -->
+    <!-- @animation: .fab.open { transform: rotate(45deg) } -->
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+  </button>
+  <!-- [/Component: MobileCardCreate] -->
+
+  <!-- @note: CreateCardDialog はフルスクリーンモーダルとして表示される（card-input.html 参照） -->
 
 </body>
 </html>

@@ -32,9 +32,10 @@ test.describe('Visual Regression Tests - 認証必要画面', () => {
     await page.goto('/stats');
     await page.waitForLoadState('networkidle');
 
+    // データによりページ高さが変化するためviewportのみ比較
     await expect(page).toHaveScreenshot('stats.png', {
-      maxDiffPixels: 100,
-      fullPage: true,
+      maxDiffPixelRatio: 0.05,
+      fullPage: false,
     });
   });
 

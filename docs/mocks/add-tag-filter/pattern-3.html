@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pattern 3: タグ色フル塗りチップ（実験的）</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+  .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+</style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+<div class="max-w-2xl mx-auto px-4 pt-4 pb-8">
+
+  <!-- Quick Input (desktop) -->
+  <div class="mb-2 space-y-1">
+    <div class="flex gap-2">
+      <input class="flex-1 h-12 px-4 rounded-lg border border-gray-200 bg-white text-sm" placeholder="覚えたいこと" />
+      <button class="h-12 w-12 rounded-lg bg-blue-500 text-white flex items-center justify-center text-xl font-bold">+</button>
+    </div>
+    <div class="flex gap-2">
+      <input class="flex-1 h-10 px-4 rounded-lg border border-gray-200 bg-white text-sm" placeholder="答え（任意）" />
+      <button class="h-10 w-10 rounded-lg border border-gray-200 bg-white text-gray-400 flex items-center justify-center">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Pattern 3: タグ色フル塗りチップ（実験的） -->
+  <!-- 説明: 全タグチップがそれぞれのタグ色で常にフル塗り表示。
+       選択中のチップはスケールアップ+影+リングで強調。
+       未選択チップは半透明化して区別。カラフルで目立つが、やや賑やか。 -->
+  <div class="mb-3 flex gap-2 overflow-x-auto scrollbar-hide py-1.5">
+    <button class="shrink-0 px-3.5 py-1.5 text-xs font-semibold rounded-full bg-gray-700 text-white shadow-sm hover:bg-gray-800 transition-all">
+      すべて
+    </button>
+    <button class="shrink-0 px-3.5 py-1.5 text-xs font-semibold rounded-full bg-blue-500 text-white shadow-md ring-2 ring-blue-300 ring-offset-1 scale-105 transition-all">
+      AWS
+    </button>
+    <button class="shrink-0 px-3.5 py-1.5 text-xs font-semibold rounded-full bg-emerald-500/60 text-white hover:bg-emerald-500 transition-all">
+      マーケティング
+    </button>
+    <button class="shrink-0 px-3.5 py-1.5 text-xs font-semibold rounded-full bg-violet-500/60 text-white hover:bg-violet-500 transition-all">
+      TLS/暗号
+    </button>
+    <button class="shrink-0 px-3.5 py-1.5 text-xs font-semibold rounded-full bg-orange-500/60 text-white hover:bg-orange-500 transition-all">
+      React
+    </button>
+    <button class="shrink-0 px-3.5 py-1.5 text-xs font-semibold rounded-full bg-pink-500/60 text-white hover:bg-pink-500 transition-all">
+      データベース
+    </button>
+    <button class="shrink-0 px-3.5 py-1.5 text-xs font-semibold rounded-full bg-cyan-500/60 text-white hover:bg-cyan-500 transition-all">
+      Kubernetes
+    </button>
+  </div>
+
+  <!-- Tabs -->
+  <div class="flex border-b border-gray-200 mb-0">
+    <button class="flex-1 flex items-center justify-center gap-2 py-2 px-4 border-b-2 border-orange-400 text-orange-500 bg-orange-50/50 rounded-t-lg text-sm font-medium">
+      未学習 <span class="text-xs font-semibold px-1.5 py-0.5 rounded bg-orange-100 text-orange-500">3</span>
+    </button>
+    <button class="flex-1 flex items-center justify-center gap-2 py-2 px-4 border-b-2 border-transparent text-gray-400 hover:text-gray-600 text-sm font-medium">
+      復習中 <span class="text-xs font-semibold px-1.5 py-0.5 rounded bg-blue-100 text-blue-500">2</span>
+    </button>
+  </div>
+
+  <!-- Cards -->
+  <div class="bg-white shadow-sm divide-y divide-gray-100">
+    <div class="p-4 space-y-3">
+      <div class="flex items-center gap-2">
+        <button class="px-3 py-1.5 text-xs font-medium rounded-lg border border-green-200 text-green-600 bg-green-50">OK <span class="text-green-500">1日後</span></button>
+        <button class="px-3 py-1.5 text-xs font-medium rounded-lg border border-blue-200 text-blue-600 bg-blue-50">覚えた <span class="text-blue-500">完了</span></button>
+        <span class="ml-auto text-xs text-gray-400">0/6</span>
+      </div>
+      <div class="flex items-center justify-between">
+        <span class="text-base font-medium text-gray-800">TLS暗号</span>
+        <div class="flex gap-2 text-gray-400">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+        </div>
+      </div>
+      <div class="flex gap-1.5">
+        <span class="px-2.5 py-0.5 text-xs font-medium rounded-full bg-sky-100 text-sky-700 border border-sky-200">AWS</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 説明テキスト -->
+  <div class="mt-8 p-4 bg-purple-50 rounded-lg text-sm text-purple-800 space-y-2">
+    <p class="font-semibold">Pattern 3: タグ色フル塗りチップ（実験的）</p>
+    <ul class="list-disc list-inside space-y-1">
+      <li>全チップがタグ色でフル塗り表示（カラフル）</li>
+      <li>選択中チップはスケールアップ + 影 + リングで強調</li>
+      <li>未選択チップは半透明（opacity 60%）で区別</li>
+      <li>視覚的インパクトが強く、タグ色がダイレクトに伝わる</li>
+      <li>タグ数が多い場合やや賑やかになる</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>
