@@ -51,6 +51,10 @@ enable_confirmations = false
 secure_password_change = false
 max_frequency = "1s"
 
+[auth.email.template.recovery]
+subject = "パスワードリセット - ReSave"
+content_path = "./supabase/templates/reset-password.html"
+
 [auth.sms]
 enable_signup = false
 enable_confirmations = false
