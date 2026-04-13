@@ -1,15 +1,20 @@
 #!/bin/bash
-# PreToolUse hook: developブランチでのEdit/Write をブロック
+# PreToolUse hook: developブランチでのReSaveプロジェクト内ファイル編集をブロック
 
 CURRENT_BRANCH=$(git branch --show-current 2>/dev/null)
 
 if [[ "$CURRENT_BRANCH" == "develop" || "$CURRENT_BRANCH" == "master" ]]; then
-  # .claude/ 配下のファイル（スキル・フック・設定）は編集を許可する
   TOOL_INPUT=$(cat)
-  FILE_PATH=$(echo "$TOOL_INPUT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('file_path',''))" 2>/dev/null)
+  FILE_PATH=$(echo "$TOOL_INPUT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('file_path', d.get('path', '')))" 2>/dev/null)
 
-  if [[ "$FILE_PATH" == *"/.claude/"* || "$FILE_PATH" == *"/.claude/skills/"* || "$FILE_PATH" == *"/.claude/worktrees/"* ]]; then
-    echo '{"decision": "approve"}'
+  # ReSaveプロジェクト外のファイルは無条件でスルー
+  REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
+  if [[ "$FILE_PATH" != "$REPO_ROOT/"* ]]; then
+    exit 0
+  fi
+
+  # プロジェクト内の .claude/ 配下（フック・設定・スキル）は許可
+  if [[ "$FILE_PATH" == "$REPO_ROOT/.claude/"* ]]; then
     exit 0
   fi
 
