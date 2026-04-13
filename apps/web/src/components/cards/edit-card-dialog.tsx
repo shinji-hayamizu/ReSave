@@ -1,5 +1,6 @@
 'use client';
 
+import { useMemo } from 'react';
 import { Check, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -33,7 +34,8 @@ export function EditCardDialog({ card, open, onOpenChange }: EditCardDialogProps
         input: {
           front: data.front,
           back: data.back || undefined,
-          tagIds: data.tagIds.length > 0 ? data.tagIds : undefined,
+          sourceUrl: data.sourceUrl,
+          tagIds: data.tagIds,
         },
       });
       toast.success('カードを更新しました');
@@ -43,13 +45,19 @@ export function EditCardDialog({ card, open, onOpenChange }: EditCardDialogProps
     }
   };
 
-  const defaultValues: Partial<CardInputFormValues> | undefined = card
-    ? {
-        front: card.front,
-        back: card.back || '',
-        tagIds: card.tags.map((tag) => tag.id),
-      }
-    : undefined;
+  const defaultValues = useMemo<Partial<CardInputFormValues> | undefined>(
+    () =>
+      card
+        ? {
+            front: card.front,
+            back: card.back || '',
+            sourceUrl: card.sourceUrl || '',
+            tagIds: card.tags.map((tag) => tag.id),
+          }
+        : undefined,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [card?.id, card?.front, card?.back, card?.sourceUrl, card?.tags]
+  );
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

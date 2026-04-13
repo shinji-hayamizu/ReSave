@@ -45,7 +45,8 @@
     "tailwind-merge": "^3.4.0",
     "tailwindcss-animate": "^1.0.7",
     "zod": "^4.3.4",
-    "zustand": "^5.0.9"
+    "zustand": "^5.0.9",
+    "@resave/shared": "workspace:*"
   },
   "devDependencies": {
     "@playwright/test": "^1.57.0",

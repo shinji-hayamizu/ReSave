@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>sourceURL カード表示 UIモック 3パターン</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: 'hsl(217.2, 91.2%, 59.8%)',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { font-family: 'Noto Sans JP', 'Inter', sans-serif; background: #f0f4f8; }
+    .card { background: white; border-radius: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+    .pattern-section { margin-bottom: 48px; }
+    .pattern-label { font-size: 13px; font-weight: 600; color: #64748b; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 12px; }
+  </style>
+</head>
+<body class="p-6 max-w-lg mx-auto">
+
+  <h1 class="text-xl font-bold text-slate-800 mb-2">sourceURL 表示 UIモック</h1>
+  <p class="text-sm text-slate-500 mb-8">カードにリンクがある場合の表示パターン（3種類）</p>
+
+  <!-- ============================================================ -->
+  <!-- Pattern 1: 控えめなフッターリンク（保守的） -->
+  <!-- ============================================================ -->
+  <div class="pattern-section">
+    <div class="pattern-label">Pattern 1 — 控えめなフッターリンク（保守的）</div>
+    <p class="text-xs text-slate-400 mb-3">カード下部にさりげなく配置。学習に集中させつつ出典を確認できる。</p>
+
+    <div class="card overflow-hidden">
+      <!-- header -->
+      <div class="px-5 pt-4 pb-3">
+        <div class="flex items-start justify-between gap-3">
+          <p class="text-base text-slate-800 leading-relaxed flex-1">
+            ReactのuseEffectのdependency arrayに関数を入れると何が起きる？
+          </p>
+          <div class="flex gap-1 flex-shrink-0">
+            <button class="h-8 w-8 rounded-md flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+            </button>
+            <button class="h-8 w-8 rounded-md flex items-center justify-center text-slate-400 hover:text-red-500 hover:bg-red-50">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+            </button>
+          </div>
+        </div>
+        <!-- タグ -->
+        <div class="mt-2 flex gap-1.5">
+          <span class="text-xs px-2 py-0.5 rounded-full bg-sky-100 text-sky-700 border border-sky-200">React</span>
+          <span class="text-xs px-2 py-0.5 rounded-full bg-sky-100 text-sky-700 border border-sky-200">Hooks</span>
+        </div>
+      </div>
+
+      <!-- 答えボタン -->
+      <div class="flex justify-center py-2 bg-white">
+        <button class="inline-flex items-center gap-2 px-6 h-9 rounded-full text-sm font-semibold border-2 bg-blue-500 text-white border-blue-500">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+          答えを隠す
+        </button>
+      </div>
+
+      <!-- 答えエリア（展開済み） -->
+      <div class="px-5 py-4 bg-white">
+        <div class="inline-block px-4 py-3 bg-amber-50 border border-amber-200 rounded-lg">
+          <p class="text-base text-slate-800 leading-relaxed">
+            毎レンダーで新しい関数参照が生成されるため、無限ループが発生する可能性がある。useCallbackでメモ化するか、dependency arrayから除外する。
+          </p>
+        </div>
+      </div>
+
+      <!-- 評価ボタン -->
+      <div class="px-5 py-3 flex gap-2">
+        <button class="flex-1 h-10 rounded-lg bg-red-50 text-red-500 text-sm font-medium">もう一度</button>
+        <button class="flex-1 h-10 rounded-lg bg-green-50 text-green-600 text-sm font-medium">OK</button>
+        <button class="flex-1 h-10 rounded-lg bg-slate-100 text-slate-600 text-sm font-medium">完了</button>
+      </div>
+
+      <!-- sourceURL フッター（Pattern 1のポイント） -->
+      <a
+        href="https://react.dev/reference/react/useEffect"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="flex items-center gap-2 px-5 py-2.5 border-t border-slate-100 hover:bg-slate-50 transition-colors group"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-slate-400 flex-shrink-0"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        <span class="text-xs text-slate-400 truncate flex-1 group-hover:text-slate-600 transition-colors">
+          react.dev — useEffect リファレンス
+        </span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-slate-300 flex-shrink-0 group-hover:text-slate-500"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      </a>
+    </div>
+  </div>
+
+  <hr class="border-slate-200 my-8" />
+
+  <!-- ============================================================ -->
+  <!-- Pattern 2: リッチリンクプレビュー（推奨案） -->
+  <!-- ============================================================ -->
+  <div class="pattern-section">
+    <div class="pattern-label">Pattern 2 — リッチリンクプレビュー（推奨案）</div>
+    <p class="text-xs text-slate-400 mb-3">OGPタイトル・ドメインを見やすく表示。答え展開後に出典として自然に目に入る。</p>
+
+    <div class="card overflow-hidden">
+      <!-- header -->
+      <div class="px-5 pt-4 pb-3">
+        <div class="flex items-start justify-between gap-3">
+          <p class="text-base text-slate-800 leading-relaxed flex-1">
+            Supabaseでリアルタイム購読をセットアップする方法は？
+          </p>
+          <div class="flex gap-1 flex-shrink-0">
+            <button class="h-8 w-8 rounded-md flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="mt-2 flex gap-1.5">
+          <span class="text-xs px-2 py-0.5 rounded-full bg-sky-100 text-sky-700 border border-sky-200">Supabase</span>
+        </div>
+      </div>
+
+      <!-- 答えボタン -->
+      <div class="flex justify-center py-2 bg-white">
+        <button class="inline-flex items-center gap-2 px-6 h-9 rounded-full text-sm font-semibold border-2 bg-blue-500 text-white border-blue-500">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+          答えを隠す
+        </button>
+      </div>
+
+      <!-- 答えエリア -->
+      <div class="px-5 py-4 bg-white">
+        <div class="inline-block px-4 py-3 bg-amber-50 border border-amber-200 rounded-lg">
+          <p class="text-base text-slate-800 leading-relaxed">
+            supabase.channel('room').on('postgres_changes', ...) を使い、subscribe() を呼ぶ。クリーンアップでは channel.unsubscribe() を実行する。
+          </p>
+        </div>
+      </div>
+
+      <!-- 評価ボタン -->
+      <div class="px-5 py-3 flex gap-2">
+        <button class="flex-1 h-10 rounded-lg bg-red-50 text-red-500 text-sm font-medium">もう一度</button>
+        <button class="flex-1 h-10 rounded-lg bg-green-50 text-green-600 text-sm font-medium">OK</button>
+        <button class="flex-1 h-10 rounded-lg bg-slate-100 text-slate-600 text-sm font-medium">完了</button>
+      </div>
+
+      <!-- sourceURL リッチプレビュー（Pattern 2のポイント） -->
+      <div class="px-5 pb-4 pt-1">
+        <a
+          href="https://supabase.com/docs/guides/realtime"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="flex items-center gap-3 p-3 rounded-xl border border-slate-200 hover:border-blue-300 hover:bg-blue-50/50 transition-all group"
+        >
+          <!-- favicon -->
+          <div class="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center flex-shrink-0">
+            <span class="text-white text-xs font-bold">S</span>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-medium text-slate-700 truncate group-hover:text-blue-600 transition-colors">
+              Realtime | Supabase Docs
+            </p>
+            <p class="text-xs text-slate-400 truncate mt-0.5">supabase.com</p>
+          </div>
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-slate-300 flex-shrink-0 group-hover:text-blue-400 transition-colors"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <hr class="border-slate-200 my-8" />
+
+  <!-- ============================================================ -->
+  <!-- Pattern 3: 「出典」バッジ + ドロワー展開（実験的） -->
+  <!-- ============================================================ -->
+  <div class="pattern-section">
+    <div class="pattern-label">Pattern 3 — 出典バッジ＋インライン展開（実験的）</div>
+    <p class="text-xs text-slate-400 mb-3">質問エリアに「出典あり」バッジを配置。タップで答えの下にリンクをインライン展開する。</p>
+
+    <div class="card overflow-hidden">
+      <!-- header -->
+      <div class="px-5 pt-4 pb-3">
+        <div class="flex items-start justify-between gap-3">
+          <div class="flex-1">
+            <p class="text-base text-slate-800 leading-relaxed">
+              TypeScriptのsatisfies演算子とは何か？as との違いは？
+            </p>
+            <!-- 出典バッジ（Pattern 3のポイント1） -->
+            <div class="mt-2 flex items-center gap-2">
+              <div class="flex gap-1.5">
+                <span class="text-xs px-2 py-0.5 rounded-full bg-sky-100 text-sky-700 border border-sky-200">TypeScript</span>
+              </div>
+              <span class="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-violet-50 text-violet-500 border border-violet-200">
+                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                出典あり
+              </span>
+            </div>
+          </div>
+          <div class="flex gap-1 flex-shrink-0">
+            <button class="h-8 w-8 rounded-md flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 答えボタン -->
+      <div class="flex justify-center py-2 bg-white">
+        <button class="inline-flex items-center gap-2 px-6 h-9 rounded-full text-sm font-semibold border-2 bg-blue-500 text-white border-blue-500">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+          答えを隠す
+        </button>
+      </div>
+
+      <!-- 答えエリア -->
+      <div class="px-5 py-4 bg-white">
+        <div class="inline-block px-4 py-3 bg-amber-50 border border-amber-200 rounded-lg">
+          <p class="text-base text-slate-800 leading-relaxed">
+            satisfies は型チェックのみ行い、型推論の結果を保持する。as は強制型変換で型安全性を失う。satisfies を優先し、as はやむを得ない場合のみ使う。
+          </p>
+        </div>
+
+        <!-- 出典インライン展開（Pattern 3のポイント2）: 答え展開後に自動表示 -->
+        <div class="mt-3 rounded-xl border border-violet-100 bg-violet-50/60 overflow-hidden">
+          <div class="flex items-center gap-2 px-3 py-2 border-b border-violet-100">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-violet-400"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            <span class="text-xs font-medium text-violet-500">出典</span>
+          </div>
+          <a
+            href="https://devblogs.microsoft.com/typescript/announcing-typescript-4-9/#the-satisfies-operator"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="flex items-center gap-3 px-3 py-2.5 hover:bg-violet-100/60 transition-colors group"
+          >
+            <div class="w-7 h-7 rounded bg-blue-600 flex items-center justify-center flex-shrink-0">
+              <span class="text-white text-xs font-bold">TS</span>
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-medium text-slate-700 truncate group-hover:text-violet-700 transition-colors">
+                Announcing TypeScript 4.9 — the satisfies Operator
+              </p>
+              <p class="text-xs text-slate-400 mt-0.5">devblogs.microsoft.com</p>
+            </div>
+            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-violet-300 flex-shrink-0 group-hover:text-violet-500 transition-colors"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- 評価ボタン -->
+      <div class="px-5 pb-4 flex gap-2">
+        <button class="flex-1 h-10 rounded-lg bg-red-50 text-red-500 text-sm font-medium">もう一度</button>
+        <button class="flex-1 h-10 rounded-lg bg-green-50 text-green-600 text-sm font-medium">OK</button>
+        <button class="flex-1 h-10 rounded-lg bg-slate-100 text-slate-600 text-sm font-medium">完了</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- URLなしカード（参考） -->
+  <div class="mt-4 mb-2">
+    <div class="pattern-label">参考 — sourceUrlなしカード（変化なし）</div>
+    <div class="card overflow-hidden">
+      <div class="px-5 pt-4 pb-3">
+        <p class="text-base text-slate-800 leading-relaxed">CSSのgrid-template-areasの使い方は？</p>
+        <div class="mt-2 flex gap-1.5">
+          <span class="text-xs px-2 py-0.5 rounded-full bg-sky-100 text-sky-700 border border-sky-200">CSS</span>
+        </div>
+      </div>
+      <div class="flex justify-center py-2">
+        <button class="inline-flex items-center gap-2 px-6 h-9 rounded-full text-sm font-semibold border-2 border-blue-500 text-blue-500">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          答えを見る
+        </button>
+      </div>
+      <div class="px-5 pb-4 flex gap-2">
+        <button class="flex-1 h-10 rounded-lg bg-red-50 text-red-500 text-sm font-medium">もう一度</button>
+        <button class="flex-1 h-10 rounded-lg bg-green-50 text-green-600 text-sm font-medium">OK</button>
+        <button class="flex-1 h-10 rounded-lg bg-slate-100 text-slate-600 text-sm font-medium">完了</button>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

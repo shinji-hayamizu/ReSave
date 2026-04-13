@@ -29,10 +29,13 @@ interface HomeStudyCardProps {
   tags?: Tag[];
   currentStep?: number;
   schedule?: number[];
+  sourceUrl?: string | null;
   intervals?: { ok?: string; again?: string };
   showAgain?: boolean;
+  isDisabled?: boolean;
   onAssessmentComplete?: () => void;
   onEdit?: () => void;
+  onEditingChange?: (isEditing: boolean) => void;
   className?: string;
 }
 
@@ -51,10 +54,13 @@ export const HomeStudyCard = memo(function HomeStudyCard({
   tags = [],
   currentStep,
   schedule,
+  sourceUrl,
   intervals,
   showAgain = true,
+  isDisabled = false,
   onAssessmentComplete,
   onEdit,
+  onEditingChange,
   className,
 }: HomeStudyCardProps) {
   const [isRemoving, setIsRemoving] = useState(false);
@@ -94,6 +100,7 @@ export const HomeStudyCard = memo(function HomeStudyCard({
 
   const handleSave = useCallback(
     async (data: { front?: string; back?: string }) => {
+      onEditingChange?.(true);
       try {
         await updateCard.mutateAsync({
           id,
@@ -102,9 +109,11 @@ export const HomeStudyCard = memo(function HomeStudyCard({
         toast.success('カードを更新しました');
       } catch {
         toast.error('カードの更新に失敗しました');
+      } finally {
+        onEditingChange?.(false);
       }
     },
-    [id, updateCard]
+    [id, updateCard, onEditingChange]
   );
 
   const handleDeleteClick = useCallback(() => {
@@ -141,7 +150,9 @@ export const HomeStudyCard = memo(function HomeStudyCard({
           answer={back}
           className={className}
           currentStep={currentStep}
+          isSaving={updateCard.isPending || isDisabled}
           question={front}
+          sourceUrl={sourceUrl}
           ratingButtons={
             <RatingButtons
               disabled={submitAssessment.isPending || isRemoving}
@@ -154,7 +165,7 @@ export const HomeStudyCard = memo(function HomeStudyCard({
             tags.length > 0 ? (
               <>
                 {tags.map((tag) => (
-                  <TagBadge key={tag.id}>{tag.name}</TagBadge>
+                  <TagBadge key={tag.id} color={tag.color}>{tag.name}</TagBadge>
                 ))}
               </>
             ) : undefined

@@ -122,8 +122,8 @@ describe('SignupForm', () => {
 
   describe('登録処理', () => {
     it('登録成功時に確認メール送信画面が表示される', async () => {
-      // Given: 登録が成功する状態
-      mockSignUp.mockResolvedValue({ error: null });
+      // Given: 登録が成功する状態（identitiesが存在し空でない）
+      mockSignUp.mockResolvedValue({ data: { user: { identities: [{ id: '1' }] } }, error: null });
       const user = userEvent.setup();
       render(<SignupForm />);
 
@@ -140,10 +140,10 @@ describe('SignupForm', () => {
       });
     });
 
-    it('登録失敗時にエラーメッセージが表示される', async () => {
-      // Given: 登録が失敗する状態
+    it('不明なエラー時に汎用登録失敗メッセージが表示される', async () => {
+      // Given: 未知のエラーコードが返る状態
       mockSignUp.mockResolvedValue({
-        error: { message: 'Registration failed' },
+        error: { code: 'unknown_error', message: 'Registration failed' },
       });
       const user = userEvent.setup();
       render(<SignupForm />);
@@ -154,10 +154,143 @@ describe('SignupForm', () => {
       await user.type(screen.getByLabelText('パスワード（確認）'), 'password123');
       await user.click(screen.getByRole('button', { name: '新規登録' }));
 
-      // Then: エラーメッセージが表示される
+      // Then: 汎用エラーメッセージが表示される
       await waitFor(() => {
         expect(
           screen.getByText('登録に失敗しました。しばらくしてから再度お試しください')
+        ).toBeInTheDocument();
+      });
+    });
+
+    it('user_already_existsエラー時にメールアドレス重複メッセージが表示される', async () => {
+      // Given: user_already_existsコードのエラーが返る状態
+      mockSignUp.mockResolvedValue({
+        error: { code: 'user_already_exists', message: 'User already registered' },
+      });
+      const user = userEvent.setup();
+      render(<SignupForm />);
+
+      // When: 登録済みメールアドレスで送信
+      await user.type(screen.getByLabelText('メールアドレス'), 'existing@example.com');
+      await user.type(screen.getByLabelText('パスワード'), 'password123');
+      await user.type(screen.getByLabelText('パスワード（確認）'), 'password123');
+      await user.click(screen.getByRole('button', { name: '新規登録' }));
+
+      // Then: メールアドレス重複メッセージが表示される
+      await waitFor(() => {
+        expect(
+          screen.getByText('このメールアドレスはすでに登録されています')
+        ).toBeInTheDocument();
+      });
+    });
+
+    it('identitiesが空の場合にメールアドレス重複メッセージが表示される', async () => {
+      // Given: signUpが成功するがidentitiesが空の状態（既登録ユーザーの別パターン）
+      mockSignUp.mockResolvedValue({
+        data: { user: { identities: [] } },
+        error: null,
+      });
+      const user = userEvent.setup();
+      render(<SignupForm />);
+
+      // When: 登録済みメールアドレスで送信
+      await user.type(screen.getByLabelText('メールアドレス'), 'existing@example.com');
+      await user.type(screen.getByLabelText('パスワード'), 'password123');
+      await user.type(screen.getByLabelText('パスワード（確認）'), 'password123');
+      await user.click(screen.getByRole('button', { name: '新規登録' }));
+
+      // Then: メールアドレス重複メッセージが表示される
+      await waitFor(() => {
+        expect(
+          screen.getByText('このメールアドレスはすでに登録されています')
+        ).toBeInTheDocument();
+      });
+    });
+
+    it('weak_passwordエラー時にパスワード強度メッセージが表示される', async () => {
+      // Given: weak_passwordコードのエラーが返る状態
+      mockSignUp.mockResolvedValue({
+        error: { code: 'weak_password', message: 'Password is too weak' },
+      });
+      const user = userEvent.setup();
+      render(<SignupForm />);
+
+      // When: 弱いパスワードで送信
+      await user.type(screen.getByLabelText('メールアドレス'), 'test@example.com');
+      await user.type(screen.getByLabelText('パスワード'), 'password123');
+      await user.type(screen.getByLabelText('パスワード（確認）'), 'password123');
+      await user.click(screen.getByRole('button', { name: '新規登録' }));
+
+      // Then: パスワード強度不足メッセージが表示される
+      await waitFor(() => {
+        expect(
+          screen.getByText('パスワードが弱すぎます。8文字以上の英数字混在にしてください')
+        ).toBeInTheDocument();
+      });
+    });
+
+    it('email_rate_limit_exceededエラー時にレート制限メッセージが表示される', async () => {
+      // Given: email_rate_limit_exceededコードのエラーが返る状態
+      mockSignUp.mockResolvedValue({
+        error: { code: 'email_rate_limit_exceeded', message: 'Rate limit exceeded' },
+      });
+      const user = userEvent.setup();
+      render(<SignupForm />);
+
+      // When: 登録を試みる
+      await user.type(screen.getByLabelText('メールアドレス'), 'test@example.com');
+      await user.type(screen.getByLabelText('パスワード'), 'password123');
+      await user.type(screen.getByLabelText('パスワード（確認）'), 'password123');
+      await user.click(screen.getByRole('button', { name: '新規登録' }));
+
+      // Then: レート制限メッセージが表示される
+      await waitFor(() => {
+        expect(
+          screen.getByText('しばらく時間をおいてから再度お試しください')
+        ).toBeInTheDocument();
+      });
+    });
+
+    it('status 429エラー時にレート制限メッセージが表示される', async () => {
+      // Given: status 429のエラーが返る状態
+      mockSignUp.mockResolvedValue({
+        error: { status: 429, message: 'Too many requests' },
+      });
+      const user = userEvent.setup();
+      render(<SignupForm />);
+
+      // When: 登録を試みる
+      await user.type(screen.getByLabelText('メールアドレス'), 'test@example.com');
+      await user.type(screen.getByLabelText('パスワード'), 'password123');
+      await user.type(screen.getByLabelText('パスワード（確認）'), 'password123');
+      await user.click(screen.getByRole('button', { name: '新規登録' }));
+
+      // Then: レート制限メッセージが表示される
+      await waitFor(() => {
+        expect(
+          screen.getByText('しばらく時間をおいてから再度お試しください')
+        ).toBeInTheDocument();
+      });
+    });
+
+    it('email_provider_disabledエラー時にメール認証無効メッセージが表示される', async () => {
+      // Given: email_provider_disabledコードのエラーが返る状態
+      mockSignUp.mockResolvedValue({
+        error: { code: 'email_provider_disabled', message: 'Email provider is disabled' },
+      });
+      const user = userEvent.setup();
+      render(<SignupForm />);
+
+      // When: 登録を試みる
+      await user.type(screen.getByLabelText('メールアドレス'), 'test@example.com');
+      await user.type(screen.getByLabelText('パスワード'), 'password123');
+      await user.type(screen.getByLabelText('パスワード（確認）'), 'password123');
+      await user.click(screen.getByRole('button', { name: '新規登録' }));
+
+      // Then: メール認証無効メッセージが表示される
+      await waitFor(() => {
+        expect(
+          screen.getByText('メール認証が無効です。管理者にお問い合わせください')
         ).toBeInTheDocument();
       });
     });
@@ -202,7 +335,7 @@ describe('SignupForm', () => {
     it('登録処理中はボタンが無効化される', async () => {
       // Given: 登録が遅延する状態
       mockSignUp.mockImplementation(
-        () => new Promise((resolve) => setTimeout(() => resolve({ error: null }), 100))
+        () => new Promise((resolve) => setTimeout(() => resolve({ data: { user: { identities: [{ id: '1' }] } }, error: null }), 100))
       );
       const user = userEvent.setup();
       render(<SignupForm />);

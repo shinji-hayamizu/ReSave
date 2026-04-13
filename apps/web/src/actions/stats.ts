@@ -198,25 +198,34 @@ export async function getSummaryStats(): Promise<SummaryStats> {
     throw new Error(`Failed to fetch total cards: ${cardsError.message}`);
   }
 
-  const { data: logs, error: logsError } = await supabase
+  const { count: totalReviews, error: totalReviewsError } = await supabase
     .from('study_logs')
-    .select('assessment')
+    .select('*', { count: 'exact', head: true })
     .eq('user_id', user.id);
 
-  if (logsError) {
-    throw new Error(`Failed to fetch study logs: ${logsError.message}`);
+  if (totalReviewsError) {
+    throw new Error(`Failed to fetch total reviews: ${totalReviewsError.message}`);
   }
 
-  const totalReviews = logs?.length ?? 0;
-  const correctReviews =
-    logs?.filter((log) => log.assessment === 'ok' || log.assessment === 'remembered').length ?? 0;
-  const averageAccuracy = totalReviews > 0 ? correctReviews / totalReviews : 0;
+  const { count: correctReviews, error: correctReviewsError } = await supabase
+    .from('study_logs')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', user.id)
+    .in('assessment', ['ok', 'remembered']);
+
+  if (correctReviewsError) {
+    throw new Error(`Failed to fetch correct reviews: ${correctReviewsError.message}`);
+  }
+
+  const safeTotal = totalReviews ?? 0;
+  const safeCorrect = correctReviews ?? 0;
+  const averageAccuracy = safeTotal > 0 ? safeCorrect / safeTotal : 0;
 
   const currentStreak = await calculateStreak(user.id, supabase);
 
   return {
     totalCards: totalCards ?? 0,
-    totalReviews,
+    totalReviews: safeTotal,
     currentStreak,
     averageAccuracy,
   };

@@ -15,6 +15,9 @@ test.describe('完了ページ', () => {
   });
 
   test('完了カードがない場合に空状態が表示される', async ({ page }) => {
+    // ページの読み込み完了を待つ（スケルトンまたはコンテンツ表示まで）
+    await page.waitForSelector('[data-testid="card-list"], h3:has-text("完了済みカードなし")', { timeout: 10000 }).catch(() => {});
+
     const hasCards = await page.locator('[data-testid="card-list"]').count() > 0;
 
     if (!hasCards) {
@@ -49,20 +52,30 @@ test.describe('ナビゲーション - 完了メニュー', () => {
     await expect(page.getByRole('heading', { name: '完了' })).toBeVisible();
   });
 
-  test('モバイル: ボトムナビに「完了」メニュー項目が表示される', async ({ page }) => {
+  test('モバイル: サイドバーを開いて「完了」メニュー項目が表示される', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
+    await page.goto('/');
 
-    const nav = page.locator('nav');
-    const completedLink = nav.locator('a[href="/cards/completed"]');
-    await expect(completedLink).toBeVisible();
+    // モバイルではヘッダーのメニューボタンでサイドバーを開く
+    const toggleBtn = page.locator('button[aria-label="Toggle menu"]');
+    await toggleBtn.click();
+
+    const completedLink = page.locator('a[href="/cards/completed"]').first();
+    await expect(completedLink).toBeVisible({ timeout: 10000 });
     await expect(completedLink).toContainText('完了');
   });
 
-  test('モバイル: ボトムナビから完了ページに遷移できる', async ({ page }) => {
+  test('モバイル: サイドバーから完了ページに遷移できる', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
+    await page.goto('/');
 
-    const nav = page.locator('nav');
-    await nav.locator('a[href="/cards/completed"]').click();
+    // モバイルではヘッダーのメニューボタンでサイドバーを開く
+    const toggleBtn = page.locator('button[aria-label="Toggle menu"]');
+    await toggleBtn.click();
+
+    const completedLink = page.locator('a[href="/cards/completed"]').first();
+    await expect(completedLink).toBeVisible({ timeout: 10000 });
+    await completedLink.click();
     await page.waitForURL('/cards/completed');
 
     await expect(page.getByRole('heading', { name: '完了' })).toBeVisible();
