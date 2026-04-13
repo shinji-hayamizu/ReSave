@@ -34,7 +34,7 @@ import type { LoginInput } from '@/validations/user';
 
 export function LoginForm() {
   const searchParams = useSearchParams();
-  const redirectTo = searchParams.get('redirect') || '/';
+  const redirectTo = searchParams.get('redirect') || '/home';
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);

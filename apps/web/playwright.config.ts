@@ -13,7 +13,7 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   reporter: 'html',
   use: {
-    baseURL: 'http://localhost:3000',
+    baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:3000',
     trace: 'on-first-retry',
   },
   projects: [
@@ -28,17 +28,17 @@ export default defineConfig({
         storageState: STORAGE_STATE,
       },
       dependencies: ['setup'],
-      testIgnore: /auth\.spec\.ts|splash\.spec\.ts|visual\.spec\.ts|auth\.setup\.ts/,
+      testIgnore: /auth\.spec\.ts|splash\.spec\.ts|visual\.spec\.ts|auth\.setup\.ts|landing\.spec\.ts/,
     },
     {
       name: 'chromium-no-auth',
       use: { ...devices['Desktop Chrome'] },
-      testMatch: /auth\.spec\.ts|splash\.spec\.ts|visual\.spec\.ts|update-password\.spec\.ts/,
+      testMatch: /auth\.spec\.ts|splash\.spec\.ts|visual\.spec\.ts|update-password\.spec\.ts|landing\.spec\.ts/,
     },
   ],
   webServer: {
     command: 'pnpm dev',
-    url: 'http://localhost:3000',
+    url: process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
   },
 });

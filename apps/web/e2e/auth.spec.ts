@@ -1,8 +1,8 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('認証フロー', () => {
-  test('未認証時: ホーム画面アクセスでログイン画面へリダイレクト', async ({ page }) => {
-    await page.goto('/');
+  test('未認証時: /home アクセスでログイン画面へリダイレクト', async ({ page }) => {
+    await page.goto('/home');
 
     await expect(page).toHaveURL(/\/login/);
     await expect(page.getByText('ログイン', { exact: true }).first()).toBeVisible();

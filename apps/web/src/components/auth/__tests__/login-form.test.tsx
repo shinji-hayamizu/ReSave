@@ -172,7 +172,7 @@ describe('LoginForm', () => {
           email: 'test@example.com',
           password: 'password123',
         });
-        expect(window.location.href).toBe('/');
+        expect(window.location.href).toBe('/home');
       });
     });
 

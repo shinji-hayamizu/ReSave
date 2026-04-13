@@ -22,7 +22,7 @@ export function AppSidebar() {
   const { toggleSidebar, isMobile, isTablet, setOpenMobile } = useSidebar();
 
   const navItems = [
-    { title: 'ホーム', href: '/', icon: Home },
+    { title: 'ホーム', href: '/home', icon: Home },
     { title: '完了', href: '/cards/completed', icon: CheckCheck },
     { title: 'タグ', href: '/tags', icon: Tag },
     { title: '設定', href: '/settings', icon: Settings },
@@ -48,7 +48,7 @@ export function AppSidebar() {
           >
             <Menu className="h-6 w-6" />
           </Button>
-          <Link href="/" className="flex items-end gap-0.5 group-data-[collapsible=icon]:hidden">
+          <Link href="/home" className="flex items-end gap-0.5 group-data-[collapsible=icon]:hidden">
             <ReSaveIcon size={28} className="mb-[2px]" />
             <span className="text-xl font-bold">ReSave</span>
           </Link>

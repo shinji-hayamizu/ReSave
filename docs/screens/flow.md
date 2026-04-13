@@ -17,15 +17,18 @@
 
 ```mermaid
 flowchart TD
+    subgraph Landing[ランディング]
+        LP[ランディングページ /]
+    end
+
     subgraph Auth[認証]
-        Splash[スプラッシュ]
         Login[ログイン]
         Register[新規登録]
         PasswordReset[パスワードリセット]
     end
 
     subgraph Main[メイン]
-        Home[ホーム<br/>未学習/復習中/完了タブ]
+        Home[ホーム /home<br/>未学習/復習中/完了タブ]
         CardInput[カード入力画面<br/>詳細入力]
     end
 
@@ -39,8 +42,10 @@ flowchart TD
     %% ========================================
     %% 認証フロー
     %% ========================================
-    Splash -->|認証済み| Home
-    Splash -->|未認証| Login
+    LP -->|未認証| LP
+    LP -->|無料で始める| Register
+    LP -->|ログイン| Login
+    LP -->|認証済みアクセス| Home
     Login -->|新規登録へ| Register
     Login -->|パスワード忘れ| PasswordReset
     Login -->|ログイン成功| Home
@@ -192,19 +197,19 @@ flowchart TD
 
 ### 認証系画面
 
-| 画面名 | 概要 | 対応機能 |
-|-------|------|---------|
-| スプラッシュ | 初期ロード・認証状態チェック | - |
-| ログイン | メール/パスワード認証 | F-002 |
-| 新規登録 | アカウント作成 | F-001 |
-| パスワードリセット | パスワード再設定 | F-003 |
+| 画面名 | URL | 概要 | 対応機能 |
+|-------|-----|------|---------|
+| ランディングページ | `/` | サービス説明・登録/ログインCTA（未認証ユーザーのみ表示） | - |
+| ログイン | `/login` | メール/パスワード認証 | F-002 |
+| 新規登録 | `/signup` | アカウント作成 | F-001 |
+| パスワードリセット | `/reset-password` | パスワード再設定 | F-003 |
 
 ### メイン画面
 
-| 画面名 | 概要 | 対応機能 |
-|-------|------|---------|
-| ホーム | カード表示（未学習/復習中/完了タブ）・学習・評価・クイック入力 | F-013, F-020, F-021, F-022, F-023 |
-| カード入力画面 | 詳細なカード作成・編集 | F-013, F-014, F-016 |
+| 画面名 | URL | 概要 | 対応機能 |
+|-------|-----|------|---------|
+| ホーム | `/home` | カード表示（未学習/復習中/完了タブ）・学習・評価・クイック入力 | F-013, F-020, F-021, F-022, F-023 |
+| カード入力画面 | `/cards/[id]/edit` | 詳細なカード作成・編集 | F-013, F-014, F-016 |
 
 ### サイドバーから遷移する画面
 
@@ -221,18 +226,20 @@ flowchart TD
 
 ```mermaid
 stateDiagram-v2
-    [*] --> CheckAuth: アプリ起動
+    [*] --> CheckAuth: アクセス
 
-    CheckAuth --> Unauthenticated: トークンなし/無効
+    CheckAuth --> LandingPage: トークンなし/無効 + /にアクセス
+    CheckAuth --> Login: トークンなし/無効 + 保護ルートにアクセス
     CheckAuth --> Authenticated: トークン有効
 
-    Unauthenticated --> Login
+    LandingPage --> Login: ログインボタン
+    LandingPage --> Register: 無料登録ボタン
     Login --> Authenticated: ログイン成功
     Login --> Register: 新規登録
     Register --> Authenticated: 登録完了
 
     Authenticated --> Home
-    Home --> Unauthenticated: ログアウト
+    Home --> LandingPage: ログアウト
 ```
 
 ---
@@ -467,4 +474,5 @@ stateDiagram-v2
 | 2026-01-02 | 1.3 | クイック入力とカード入力画面（詳細）を追加 | Claude Code |
 | 2026-01-02 | 1.2 | ホーム画面内タブ構造に変更。サイドバーナビゲーション採用 | Claude Code |
 | 2026-01-02 | 1.1 | ホーム画面中心の構造に変更。学習画面を廃止 | Claude Code |
+| 2026-04-13 | 1.6 | LPページ追加に伴う画面遷移図の更新。スプラッシュをLPに置き換え、ホームURLを/homeに変更 | Claude Code |
 | 2026-01-02 | 1.0 | 初版作成 | Claude Code |
