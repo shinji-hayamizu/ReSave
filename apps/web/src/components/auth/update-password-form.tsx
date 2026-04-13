@@ -62,7 +62,7 @@ export function UpdatePasswordForm() {
     setLoading(false);
 
     setTimeout(() => {
-      router.push('/');
+      router.push('/home');
       router.refresh();
     }, 2000);
   };
@@ -79,7 +79,7 @@ export function UpdatePasswordForm() {
           </CardDescription>
         </CardHeader>
         <CardContent className="text-center">
-          <Link className="text-sm text-primary hover:underline" href="/">
+          <Link className="text-sm text-primary hover:underline" href="/home">
             今すぐホームへ移動
           </Link>
         </CardContent>
