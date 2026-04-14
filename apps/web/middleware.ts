@@ -33,7 +33,7 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   // 認証が必要なパスの定義
-  const protectedPaths = ['/', '/cards', '/study', '/stats', '/settings', '/tags'];
+  const protectedPaths = ['/home', '/cards', '/study', '/stats', '/settings', '/tags'];
   const isProtectedPath = protectedPaths.some(
     (path) =>
       request.nextUrl.pathname === path || request.nextUrl.pathname.startsWith(path + '/')
@@ -77,10 +77,17 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  // 認証済みユーザーがLPにアクセスした場合はダッシュボードへリダイレクト
+  if (request.nextUrl.pathname === '/' && user) {
+    const url = request.nextUrl.clone();
+    url.pathname = '/home';
+    return NextResponse.redirect(url);
+  }
+
   // 認証済みユーザーを認証ページからリダイレクト
   if (isAuthPath && user) {
     const url = request.nextUrl.clone();
-    url.pathname = '/';
+    url.pathname = '/home';
     return NextResponse.redirect(url);
   }
 
