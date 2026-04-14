@@ -16,6 +16,9 @@ test.describe('タグ管理フロー', () => {
     });
 
     test('タグがない場合に空状態メッセージが表示される', async ({ page }) => {
+      // ページロード完了を待つ
+      await page.waitForSelector('[data-testid="tag-item"], h3:has-text("タグがありません")', { timeout: 10000 }).catch(() => {});
+
       const tagItems = page.locator('[data-testid="tag-item"]');
       const tagCount = await tagItems.count();
 
@@ -33,11 +36,10 @@ test.describe('タグ管理フロー', () => {
       await expect(page.getByText('色')).toBeVisible();
     });
 
-    test('タグ作成モーダル: 空のタグ名でエラー', async ({ page }) => {
+    test('タグ作成モーダル: 空のタグ名では保存ボタンが無効', async ({ page }) => {
       await page.getByRole('button', { name: 'タグ追加' }).click();
-      await page.getByRole('button', { name: '保存' }).click();
 
-      await expect(page.getByText('タグ名を入力してください')).toBeVisible();
+      await expect(page.getByRole('button', { name: '保存' })).toBeDisabled();
     });
 
     test('タグ作成モーダル: 文字数カウンターが表示される', async ({ page }) => {

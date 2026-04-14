@@ -8,11 +8,17 @@ import {
   CardTabs,
   type CardTabValue,
   HomeStudyCard,
+  LoadMoreIndicator,
+  MobileCardCreate,
   QuickInputForm,
+  TagFilterBar,
 } from '@/components/home';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useHomeCards } from '@/hooks/useHomeCards';
+import { useHomeDueCards, useHomeDueCount, useHomeLearningCards, getTotalFromInfiniteData } from '@/hooks/useHomeCards';
+import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { useTags } from '@/hooks/useTags';
 import type { CardWithTags } from '@/types/card';
 
 function getNextInterval(schedule: number[], currentStep: number, isNew: boolean): string {
@@ -44,49 +50,86 @@ function StudyCardsSkeleton() {
 
 export function DashboardContent() {
   const [userSelectedTab, setUserSelectedTab] = useState<CardTabValue | null>(null);
+  const [selectedTagId, setSelectedTagId] = useState<string | null>(null);
   const [editingCard, setEditingCard] = useState<CardWithTags | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const { data, isLoading } = useHomeCards();
+  const [isDueUserEnabled, setIsDueUserEnabled] = useState(false);
+  const [inlineEditingCardId, setInlineEditingCardId] = useState<string | null>(null);
 
-  const categorizedCards = useMemo(() => {
-    if (!data) return { due: [], learning: [] };
+  const dueCountQuery = useHomeDueCount();
+  const learningQuery = useHomeLearningCards();
+  const { data: tags = [] } = useTags();
 
-    const now = data.fetchedAt;
+  const learningSettled = !learningQuery.isLoading && learningQuery.data !== undefined;
+  const learningIsEmpty = learningSettled && getTotalFromInfiniteData(learningQuery.data) === 0;
 
-    const due: CardWithTags[] = [];
-    const learning: CardWithTags[] = [];
+  const isDueEnabled = isDueUserEnabled || learningIsEmpty;
 
-    for (const card of data.cards) {
-      if (card.status === 'new') {
-        due.push(card);
-      } else if (card.status === 'active' && card.nextReviewAt && card.nextReviewAt <= now) {
-        learning.push(card);
-      }
-    }
+  const dueQuery = useHomeDueCards({ enabled: isDueEnabled });
 
-    return { due, learning };
-  }, [data]);
+  const dueCards = useMemo(() =>
+    dueQuery.data?.pages.flatMap((page) => page.cards) ?? [],
+    [dueQuery.data]
+  );
 
-  const counts = useMemo(() => ({
-    due: categorizedCards.due.length,
-    learning: categorizedCards.learning.length,
-  }), [categorizedCards]);
+  const learningCards = useMemo(() =>
+    learningQuery.data?.pages.flatMap((page) => page.cards) ?? [],
+    [learningQuery.data]
+  );
 
+  const filteredDueCards = useMemo(() => {
+    if (!selectedTagId) return dueCards;
+    return dueCards.filter((card) => card.tags.some((tag) => tag.id === selectedTagId));
+  }, [dueCards, selectedTagId]);
+
+  const filteredLearningCards = useMemo(() => {
+    if (!selectedTagId) return learningCards;
+    return learningCards.filter((card) => card.tags.some((tag) => tag.id === selectedTagId));
+  }, [learningCards, selectedTagId]);
+
+  const counts = useMemo(() => {
+    const dueTotal = isDueEnabled
+      ? getTotalFromInfiniteData(dueQuery.data)
+      : (dueCountQuery.data ?? 0);
+    return {
+      due: selectedTagId ? filteredDueCards.length : dueTotal,
+      learning: selectedTagId ? filteredLearningCards.length : getTotalFromInfiniteData(learningQuery.data),
+    };
+  }, [isDueEnabled, dueQuery.data, dueCountQuery.data, selectedTagId, filteredDueCards.length, filteredLearningCards.length, learningQuery.data]);
+
+  const isLoading = learningQuery.isLoading || (isDueEnabled && dueQuery.isLoading);
   const dataReady = !isLoading;
-  const todayCardCount = categorizedCards.learning.length;
 
   const activeTab = useMemo<CardTabValue>(() => {
     if (!dataReady) return 'due';
 
     if (userSelectedTab === null) {
-      return todayCardCount > 0 ? 'learning' : 'due';
+      return counts.learning > 0 ? 'learning' : 'due';
     }
 
     return userSelectedTab;
-  }, [dataReady, userSelectedTab, todayCardCount]);
+  }, [dataReady, userSelectedTab, counts.learning]);
+
+  const activeQuery = activeTab === 'due' ? dueQuery : learningQuery;
+  const activeCards = activeTab === 'due' ? filteredDueCards : filteredLearningCards;
+
+  const handleFetchNextPage = useCallback(() => {
+    if (activeQuery.hasNextPage && !activeQuery.isFetchingNextPage) {
+      activeQuery.fetchNextPage();
+    }
+  }, [activeQuery]);
+
+  const triggerRef = useIntersectionObserver({
+    enabled: !!activeQuery.hasNextPage && !activeQuery.isFetchingNextPage,
+    rootMargin: '200px',
+    onIntersect: handleFetchNextPage,
+  });
 
   const handleTabChange = useCallback((value: CardTabValue) => {
     setUserSelectedTab(value);
+    if (value === 'due') {
+      setIsDueUserEnabled(true);
+    }
   }, []);
 
   const handleEdit = useCallback((card: CardWithTags) => {
@@ -102,16 +145,33 @@ export function DashboardContent() {
   }, []);
 
   const handleCardCreated = useCallback(() => {
+    setIsDueUserEnabled(true);
     setUserSelectedTab('due');
   }, []);
 
-  const activeCards = categorizedCards[activeTab];
+  const handleInlineEditingChange = useCallback((cardId: string, isEditing: boolean) => {
+    setInlineEditingCardId(isEditing ? cardId : null);
+  }, []);
+
+  const isMobile = useIsMobile();
 
   return (
     <div className="pt-1 pb-2 md:pt-2 md:pb-4">
-        <div className="mb-2">
-          <QuickInputForm onCardCreated={handleCardCreated} />
-        </div>
+        {!isMobile && (
+          <div className="mb-2">
+            <QuickInputForm onCardCreated={handleCardCreated} />
+          </div>
+        )}
+
+        {tags.length > 0 && (
+          <div className="mb-2">
+            <TagFilterBar
+              tags={tags}
+              selectedTagId={selectedTagId}
+              onTagSelect={setSelectedTagId}
+            />
+          </div>
+        )}
 
         <CardTabs counts={counts} value={activeTab} onChange={handleTabChange} />
 
@@ -120,33 +180,49 @@ export function DashboardContent() {
         ) : activeCards.length === 0 ? (
           <EmptyState
             description={
-              activeTab === 'due'
-                ? '新しいカードを追加して学習を始めましょう'
-                : '復習予定のカードはありません'
+              selectedTagId
+                ? 'このタグのカードはありません'
+                : activeTab === 'due'
+                  ? '新しいカードを追加して学習を始めましょう'
+                  : '復習予定のカードはありません'
             }
             icon={<FileQuestion />}
             title="カードなし"
           />
         ) : (
-          <div className="bg-card shadow-sm divide-y divide-border">
-            {activeCards.map((card) => (
-              <HomeStudyCard
-                key={card.id}
-                back={card.back}
-                currentStep={card.currentStep}
-                front={card.front}
-                id={card.id}
-                intervals={{
-                  ok: getNextInterval(card.schedule, card.currentStep, card.status === 'new'),
-                  again: `${card.schedule[0]}日後`,
-                }}
-                schedule={card.schedule}
-                showAgain={card.currentStep > 0}
-                tags={card.tags}
-                onEdit={() => handleEdit(card)}
-              />
-            ))}
-          </div>
+          <>
+            <div className="bg-card shadow-sm divide-y divide-border">
+              {activeCards.map((card, index) => (
+                <div key={card.id}>
+                  <HomeStudyCard
+                    back={card.back}
+                    currentStep={card.currentStep}
+                    front={card.front}
+                    id={card.id}
+                    intervals={{
+                      ok: getNextInterval(card.schedule, card.currentStep, card.status === 'new'),
+                      again: `${card.schedule[0]}日後`,
+                    }}
+                    isDisabled={inlineEditingCardId !== null && inlineEditingCardId !== card.id}
+                    schedule={card.schedule}
+                    showAgain={card.currentStep > 0}
+                    sourceUrl={card.sourceUrl}
+                    tags={card.tags}
+                    onEdit={() => handleEdit(card)}
+                    onEditingChange={(isEditing) => handleInlineEditingChange(card.id, isEditing)}
+                  />
+                  {index === activeCards.length - 2 && (
+                    <div ref={triggerRef} aria-hidden="true" />
+                  )}
+                </div>
+              ))}
+            </div>
+            <LoadMoreIndicator
+              hasNextPage={!!activeQuery.hasNextPage}
+              isFetchingNextPage={activeQuery.isFetchingNextPage}
+              totalCount={counts[activeTab]}
+            />
+          </>
         )}
 
         <EditCardDialog
@@ -154,6 +230,8 @@ export function DashboardContent() {
           open={isEditDialogOpen}
           onOpenChange={handleEditDialogClose}
         />
+
+        {isMobile && <MobileCardCreate onCardCreated={handleCardCreated} />}
     </div>
   );
 }

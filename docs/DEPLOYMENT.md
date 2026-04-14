@@ -6,7 +6,7 @@
 
 | 環境 | ブランチ | URL | 用途 |
 |------|---------|-----|------|
-| Production | main | resave.vercel.app | 本番環境 |
+| Production | master | resave.vercel.app | 本番環境 |
 | Preview | develop | develop-resave.vercel.app | ステージング/QA |
 | Preview | feature/* | pr-xxx-resave.vercel.app | PR プレビュー |
 
@@ -15,7 +15,7 @@
 ## ブランチ戦略
 
 ```
-main ─────────────●───────────●─── 本番環境
+master ─────────────●───────────●─── 本番環境
                   ↑           ↑
 develop ───●──●──●───●──●──●──●─── ステージング
             \   /     \     /
@@ -26,17 +26,17 @@ develop ───●──●──●───●──●──●──●─
 
 | ブランチ | 用途 | マージ先 |
 |---------|------|----------|
-| main | 本番リリース済みコード | - |
-| develop | 開発統合・QA | main |
+| master | 本番環境 (Production) | - |
+| develop | 開発統合・QA | master |
 | feature/* | 機能開発 | develop |
-| hotfix/* | 緊急修正 | main, develop |
+| hotfix/* | 緊急修正 | master, develop |
 
 ### 開発フロー
 
 1. `develop` から feature ブランチを作成
 2. 開発完了後、`develop` へ PR 作成
 3. レビュー・マージ → Preview 環境で確認
-4. QA 完了後、`develop` → `main` へ PR 作成
+4. QA 完了後、`develop` → `master` へ PR 作成
 5. マージ → Production デプロイ
 
 ---
@@ -47,7 +47,7 @@ develop ───●──●──●───●──●──●──●─
 
 Vercel は GitHub 連携により自動デプロイを行います：
 
-- **main ブランチへのプッシュ** → Production デプロイ
+- **master ブランチへのプッシュ** → Production デプロイ
 - **develop ブランチへのプッシュ** → Preview デプロイ
 - **PR 作成** → Preview デプロイ（PR ごとに一意の URL）
 
@@ -109,15 +109,62 @@ Vercel ダッシュボードから即座にロールバック可能：
 | Development | 開発・テスト | resave-dev |
 | Local | ローカル開発 | supabase start |
 
-### マイグレーション適用
+### マイグレーション適用フロー
+
+DBスキーマ変更が含まれるリリースは、**必ずコードのデプロイ前にマイグレーションを適用**すること。
+順序が逆になるとコードが新スキーマを前提に動くのに DB が古い状態となり障害になる。
+
+#### 1. マイグレーションファイルの作成
 
 ```bash
-# ローカル → リモート（開発環境）
-supabase db push --linked
-
-# マイグレーションファイル作成
+# プロジェクトルートで実行
 supabase migration new <name>
+# 例: supabase migration new add_column_to_cards
+# → supabase/migrations/YYYYMMDDHHMMSS_add_column_to_cards.sql が生成される
 ```
+
+#### 2. ローカルで確認
+
+```bash
+supabase start          # ローカル Supabase 起動
+supabase db reset       # 全マイグレーションをローカルに適用して動作確認
+```
+
+#### 3. 開発環境（resave-dev）に適用
+
+```bash
+# Supabase ダッシュボード → resave-dev のプロジェクト設定 → Reference ID をコピー
+supabase link --project-ref <dev-project-ref>
+supabase db push
+```
+
+Preview（develop-resave.vercel.app）で動作確認する。
+
+#### 4. 本番環境（resave-prod）に適用 ← masterマージの前に必ず実施
+
+```bash
+# Supabase ダッシュボード → resave-prod のプロジェクト設定 → Reference ID をコピー
+supabase link --project-ref <prod-project-ref>
+supabase db push
+```
+
+適用後、Supabase ダッシュボードの Table Editor でスキーマが正しく反映されていることを確認する。
+
+#### 5. masterにマージ → Vercel が自動デプロイ
+
+本番 DB への適用完了を確認してから PR をマージする。
+
+#### マイグレーションが不要なリリース（今回のような UI/ロジック修正のみ）
+
+DBスキーマ変更がなければ上記手順は不要。Preview で動作確認後、そのまま master にマージしてよい。
+
+変更内容にマイグレーションが含まれるかは以下で確認できる：
+
+```bash
+git diff origin/master...HEAD -- supabase/migrations/
+```
+
+差分がなければマイグレーション不要。
 
 ---
 

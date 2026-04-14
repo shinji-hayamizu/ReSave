@@ -1,21 +1,27 @@
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import type { InfiniteData } from '@tanstack/react-query';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ReactNode } from 'react';
 import { createElement } from 'react';
 
-import type { Card, CardWithTags, HomeCardsData } from '@/types/card';
+import type { Card, CardWithTags, HomeCardsData, HomeCardsPage } from '@/types/card';
 import {
   homeCardKeys,
   useHomeCards,
+  useHomeDueCards,
+  useHomeLearningCards,
   useHomeCreateCard,
   useHomeUpdateCard,
   useHomeDeleteCard,
   useHomeResetCard,
   useHomeSubmitAssessment,
+  getTotalFromInfiniteData,
 } from '../useHomeCards';
 
 const mockGetHomeCards = vi.fn();
+const mockGetHomeDueCards = vi.fn();
+const mockGetHomeLearningCards = vi.fn();
 const mockCreateCard = vi.fn();
 const mockUpdateCard = vi.fn();
 const mockDeleteCard = vi.fn();
@@ -24,6 +30,8 @@ const mockSubmitAssessment = vi.fn();
 
 vi.mock('@/actions/cards', () => ({
   getHomeCards: (...args: unknown[]) => mockGetHomeCards(...args),
+  getHomeDueCards: (...args: unknown[]) => mockGetHomeDueCards(...args),
+  getHomeLearningCards: (...args: unknown[]) => mockGetHomeLearningCards(...args),
   createCard: (...args: unknown[]) => mockCreateCard(...args),
   updateCard: (...args: unknown[]) => mockUpdateCard(...args),
   deleteCard: (...args: unknown[]) => mockDeleteCard(...args),
@@ -47,6 +55,7 @@ function createTestCard(overrides: Partial<CardWithTags> = {}): CardWithTags {
     userId: 'user-1',
     front: 'front text',
     back: 'back text',
+    sourceUrl: null,
     schedule: [1, 3, 7, 14, 30, 180],
     currentStep: 1,
     nextReviewAt: new Date().toISOString(),
@@ -66,6 +75,31 @@ function createHomeData(
   return { cards, todayStudiedCardIds, fetchedAt: new Date().toISOString() };
 }
 
+function createHomePage(
+  cards: CardWithTags[] = [],
+  todayStudiedCardIds: string[] = [],
+  pagination?: Partial<HomeCardsPage['pagination']>
+): HomeCardsPage {
+  return {
+    cards,
+    todayStudiedCardIds,
+    fetchedAt: new Date().toISOString(),
+    pagination: {
+      total: pagination?.total ?? cards.length,
+      limit: pagination?.limit ?? 10,
+      offset: pagination?.offset ?? 0,
+      hasMore: pagination?.hasMore ?? false,
+    },
+  };
+}
+
+function createInfiniteData(pages: HomeCardsPage[]): InfiniteData<HomeCardsPage> {
+  return {
+    pages,
+    pageParams: pages.map((_, i) => i * 10),
+  };
+}
+
 function createWrapper(queryClient: QueryClient) {
   return function Wrapper({ children }: { children: ReactNode }) {
     return createElement(QueryClientProvider, { client: queryClient }, children);
@@ -81,13 +115,68 @@ function createQueryClient() {
   });
 }
 
+function setTabCache(
+  queryClient: QueryClient,
+  tab: 'due' | 'learning',
+  cards: CardWithTags[],
+  todayStudiedCardIds: string[] = [],
+  paginationOverrides?: Partial<HomeCardsPage['pagination']>
+) {
+  const page = createHomePage(cards, todayStudiedCardIds, paginationOverrides);
+  queryClient.setQueryData(homeCardKeys.tab(tab), createInfiniteData([page]));
+}
+
+function getTabCache(
+  queryClient: QueryClient,
+  tab: 'due' | 'learning'
+): InfiniteData<HomeCardsPage> | undefined {
+  return queryClient.getQueryData<InfiniteData<HomeCardsPage>>(homeCardKeys.tab(tab));
+}
+
+function getAllCardsFromTab(
+  queryClient: QueryClient,
+  tab: 'due' | 'learning'
+): CardWithTags[] {
+  const data = getTabCache(queryClient, tab);
+  if (!data) return [];
+  return data.pages.flatMap((p) => p.cards);
+}
+
+function getStudiedIdsFromTab(
+  queryClient: QueryClient,
+  tab: 'due' | 'learning'
+): string[] {
+  const data = getTabCache(queryClient, tab);
+  if (!data || data.pages.length === 0) return [];
+  return data.pages[0].todayStudiedCardIds;
+}
+
 describe('homeCardKeys', () => {
   it('キャッシュキーが正しく定義されている', () => {
     expect(homeCardKeys.all).toEqual(['cards', 'home']);
+    expect(homeCardKeys.tab('due')).toEqual(['cards', 'home', 'due']);
+    expect(homeCardKeys.tab('learning')).toEqual(['cards', 'home', 'learning']);
   });
 });
 
-describe('useHomeCards', () => {
+describe('getTotalFromInfiniteData', () => {
+  it('データがある場合: 最初のページのtotalを返す', () => {
+    const page = createHomePage([createTestCard()], [], { total: 42 });
+    const data = createInfiniteData([page]);
+    expect(getTotalFromInfiniteData(data)).toBe(42);
+  });
+
+  it('undefinedの場合: 0を返す', () => {
+    expect(getTotalFromInfiniteData(undefined)).toBe(0);
+  });
+
+  it('ページが空の場合: 0を返す', () => {
+    const data = createInfiniteData([]);
+    expect(getTotalFromInfiniteData(data)).toBe(0);
+  });
+});
+
+describe('useHomeCards (互換フック)', () => {
   let queryClient: QueryClient;
 
   beforeEach(() => {
@@ -137,6 +226,89 @@ describe('useHomeCards', () => {
   });
 });
 
+describe('useHomeDueCards', () => {
+  let queryClient: QueryClient;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    queryClient = createQueryClient();
+  });
+
+  it('getHomeDueCardsでデータを取得する', async () => {
+    const card = createTestCard({ status: 'new' });
+    const page = createHomePage([card], [], { total: 1 });
+    mockGetHomeDueCards.mockResolvedValue(page);
+
+    const { result } = renderHook(() => useHomeDueCards(), {
+      wrapper: createWrapper(queryClient),
+    });
+
+    await waitFor(() => {
+      expect(result.current.isSuccess).toBe(true);
+    });
+
+    expect(result.current.data?.pages).toHaveLength(1);
+    expect(result.current.data?.pages[0].cards[0].id).toBe('card-1');
+    expect(mockGetHomeDueCards).toHaveBeenCalledWith({ limit: 10, offset: 0 });
+  });
+
+  it('hasMoreがtrueの場合: hasNextPageがtrueになる', async () => {
+    const page = createHomePage([createTestCard()], [], { total: 20, hasMore: true });
+    mockGetHomeDueCards.mockResolvedValue(page);
+
+    const { result } = renderHook(() => useHomeDueCards(), {
+      wrapper: createWrapper(queryClient),
+    });
+
+    await waitFor(() => {
+      expect(result.current.isSuccess).toBe(true);
+    });
+
+    expect(result.current.hasNextPage).toBe(true);
+  });
+
+  it('hasMoreがfalseの場合: hasNextPageがfalseになる', async () => {
+    const page = createHomePage([createTestCard()], [], { total: 1, hasMore: false });
+    mockGetHomeDueCards.mockResolvedValue(page);
+
+    const { result } = renderHook(() => useHomeDueCards(), {
+      wrapper: createWrapper(queryClient),
+    });
+
+    await waitFor(() => {
+      expect(result.current.isSuccess).toBe(true);
+    });
+
+    expect(result.current.hasNextPage).toBe(false);
+  });
+});
+
+describe('useHomeLearningCards', () => {
+  let queryClient: QueryClient;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    queryClient = createQueryClient();
+  });
+
+  it('getHomeLearningCardsでデータを取得する', async () => {
+    const card = createTestCard({ status: 'active' });
+    const page = createHomePage([card], [], { total: 1 });
+    mockGetHomeLearningCards.mockResolvedValue(page);
+
+    const { result } = renderHook(() => useHomeLearningCards(), {
+      wrapper: createWrapper(queryClient),
+    });
+
+    await waitFor(() => {
+      expect(result.current.isSuccess).toBe(true);
+    });
+
+    expect(result.current.data?.pages[0].cards[0].id).toBe('card-1');
+    expect(mockGetHomeLearningCards).toHaveBeenCalledWith({ limit: 10, offset: 0 });
+  });
+});
+
 describe('useHomeCreateCard', () => {
   let queryClient: QueryClient;
 
@@ -145,16 +317,16 @@ describe('useHomeCreateCard', () => {
     queryClient = createQueryClient();
   });
 
-  it('楽観的更新: 新カードがキャッシュに即時追加される', async () => {
-    const existingCard = createTestCard({ id: 'existing-1' });
-    const initialData = createHomeData([existingCard]);
-    queryClient.setQueryData(homeCardKeys.all, initialData);
+  it('楽観的更新: 新カードがdueタブキャッシュに即時追加される', async () => {
+    const existingCard = createTestCard({ id: 'existing-1', status: 'new' });
+    setTabCache(queryClient, 'due', [existingCard]);
 
     const newCardFromServer: Card = {
       id: 'server-card-1',
       userId: 'user-1',
       front: 'new front',
       back: 'new back',
+      sourceUrl: null,
       schedule: [1, 3, 7, 14, 30, 180],
       currentStep: 0,
       nextReviewAt: null,
@@ -177,15 +349,14 @@ describe('useHomeCreateCard', () => {
       expect(result.current.isSuccess).toBe(true);
     });
 
-    const cached = queryClient.getQueryData<HomeCardsData>(homeCardKeys.all);
-    expect(cached?.cards).toHaveLength(2);
-    expect(cached?.cards[0].id).toBe('server-card-1');
+    const cards = getAllCardsFromTab(queryClient, 'due');
+    expect(cards).toHaveLength(2);
+    expect(cards[0].id).toBe('server-card-1');
   });
 
   it('エラー時: 前の状態にロールバックされる', async () => {
-    const existingCard = createTestCard({ id: 'existing-1' });
-    const initialData = createHomeData([existingCard]);
-    queryClient.setQueryData(homeCardKeys.all, initialData);
+    const existingCard = createTestCard({ id: 'existing-1', status: 'new' });
+    setTabCache(queryClient, 'due', [existingCard]);
 
     mockCreateCard.mockRejectedValue(new Error('Server error'));
 
@@ -201,17 +372,18 @@ describe('useHomeCreateCard', () => {
       expect(result.current.isError).toBe(true);
     });
 
-    const cached = queryClient.getQueryData<HomeCardsData>(homeCardKeys.all);
-    expect(cached?.cards).toHaveLength(1);
-    expect(cached?.cards[0].id).toBe('existing-1');
+    const cards = getAllCardsFromTab(queryClient, 'due');
+    expect(cards).toHaveLength(1);
+    expect(cards[0].id).toBe('existing-1');
   });
 
-  it('キャッシュなし時: 楽観的更新で新しいキャッシュが作成される', async () => {
+  it('キャッシュなし時: 楽観的更新でundefinedが返される', async () => {
     const newCardFromServer: Card = {
       id: 'server-card-1',
       userId: 'user-1',
       front: 'new front',
       back: 'new back',
+      sourceUrl: null,
       schedule: [1, 3, 7, 14, 30, 180],
       currentStep: 0,
       nextReviewAt: null,
@@ -233,9 +405,6 @@ describe('useHomeCreateCard', () => {
     await waitFor(() => {
       expect(result.current.isSuccess).toBe(true);
     });
-
-    const cached = queryClient.getQueryData<HomeCardsData>(homeCardKeys.all);
-    expect(cached?.cards).toHaveLength(1);
   });
 
   it('エラー時: context.previousDataがない場合はロールバックしない', async () => {
@@ -260,6 +429,7 @@ describe('useHomeCreateCard', () => {
       userId: 'user-1',
       front: 'new front',
       back: 'new back',
+      sourceUrl: null,
       schedule: [1, 3, 7, 14, 30, 180],
       currentStep: 0,
       nextReviewAt: null,
@@ -282,7 +452,7 @@ describe('useHomeCreateCard', () => {
       result.current.mutate({ front: 'new front' });
     });
 
-    queryClient.removeQueries({ queryKey: homeCardKeys.all });
+    queryClient.removeQueries({ queryKey: homeCardKeys.tab('due') });
 
     await act(async () => {
       resolveCreate!(newCardFromServer);
@@ -302,15 +472,17 @@ describe('useHomeUpdateCard', () => {
     queryClient = createQueryClient();
   });
 
-  it('楽観的更新: カードが即時更新される', async () => {
+  it('楽観的更新: カードが両タブで即時更新される', async () => {
     const card = createTestCard({ id: 'card-1', front: 'old front' });
-    queryClient.setQueryData(homeCardKeys.all, createHomeData([card]));
+    setTabCache(queryClient, 'due', [card]);
+    setTabCache(queryClient, 'learning', [card]);
 
     const updatedFromServer: Card = {
       id: card.id,
       userId: card.userId,
       front: 'new front',
       back: card.back,
+      sourceUrl: null,
       schedule: card.schedule,
       currentStep: card.currentStep,
       nextReviewAt: card.nextReviewAt,
@@ -333,13 +505,15 @@ describe('useHomeUpdateCard', () => {
       expect(result.current.isSuccess).toBe(true);
     });
 
-    const cached = queryClient.getQueryData<HomeCardsData>(homeCardKeys.all);
-    expect(cached?.cards[0].front).toBe('new front');
+    const dueCards = getAllCardsFromTab(queryClient, 'due');
+    expect(dueCards[0].front).toBe('new front');
+    const learningCards = getAllCardsFromTab(queryClient, 'learning');
+    expect(learningCards[0].front).toBe('new front');
   });
 
   it('エラー時: 前の状態にロールバックされる', async () => {
     const card = createTestCard({ id: 'card-1', front: 'original' });
-    queryClient.setQueryData(homeCardKeys.all, createHomeData([card]));
+    setTabCache(queryClient, 'due', [card]);
 
     mockUpdateCard.mockRejectedValue(new Error('fail'));
 
@@ -355,8 +529,8 @@ describe('useHomeUpdateCard', () => {
       expect(result.current.isError).toBe(true);
     });
 
-    const cached = queryClient.getQueryData<HomeCardsData>(homeCardKeys.all);
-    expect(cached?.cards[0].front).toBe('original');
+    const dueCards = getAllCardsFromTab(queryClient, 'due');
+    expect(dueCards[0].front).toBe('original');
   });
 
   it('エラー時: context.previousDataがない場合はロールバックしない', async () => {
@@ -378,13 +552,14 @@ describe('useHomeUpdateCard', () => {
   it('onMutate: 対象外カードはそのまま返される', async () => {
     const card1 = createTestCard({ id: 'card-1', front: 'card1 original' });
     const card2 = createTestCard({ id: 'card-2', front: 'card2 original' });
-    queryClient.setQueryData(homeCardKeys.all, createHomeData([card1, card2]));
+    setTabCache(queryClient, 'due', [card1, card2]);
 
     const updatedFromServer: Card = {
       id: card1.id,
       userId: card1.userId,
       front: 'card1 updated',
       back: card1.back,
+      sourceUrl: null,
       schedule: card1.schedule,
       currentStep: card1.currentStep,
       nextReviewAt: card1.nextReviewAt,
@@ -407,20 +582,21 @@ describe('useHomeUpdateCard', () => {
       expect(result.current.isSuccess).toBe(true);
     });
 
-    const cached = queryClient.getQueryData<HomeCardsData>(homeCardKeys.all);
-    expect(cached?.cards[1].front).toBe('card2 original');
+    const dueCards = getAllCardsFromTab(queryClient, 'due');
+    expect(dueCards[1].front).toBe('card2 original');
   });
 
   it('onSuccess: 対象外カードはそのまま返される', async () => {
     const card1 = createTestCard({ id: 'card-1', front: 'card1 original' });
     const card2 = createTestCard({ id: 'card-2', front: 'card2 original' });
-    queryClient.setQueryData(homeCardKeys.all, createHomeData([card1, card2]));
+    setTabCache(queryClient, 'due', [card1, card2]);
 
     const updatedFromServer: Card = {
       id: card1.id,
       userId: card1.userId,
       front: 'card1 updated',
       back: card1.back,
+      sourceUrl: null,
       schedule: card1.schedule,
       currentStep: card1.currentStep,
       nextReviewAt: card1.nextReviewAt,
@@ -443,19 +619,20 @@ describe('useHomeUpdateCard', () => {
       expect(result.current.isSuccess).toBe(true);
     });
 
-    const cached = queryClient.getQueryData<HomeCardsData>(homeCardKeys.all);
-    expect(cached?.cards[1].front).toBe('card2 original');
+    const dueCards = getAllCardsFromTab(queryClient, 'due');
+    expect(dueCards[1].front).toBe('card2 original');
   });
 
   it('onSuccess: キャッシュなし時は何もしない', async () => {
     const card = createTestCard({ id: 'card-1', front: 'original' });
-    queryClient.setQueryData(homeCardKeys.all, createHomeData([card]));
+    setTabCache(queryClient, 'due', [card]);
 
     const updatedFromServer: Card = {
       id: card.id,
       userId: card.userId,
       front: 'updated',
       back: card.back,
+      sourceUrl: null,
       schedule: card.schedule,
       currentStep: card.currentStep,
       nextReviewAt: card.nextReviewAt,
@@ -470,7 +647,8 @@ describe('useHomeUpdateCard', () => {
       wrapper: createWrapper(queryClient),
     });
 
-    queryClient.removeQueries({ queryKey: homeCardKeys.all });
+    queryClient.removeQueries({ queryKey: homeCardKeys.tab('due') });
+    queryClient.removeQueries({ queryKey: homeCardKeys.tab('learning') });
 
     await act(async () => {
       result.current.mutate({ id: 'card-1', input: { front: 'updated' } });
@@ -493,10 +671,7 @@ describe('useHomeDeleteCard', () => {
   it('楽観的更新: カードがキャッシュから即時除去される', async () => {
     const card1 = createTestCard({ id: 'card-1' });
     const card2 = createTestCard({ id: 'card-2' });
-    queryClient.setQueryData(
-      homeCardKeys.all,
-      createHomeData([card1, card2], ['card-1'])
-    );
+    setTabCache(queryClient, 'due', [card1, card2], ['card-1']);
 
     mockDeleteCard.mockResolvedValue(undefined);
 
@@ -512,15 +687,16 @@ describe('useHomeDeleteCard', () => {
       expect(result.current.isSuccess).toBe(true);
     });
 
-    const cached = queryClient.getQueryData<HomeCardsData>(homeCardKeys.all);
-    expect(cached?.cards).toHaveLength(1);
-    expect(cached?.cards[0].id).toBe('card-2');
-    expect(cached?.todayStudiedCardIds).not.toContain('card-1');
+    const dueCards = getAllCardsFromTab(queryClient, 'due');
+    expect(dueCards).toHaveLength(1);
+    expect(dueCards[0].id).toBe('card-2');
+    const studiedIds = getStudiedIdsFromTab(queryClient, 'due');
+    expect(studiedIds).not.toContain('card-1');
   });
 
   it('エラー時: 前の状態にロールバックされる', async () => {
     const card = createTestCard({ id: 'card-1' });
-    queryClient.setQueryData(homeCardKeys.all, createHomeData([card]));
+    setTabCache(queryClient, 'due', [card]);
 
     mockDeleteCard.mockRejectedValue(new Error('fail'));
 
@@ -536,8 +712,8 @@ describe('useHomeDeleteCard', () => {
       expect(result.current.isError).toBe(true);
     });
 
-    const cached = queryClient.getQueryData<HomeCardsData>(homeCardKeys.all);
-    expect(cached?.cards).toHaveLength(1);
+    const dueCards = getAllCardsFromTab(queryClient, 'due');
+    expect(dueCards).toHaveLength(1);
   });
 
   it('エラー時: context.previousDataがない場合はロールバックしない', async () => {
@@ -565,24 +741,25 @@ describe('useHomeResetCard', () => {
     queryClient = createQueryClient();
   });
 
-  it('楽観的更新: カードのステータスがactiveに、currentStepが0にリセットされる', async () => {
+  it('楽観的更新: カードのステータスがnewに、currentStepが0にリセットされる', async () => {
     const card = createTestCard({
       id: 'card-1',
       status: 'completed',
       currentStep: 5,
       completedAt: '2025-01-01T00:00:00Z',
     });
-    queryClient.setQueryData(homeCardKeys.all, createHomeData([card]));
+    setTabCache(queryClient, 'due', [card]);
 
     const resetFromServer: Card = {
       id: card.id,
       userId: card.userId,
       front: card.front,
       back: card.back,
+      sourceUrl: null,
       schedule: card.schedule,
       currentStep: 0,
-      nextReviewAt: new Date().toISOString(),
-      status: 'active',
+      nextReviewAt: null,
+      status: 'new',
       completedAt: null,
       createdAt: card.createdAt,
       updatedAt: card.updatedAt,
@@ -594,17 +771,18 @@ describe('useHomeResetCard', () => {
     });
 
     await act(async () => {
-      result.current.mutate('card-1');
+      result.current.mutate({ id: 'card-1', card });
     });
 
     await waitFor(() => {
       expect(result.current.isSuccess).toBe(true);
     });
 
-    const cached = queryClient.getQueryData<HomeCardsData>(homeCardKeys.all);
-    expect(cached?.cards[0].status).toBe('active');
-    expect(cached?.cards[0].currentStep).toBe(0);
-    expect(cached?.cards[0].completedAt).toBeNull();
+    const dueCards = getAllCardsFromTab(queryClient, 'due');
+    expect(dueCards[0].status).toBe('new');
+    expect(dueCards[0].currentStep).toBe(0);
+    expect(dueCards[0].completedAt).toBeNull();
+    expect(dueCards[0].nextReviewAt).toBeNull();
   });
 
   it('エラー時: 前の状態にロールバックされる', async () => {
@@ -613,7 +791,7 @@ describe('useHomeResetCard', () => {
       status: 'completed',
       currentStep: 5,
     });
-    queryClient.setQueryData(homeCardKeys.all, createHomeData([card]));
+    setTabCache(queryClient, 'due', [card]);
 
     mockResetCardToUnlearned.mockRejectedValue(new Error('fail'));
 
@@ -622,19 +800,20 @@ describe('useHomeResetCard', () => {
     });
 
     await act(async () => {
-      result.current.mutate('card-1');
+      result.current.mutate({ id: 'card-1', card });
     });
 
     await waitFor(() => {
       expect(result.current.isError).toBe(true);
     });
 
-    const cached = queryClient.getQueryData<HomeCardsData>(homeCardKeys.all);
-    expect(cached?.cards[0].status).toBe('completed');
-    expect(cached?.cards[0].currentStep).toBe(5);
+    const dueCards = getAllCardsFromTab(queryClient, 'due');
+    expect(dueCards[0].status).toBe('completed');
+    expect(dueCards[0].currentStep).toBe(5);
   });
 
   it('エラー時: context.previousDataがない場合はロールバックしない', async () => {
+    const card = createTestCard({ id: 'card-1', status: 'completed', currentStep: 5 });
     mockResetCardToUnlearned.mockRejectedValue(new Error('fail'));
 
     const { result } = renderHook(() => useHomeResetCard(), {
@@ -642,7 +821,7 @@ describe('useHomeResetCard', () => {
     });
 
     await act(async () => {
-      result.current.mutate('card-1');
+      result.current.mutate({ id: 'card-1', card });
     });
 
     await waitFor(() => {
@@ -653,17 +832,18 @@ describe('useHomeResetCard', () => {
   it('onMutate: 対象外カードはそのまま返される', async () => {
     const card1 = createTestCard({ id: 'card-1', status: 'completed', currentStep: 5 });
     const card2 = createTestCard({ id: 'card-2', currentStep: 2 });
-    queryClient.setQueryData(homeCardKeys.all, createHomeData([card1, card2]));
+    setTabCache(queryClient, 'due', [card2]);
 
     const resetFromServer: Card = {
       id: card1.id,
       userId: card1.userId,
       front: card1.front,
       back: card1.back,
+      sourceUrl: null,
       schedule: card1.schedule,
       currentStep: 0,
-      nextReviewAt: new Date().toISOString(),
-      status: 'active',
+      nextReviewAt: null,
+      status: 'new',
       completedAt: null,
       createdAt: card1.createdAt,
       updatedAt: card1.updatedAt,
@@ -675,30 +855,34 @@ describe('useHomeResetCard', () => {
     });
 
     await act(async () => {
-      result.current.mutate('card-1');
+      result.current.mutate({ id: 'card-1', card: card1 });
     });
 
     await waitFor(() => {
       expect(result.current.isSuccess).toBe(true);
     });
 
-    const cached = queryClient.getQueryData<HomeCardsData>(homeCardKeys.all);
-    expect(cached?.cards[1].currentStep).toBe(2);
+    const dueCards = getAllCardsFromTab(queryClient, 'due');
+    expect(dueCards[0].id).toBe('card-1');
+    expect(dueCards[0].status).toBe('new');
+    expect(dueCards[1].id).toBe('card-2');
+    expect(dueCards[1].currentStep).toBe(2);
   });
 
   it('onSuccess: キャッシュなし時は何もしない', async () => {
     const card = createTestCard({ id: 'card-1', status: 'completed', currentStep: 5 });
-    queryClient.setQueryData(homeCardKeys.all, createHomeData([card]));
+    setTabCache(queryClient, 'due', [card]);
 
     const resetFromServer: Card = {
       id: card.id,
       userId: card.userId,
       front: card.front,
       back: card.back,
+      sourceUrl: null,
       schedule: card.schedule,
       currentStep: 0,
-      nextReviewAt: new Date().toISOString(),
-      status: 'active',
+      nextReviewAt: null,
+      status: 'new',
       completedAt: null,
       createdAt: card.createdAt,
       updatedAt: card.updatedAt,
@@ -709,10 +893,11 @@ describe('useHomeResetCard', () => {
       wrapper: createWrapper(queryClient),
     });
 
-    queryClient.removeQueries({ queryKey: homeCardKeys.all });
+    queryClient.removeQueries({ queryKey: homeCardKeys.tab('due') });
+    queryClient.removeQueries({ queryKey: homeCardKeys.tab('learning') });
 
     await act(async () => {
-      result.current.mutate('card-1');
+      result.current.mutate({ id: 'card-1', card });
     });
 
     await waitFor(() => {
@@ -735,13 +920,14 @@ describe('useHomeSubmitAssessment', () => {
       status: 'active',
       currentStep: 1,
     });
-    queryClient.setQueryData(homeCardKeys.all, createHomeData([card]));
+    setTabCache(queryClient, 'learning', [card]);
 
     const updatedCard: Card = {
       id: card.id,
       userId: card.userId,
       front: card.front,
       back: card.back,
+      sourceUrl: null,
       schedule: card.schedule,
       currentStep: 2,
       nextReviewAt: new Date().toISOString(),
@@ -764,8 +950,8 @@ describe('useHomeSubmitAssessment', () => {
       expect(result.current.isSuccess).toBe(true);
     });
 
-    const cached = queryClient.getQueryData<HomeCardsData>(homeCardKeys.all);
-    expect(cached?.todayStudiedCardIds).toContain('card-1');
+    const studiedIds = getStudiedIdsFromTab(queryClient, 'learning');
+    expect(studiedIds).toContain('card-1');
   });
 
   it('again評価: currentStepが0にリセットされる', async () => {
@@ -774,13 +960,14 @@ describe('useHomeSubmitAssessment', () => {
       status: 'active',
       currentStep: 3,
     });
-    queryClient.setQueryData(homeCardKeys.all, createHomeData([card]));
+    setTabCache(queryClient, 'learning', [card]);
 
     const updatedCard: Card = {
       id: card.id,
       userId: card.userId,
       front: card.front,
       back: card.back,
+      sourceUrl: null,
       schedule: card.schedule,
       currentStep: 0,
       nextReviewAt: card.nextReviewAt,
@@ -803,9 +990,10 @@ describe('useHomeSubmitAssessment', () => {
       expect(result.current.isSuccess).toBe(true);
     });
 
-    const cached = queryClient.getQueryData<HomeCardsData>(homeCardKeys.all);
-    expect(cached?.cards[0].currentStep).toBe(0);
-    expect(cached?.todayStudiedCardIds).toContain('card-1');
+    const learningCards = getAllCardsFromTab(queryClient, 'learning');
+    expect(learningCards[0].currentStep).toBe(0);
+    const studiedIds = getStudiedIdsFromTab(queryClient, 'learning');
+    expect(studiedIds).toContain('card-1');
   });
 
   it('remembered評価: ステータスがcompletedになる', async () => {
@@ -814,7 +1002,7 @@ describe('useHomeSubmitAssessment', () => {
       status: 'active',
       currentStep: 2,
     });
-    queryClient.setQueryData(homeCardKeys.all, createHomeData([card]));
+    setTabCache(queryClient, 'learning', [card]);
 
     const completedAt = new Date().toISOString();
     const updatedCard: Card = {
@@ -822,6 +1010,7 @@ describe('useHomeSubmitAssessment', () => {
       userId: card.userId,
       front: card.front,
       back: card.back,
+      sourceUrl: null,
       schedule: card.schedule,
       currentStep: card.currentStep,
       nextReviewAt: null,
@@ -844,9 +1033,10 @@ describe('useHomeSubmitAssessment', () => {
       expect(result.current.isSuccess).toBe(true);
     });
 
-    const cached = queryClient.getQueryData<HomeCardsData>(homeCardKeys.all);
-    expect(cached?.cards[0].status).toBe('completed');
-    expect(cached?.todayStudiedCardIds).toContain('card-1');
+    const learningCards = getAllCardsFromTab(queryClient, 'learning');
+    expect(learningCards[0].status).toBe('completed');
+    const studiedIds = getStudiedIdsFromTab(queryClient, 'learning');
+    expect(studiedIds).toContain('card-1');
   });
 
   it('エラー時: 前の状態にロールバックされる', async () => {
@@ -855,7 +1045,7 @@ describe('useHomeSubmitAssessment', () => {
       status: 'active',
       currentStep: 1,
     });
-    queryClient.setQueryData(homeCardKeys.all, createHomeData([card]));
+    setTabCache(queryClient, 'learning', [card]);
 
     mockSubmitAssessment.mockResolvedValue({ ok: false, error: 'Server error' });
 
@@ -871,9 +1061,10 @@ describe('useHomeSubmitAssessment', () => {
       expect(result.current.isError).toBe(true);
     });
 
-    const cached = queryClient.getQueryData<HomeCardsData>(homeCardKeys.all);
-    expect(cached?.cards[0].currentStep).toBe(1);
-    expect(cached?.todayStudiedCardIds).toEqual([]);
+    const learningCards = getAllCardsFromTab(queryClient, 'learning');
+    expect(learningCards[0].currentStep).toBe(1);
+    const studiedIds = getStudiedIdsFromTab(queryClient, 'learning');
+    expect(studiedIds).toEqual([]);
   });
 
   it('ok評価: スケジュール最終ステップを超えた場合completedになる', async () => {
@@ -883,13 +1074,14 @@ describe('useHomeSubmitAssessment', () => {
       currentStep: 5,
       schedule: [1, 3, 7, 14, 30, 180],
     });
-    queryClient.setQueryData(homeCardKeys.all, createHomeData([card]));
+    setTabCache(queryClient, 'learning', [card]);
 
     const updatedCard: Card = {
       id: card.id,
       userId: card.userId,
       front: card.front,
       back: card.back,
+      sourceUrl: null,
       schedule: card.schedule,
       currentStep: 6,
       nextReviewAt: null,
@@ -912,22 +1104,24 @@ describe('useHomeSubmitAssessment', () => {
       expect(result.current.isSuccess).toBe(true);
     });
 
-    const cached = queryClient.getQueryData<HomeCardsData>(homeCardKeys.all);
-    expect(cached?.cards[0].status).toBe('completed');
-    expect(cached?.cards[0].nextReviewAt).toBeNull();
-    expect(cached?.todayStudiedCardIds).toContain('card-1');
+    const learningCards = getAllCardsFromTab(queryClient, 'learning');
+    expect(learningCards[0].status).toBe('completed');
+    expect(learningCards[0].nextReviewAt).toBeNull();
+    const studiedIds = getStudiedIdsFromTab(queryClient, 'learning');
+    expect(studiedIds).toContain('card-1');
   });
 
   it('対象外カードIDはそのまま返される', async () => {
     const card1 = createTestCard({ id: 'card-1', currentStep: 1 });
     const card2 = createTestCard({ id: 'card-2', currentStep: 2 });
-    queryClient.setQueryData(homeCardKeys.all, createHomeData([card1, card2]));
+    setTabCache(queryClient, 'learning', [card1, card2]);
 
     const updatedCard: Card = {
       id: card1.id,
       userId: card1.userId,
       front: card1.front,
       back: card1.back,
+      sourceUrl: null,
       schedule: card1.schedule,
       currentStep: 2,
       nextReviewAt: new Date().toISOString(),
@@ -950,19 +1144,20 @@ describe('useHomeSubmitAssessment', () => {
       expect(result.current.isSuccess).toBe(true);
     });
 
-    const cached = queryClient.getQueryData<HomeCardsData>(homeCardKeys.all);
-    expect(cached?.cards[1].currentStep).toBe(2);
+    const learningCards = getAllCardsFromTab(queryClient, 'learning');
+    expect(learningCards[1].currentStep).toBe(2);
   });
 
   it('未知のassessment値の場合カードはそのまま返される', async () => {
     const card = createTestCard({ id: 'card-1', currentStep: 1 });
-    queryClient.setQueryData(homeCardKeys.all, createHomeData([card]));
+    setTabCache(queryClient, 'learning', [card]);
 
     const updatedCard: Card = {
       id: card.id,
       userId: card.userId,
       front: card.front,
       back: card.back,
+      sourceUrl: null,
       schedule: card.schedule,
       currentStep: 1,
       nextReviewAt: card.nextReviewAt,
@@ -985,8 +1180,8 @@ describe('useHomeSubmitAssessment', () => {
       expect(result.current.isSuccess).toBe(true);
     });
 
-    const cached = queryClient.getQueryData<HomeCardsData>(homeCardKeys.all);
-    expect(cached?.cards[0].currentStep).toBe(1);
+    const learningCards = getAllCardsFromTab(queryClient, 'learning');
+    expect(learningCards[0].currentStep).toBe(1);
   });
 
   it('キャッシュが存在しない場合onMutateはundefinedを返す', async () => {
@@ -995,6 +1190,7 @@ describe('useHomeSubmitAssessment', () => {
       userId: 'user-1',
       front: 'front',
       back: 'back',
+      sourceUrl: null,
       schedule: [1, 3, 7, 14, 30, 180],
       currentStep: 2,
       nextReviewAt: new Date().toISOString(),
@@ -1036,16 +1232,14 @@ describe('useHomeSubmitAssessment', () => {
 
   it('重複カードIDはtodayStudiedCardIdsに追加されない', async () => {
     const card = createTestCard({ id: 'card-1' });
-    queryClient.setQueryData(
-      homeCardKeys.all,
-      createHomeData([card], ['card-1'])
-    );
+    setTabCache(queryClient, 'learning', [card], ['card-1']);
 
     const updatedCard: Card = {
       id: card.id,
       userId: card.userId,
       front: card.front,
       back: card.back,
+      sourceUrl: null,
       schedule: card.schedule,
       currentStep: 2,
       nextReviewAt: card.nextReviewAt,
@@ -1068,8 +1262,8 @@ describe('useHomeSubmitAssessment', () => {
       expect(result.current.isSuccess).toBe(true);
     });
 
-    const cached = queryClient.getQueryData<HomeCardsData>(homeCardKeys.all);
-    const occurrences = cached?.todayStudiedCardIds.filter((id) => id === 'card-1');
+    const studiedIds = getStudiedIdsFromTab(queryClient, 'learning');
+    const occurrences = studiedIds.filter((id) => id === 'card-1');
     expect(occurrences).toHaveLength(1);
   });
 });

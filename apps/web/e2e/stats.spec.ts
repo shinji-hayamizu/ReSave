@@ -10,7 +10,7 @@ test.describe('統計画面', () => {
   });
 
   test('ページヘッダーが表示される', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: '統計' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: '統計', exact: true })).toBeVisible();
     await expect(page.getByText('学習の進捗を確認しましょう')).toBeVisible();
   });
 

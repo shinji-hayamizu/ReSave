@@ -28,12 +28,12 @@ export default defineConfig({
         storageState: STORAGE_STATE,
       },
       dependencies: ['setup'],
-      testIgnore: /auth\.spec\.ts|splash\.spec\.ts|visual\.spec\.ts|auth\.setup\.ts|landing\.spec\.ts/,
+      testIgnore: /auth\.spec\.ts|splash\.spec\.ts|visual\.spec\.ts|visual-auth\.spec\.ts|auth\.setup\.ts|landing\.spec\.ts/,
     },
     {
       name: 'chromium-no-auth',
       use: { ...devices['Desktop Chrome'] },
-      testMatch: /auth\.spec\.ts|splash\.spec\.ts|visual\.spec\.ts|update-password\.spec\.ts|landing\.spec\.ts/,
+      testMatch: /auth\.spec\.ts|splash\.spec\.ts|visual\.spec\.ts|visual-auth\.spec\.ts|update-password\.spec\.ts|landing\.spec\.ts/,
     },
   ],
   webServer: {

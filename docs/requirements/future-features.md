@@ -69,11 +69,11 @@ Features are organized by phase based on priority and implementation complexity.
 
 | ID | 機能 / Feature | 説明 / Description | 優先度 / Priority |
 |----|---------------|-------------------|------------------|
-| P2-010 | デッキ共有 / Deck Sharing | 公開URLでデッキを共有 | 高 / High |
-| P2-011 | デッキマーケット / Deck Marketplace | 公開デッキの検索・コピー | 高 / High |
-| P2-012 | フォロー機能 / Follow Users | 他ユーザーをフォローして新デッキを発見 | 中 / Medium |
-| P2-013 | いいね・レビュー / Likes & Reviews | 公開デッキへの評価機能 | 中 / Medium |
-| P2-014 | 共同編集 / Collaborative Editing | 複数人でデッキを編集 | 低 / Low |
+| P2-010 | カードセット共有 / Card Set Sharing | 公開URLでタグ付きカードセットを共有 | 高 / High |
+| P2-011 | カードマーケット / Card Marketplace | 公開カードセットの検索・コピー | 高 / High |
+| P2-012 | フォロー機能 / Follow Users | 他ユーザーをフォローして新カードセットを発見 | 中 / Medium |
+| P2-013 | いいね・レビュー / Likes & Reviews | 公開カードセットへの評価機能 | 中 / Medium |
+| P2-014 | 共同編集 / Collaborative Editing | 複数人でカードセットを編集 | 低 / Low |
 
 ### 2.3 ゲーミフィケーション / Gamification
 
@@ -101,8 +101,8 @@ Features are organized by phase based on priority and implementation complexity.
 
 | ID | 機能 / Feature | 説明 / Description | 価格帯 / Pricing |
 |----|---------------|-------------------|-----------------|
-| P3-001 | 無制限デッキ / Unlimited Decks | デッキ数の制限解除 | Premium |
-| P3-002 | 無制限カード / Unlimited Cards | カード数の制限解除 | Premium |
+| P3-001 | 無制限カード / Unlimited Cards | カード数の制限解除 | Premium |
+| P3-002 | 無制限タグ / Unlimited Tags | タグ数の制限解除 | Premium |
 | P3-003 | 高度なAI機能 / Advanced AI | AI生成の回数制限解除 | Premium |
 | P3-004 | 優先サポート / Priority Support | 優先カスタマーサポート | Premium |
 | P3-005 | カスタムテーマ / Custom Themes | 独自のカラーテーマ設定 | Premium |
@@ -139,14 +139,14 @@ Features are organized by phase based on priority and implementation complexity.
 | F-002 | Apple Watch / Wear OS | ウェアラブルデバイス対応 | 隙間時間での学習促進 |
 | F-003 | ブラウザ拡張 / Browser Extension | Webページからカードを直接作成 | カード作成の効率化 |
 | F-004 | Notion連携 / Notion Integration | Notionからカードをインポート | 既存ナレッジベースの活用 |
-| F-005 | Anki互換 / Anki Compatibility | Ankiデッキのインポート・エクスポート | Ankiユーザーの移行促進 |
+| F-005 | Anki互換 / Anki Compatibility | Ankiカードのインポート・エクスポート | Ankiユーザーの移行促進 |
 
 ### 学習科学の発展 / Learning Science Advances
 
 | ID | 機能 / Feature | 説明 / Description | 検討理由 / Rationale |
 |----|---------------|-------------------|---------------------|
 | F-010 | アクティブリコール強化 / Active Recall | ヒント機能、穴埋め問題 | 記憶定着率の向上 |
-| F-011 | インターリービング / Interleaving | 複数デッキの混合学習 | 転移学習の促進 |
+| F-011 | インターリービング / Interleaving | 複数タグの混合学習 | 転移学習の促進 |
 | F-012 | 生成効果 / Generation Effect | 答えを自分で入力するモード | 記憶エンコーディングの強化 |
 | F-013 | 睡眠学習連携 / Sleep Learning | 就寝前復習の最適化 | 睡眠中の記憶固定化を活用 |
 

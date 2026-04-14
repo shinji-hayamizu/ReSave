@@ -1,77 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 
-import type { Database } from '@/types/database';
 import type { CardWithTags } from '@/types/card';
-import type { Tag } from '@/types/tag';
+import { authenticateRequest, mapRowToCard, mapRowToTag, type CardRow } from '@/lib/supabase/api-client';
 import { updateCardSchema } from '@/validations/card';
-
-type CardRow = Database['public']['Tables']['cards']['Row'];
-type TagRow = Database['public']['Tables']['tags']['Row'];
 
 type Params = Promise<{ id: string }>;
 
-function mapRowToCard(row: CardRow): CardWithTags {
-  return {
-    id: row.id,
-    userId: row.user_id,
-    front: row.front,
-    back: row.back,
-    schedule: row.schedule,
-    currentStep: row.current_step,
-    nextReviewAt: row.next_review_at,
-    status: row.status,
-    completedAt: row.completed_at,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at,
-    tags: [],
-  };
-}
 
-function mapRowToTag(row: TagRow): Tag {
-  return {
-    id: row.id,
-    userId: row.user_id,
-    name: row.name,
-    color: row.color,
-    createdAt: row.created_at,
-  };
-}
-
-function createAuthenticatedClient(token: string) {
-  return createSupabaseClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      global: {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      },
-    }
-  );
-}
-
-async function authenticateRequest(request: NextRequest) {
-  const authHeader = request.headers.get('Authorization');
-  if (!authHeader?.startsWith('Bearer ')) {
-    return null;
-  }
-
-  const token = authHeader.split(' ')[1];
-  const supabase = createAuthenticatedClient(token);
-
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser();
-
-  if (error || !user) {
-    return null;
-  }
-
-  return { user, supabase };
-}
 
 export async function GET(request: NextRequest, { params }: { params: Params }) {
   try {
@@ -199,7 +134,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Params }
       );
     }
 
-    const { front, back, tagIds } = validationResult.data;
+    const { front, back, tagIds, sourceUrl } = validationResult.data;
 
     const { data: existingCard, error: existingError } = await supabase
       .from('cards')
@@ -223,6 +158,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Params }
     const updateData: Partial<CardRow> = {};
     if (front !== undefined) updateData.front = front;
     if (back !== undefined) updateData.back = back;
+    if (sourceUrl !== undefined) updateData.source_url = sourceUrl || null;
 
     if (Object.keys(updateData).length > 0) {
       updateData.updated_at = new Date().toISOString();

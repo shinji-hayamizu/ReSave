@@ -1,4 +1,4 @@
-import { UpdatePasswordForm } from '@/components/auth/update-password-form';
+import { UpdatePasswordForm } from './client';
 
 export const metadata = {
   title: 'パスワード更新',

@@ -176,10 +176,10 @@ describe('LoginForm', () => {
       });
     });
 
-    it('ログイン失敗時にエラーメッセージが表示される', async () => {
-      // Given: ログインが失敗する状態
+    it('invalid_credentialsエラー時に認証情報不正メッセージが表示される', async () => {
+      // Given: invalid_credentialsコードのエラーが返る状態
       mockSignInWithPassword.mockResolvedValue({
-        error: { message: 'Invalid credentials' },
+        error: { code: 'invalid_credentials', message: 'Invalid login credentials' },
       });
       const user = userEvent.setup();
       render(<LoginForm />);
@@ -189,10 +189,113 @@ describe('LoginForm', () => {
       await user.type(screen.getByLabelText('パスワード'), 'wrongpassword');
       await user.click(screen.getByRole('button', { name: 'ログイン' }));
 
-      // Then: エラーメッセージが表示される
+      // Then: 認証情報不正メッセージが表示される
       await waitFor(() => {
         expect(
           screen.getByText('メールアドレスまたはパスワードが正しくありません')
+        ).toBeInTheDocument();
+      });
+    });
+
+    it('メッセージに"Invalid login credentials"が含まれる場合に認証情報不正メッセージが表示される', async () => {
+      // Given: codeなしでmessageに"Invalid login credentials"が含まれるエラー
+      mockSignInWithPassword.mockResolvedValue({
+        error: { message: 'Invalid login credentials' },
+      });
+      const user = userEvent.setup();
+      render(<LoginForm />);
+
+      // When: 無効な認証情報を入力して送信
+      await user.type(screen.getByLabelText('メールアドレス'), 'test@example.com');
+      await user.type(screen.getByLabelText('パスワード'), 'wrongpassword');
+      await user.click(screen.getByRole('button', { name: 'ログイン' }));
+
+      // Then: 認証情報不正メッセージが表示される
+      await waitFor(() => {
+        expect(
+          screen.getByText('メールアドレスまたはパスワードが正しくありません')
+        ).toBeInTheDocument();
+      });
+    });
+
+    it('user_not_foundエラー時にアカウント未発見メッセージが表示される', async () => {
+      // Given: user_not_foundコードのエラーが返る状態
+      mockSignInWithPassword.mockResolvedValue({
+        error: { code: 'user_not_found', message: 'User not found' },
+      });
+      const user = userEvent.setup();
+      render(<LoginForm />);
+
+      // When: 存在しないメールアドレスで送信
+      await user.type(screen.getByLabelText('メールアドレス'), 'notexist@example.com');
+      await user.type(screen.getByLabelText('パスワード'), 'password123');
+      await user.click(screen.getByRole('button', { name: 'ログイン' }));
+
+      // Then: アカウント未発見メッセージが表示される
+      await waitFor(() => {
+        expect(screen.getByText('アカウントが見つかりません')).toBeInTheDocument();
+      });
+    });
+
+    it('email_rate_limit_exceededエラー時にレート制限メッセージが表示される', async () => {
+      // Given: email_rate_limit_exceededコードのエラーが返る状態
+      mockSignInWithPassword.mockResolvedValue({
+        error: { code: 'email_rate_limit_exceeded', message: 'Rate limit exceeded' },
+      });
+      const user = userEvent.setup();
+      render(<LoginForm />);
+
+      // When: ログインを試みる
+      await user.type(screen.getByLabelText('メールアドレス'), 'test@example.com');
+      await user.type(screen.getByLabelText('パスワード'), 'password123');
+      await user.click(screen.getByRole('button', { name: 'ログイン' }));
+
+      // Then: レート制限メッセージが表示される
+      await waitFor(() => {
+        expect(
+          screen.getByText('しばらく時間をおいてから再度お試しください')
+        ).toBeInTheDocument();
+      });
+    });
+
+    it('status 429エラー時にレート制限メッセージが表示される', async () => {
+      // Given: status 429のエラーが返る状態
+      mockSignInWithPassword.mockResolvedValue({
+        error: { status: 429, message: 'Too many requests' },
+      });
+      const user = userEvent.setup();
+      render(<LoginForm />);
+
+      // When: ログインを試みる
+      await user.type(screen.getByLabelText('メールアドレス'), 'test@example.com');
+      await user.type(screen.getByLabelText('パスワード'), 'password123');
+      await user.click(screen.getByRole('button', { name: 'ログイン' }));
+
+      // Then: レート制限メッセージが表示される
+      await waitFor(() => {
+        expect(
+          screen.getByText('しばらく時間をおいてから再度お試しください')
+        ).toBeInTheDocument();
+      });
+    });
+
+    it('不明なエラー時に汎用ログイン失敗メッセージが表示される', async () => {
+      // Given: 未知のエラーコードが返る状態
+      mockSignInWithPassword.mockResolvedValue({
+        error: { code: 'unknown_error', message: 'Something went wrong' },
+      });
+      const user = userEvent.setup();
+      render(<LoginForm />);
+
+      // When: ログインを試みる
+      await user.type(screen.getByLabelText('メールアドレス'), 'test@example.com');
+      await user.type(screen.getByLabelText('パスワード'), 'password123');
+      await user.click(screen.getByRole('button', { name: 'ログイン' }));
+
+      // Then: 汎用ログイン失敗メッセージが表示される
+      await waitFor(() => {
+        expect(
+          screen.getByText('ログインに失敗しました。しばらくしてから再度お試しください')
         ).toBeInTheDocument();
       });
     });
