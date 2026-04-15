@@ -914,7 +914,7 @@ describe('useHomeSubmitAssessment', () => {
     queryClient = createQueryClient();
   });
 
-  it('ok評価: currentStepが進み、todayStudiedCardIdsに追加される', async () => {
+  it('ok評価: learningタブから削除され、todayStudiedCardIdsに追加される', async () => {
     const card = createTestCard({
       id: 'card-1',
       status: 'active',
@@ -950,11 +950,13 @@ describe('useHomeSubmitAssessment', () => {
       expect(result.current.isSuccess).toBe(true);
     });
 
+    const learningCards = getAllCardsFromTab(queryClient, 'learning');
+    expect(learningCards).toHaveLength(0);
     const studiedIds = getStudiedIdsFromTab(queryClient, 'learning');
     expect(studiedIds).toContain('card-1');
   });
 
-  it('again評価: currentStepが0にリセットされる', async () => {
+  it('again評価: learningタブから削除され、todayStudiedCardIdsに追加される', async () => {
     const card = createTestCard({
       id: 'card-1',
       status: 'active',
@@ -991,12 +993,12 @@ describe('useHomeSubmitAssessment', () => {
     });
 
     const learningCards = getAllCardsFromTab(queryClient, 'learning');
-    expect(learningCards[0].currentStep).toBe(0);
+    expect(learningCards).toHaveLength(0);
     const studiedIds = getStudiedIdsFromTab(queryClient, 'learning');
     expect(studiedIds).toContain('card-1');
   });
 
-  it('remembered評価: ステータスがcompletedになる', async () => {
+  it('remembered評価: learningタブから削除され、todayStudiedCardIdsに追加される', async () => {
     const card = createTestCard({
       id: 'card-1',
       status: 'active',
@@ -1034,7 +1036,7 @@ describe('useHomeSubmitAssessment', () => {
     });
 
     const learningCards = getAllCardsFromTab(queryClient, 'learning');
-    expect(learningCards[0].status).toBe('completed');
+    expect(learningCards).toHaveLength(0);
     const studiedIds = getStudiedIdsFromTab(queryClient, 'learning');
     expect(studiedIds).toContain('card-1');
   });
@@ -1067,7 +1069,7 @@ describe('useHomeSubmitAssessment', () => {
     expect(studiedIds).toEqual([]);
   });
 
-  it('ok評価: スケジュール最終ステップを超えた場合completedになる', async () => {
+  it('ok評価: スケジュール最終ステップを超えた場合もlearningタブから削除される', async () => {
     const card = createTestCard({
       id: 'card-1',
       status: 'active',
@@ -1105,8 +1107,7 @@ describe('useHomeSubmitAssessment', () => {
     });
 
     const learningCards = getAllCardsFromTab(queryClient, 'learning');
-    expect(learningCards[0].status).toBe('completed');
-    expect(learningCards[0].nextReviewAt).toBeNull();
+    expect(learningCards).toHaveLength(0);
     const studiedIds = getStudiedIdsFromTab(queryClient, 'learning');
     expect(studiedIds).toContain('card-1');
   });
@@ -1145,10 +1146,12 @@ describe('useHomeSubmitAssessment', () => {
     });
 
     const learningCards = getAllCardsFromTab(queryClient, 'learning');
-    expect(learningCards[1].currentStep).toBe(2);
+    expect(learningCards).toHaveLength(1);
+    expect(learningCards[0].id).toBe('card-2');
+    expect(learningCards[0].currentStep).toBe(2);
   });
 
-  it('未知のassessment値の場合カードはそのまま返される', async () => {
+  it('未知のassessment値の場合もlearningタブから削除される', async () => {
     const card = createTestCard({ id: 'card-1', currentStep: 1 });
     setTabCache(queryClient, 'learning', [card]);
 
@@ -1181,7 +1184,7 @@ describe('useHomeSubmitAssessment', () => {
     });
 
     const learningCards = getAllCardsFromTab(queryClient, 'learning');
-    expect(learningCards[0].currentStep).toBe(1);
+    expect(learningCards).toHaveLength(0);
   });
 
   it('キャッシュが存在しない場合onMutateはundefinedを返す', async () => {
