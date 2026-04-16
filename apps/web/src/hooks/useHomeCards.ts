@@ -257,7 +257,7 @@ export function useHomeCreateCard() {
       });
     },
     onSettled: () => {
-      qc.invalidateQueries({ queryKey: homeCardKeys.tab('due'), refetchType: 'all' });
+      void invalidateAllHomeCaches(qc);
     },
   });
 }
@@ -306,8 +306,7 @@ export function useHomeUpdateCard() {
       }
     },
     onSettled: () => {
-      qc.invalidateQueries({ queryKey: homeCardKeys.tab('due'), refetchType: 'all' });
-      qc.invalidateQueries({ queryKey: homeCardKeys.tab('learning'), refetchType: 'all' });
+      void invalidateAllHomeCaches(qc);
     },
   });
 }
@@ -338,6 +337,9 @@ export function useHomeDeleteCard() {
         restoreBothTabs(qc, context);
       }
       toast.error('カードの削除に失敗しました');
+    },
+    onSettled: () => {
+      void invalidateAllHomeCaches(qc);
     },
   });
 }
@@ -394,10 +396,7 @@ export function useHomeResetCard() {
       });
     },
     onSettled: () => {
-      qc.invalidateQueries({ queryKey: homeCardKeys.tab('due') });
-      qc.invalidateQueries({ queryKey: homeCardKeys.tab('learning') });
-      qc.invalidateQueries({ queryKey: cardKeys.todayCompleted() });
-      qc.invalidateQueries({ queryKey: homeCardKeys.tab('completed') });
+      void invalidateAllHomeCaches(qc);
     },
   });
 }

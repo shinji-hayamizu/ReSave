@@ -18,6 +18,7 @@ export function useCompletedCards() {
       lastPage.pagination.hasMore
         ? lastPage.pagination.offset + lastPage.pagination.limit
         : undefined,
+    staleTime: 5 * 60 * 1000,
     refetchOnMount: 'always',
   });
 }
