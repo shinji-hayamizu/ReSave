@@ -137,8 +137,11 @@ export async function submitAssessment(
     updatedAt: updatedCard.updated_at,
   };
 
+  revalidatePath('/');
+  revalidatePath('/home');
   revalidatePath('/study');
   revalidatePath('/cards');
+  revalidatePath('/completed');
 
   return { ok: true, data: { card: mappedCard } };
 }

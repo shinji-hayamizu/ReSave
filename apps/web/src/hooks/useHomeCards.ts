@@ -146,6 +146,16 @@ function getTotalFromInfiniteData(data: InfiniteData<HomeCardsPage> | undefined)
 
 export { getTotalFromInfiniteData };
 
+function invalidateAllHomeCaches(qc: ReturnType<typeof useQueryClient>) {
+  return Promise.all([
+    qc.invalidateQueries({ queryKey: homeCardKeys.tab('due') }),
+    qc.invalidateQueries({ queryKey: homeCardKeys.tab('learning') }),
+    qc.invalidateQueries({ queryKey: homeCardKeys.tab('completed') }),
+    qc.invalidateQueries({ queryKey: homeCardKeys.dueCount() }),
+    qc.invalidateQueries({ queryKey: cardKeys.todayCompleted() }),
+  ]);
+}
+
 export function useHomeDueCount() {
   return useQuery<number>({
     queryKey: homeCardKeys.dueCount(),
@@ -247,7 +257,7 @@ export function useHomeCreateCard() {
       });
     },
     onSettled: () => {
-      qc.invalidateQueries({ queryKey: homeCardKeys.tab('due'), refetchType: 'all' });
+      void invalidateAllHomeCaches(qc);
     },
   });
 }
@@ -296,8 +306,7 @@ export function useHomeUpdateCard() {
       }
     },
     onSettled: () => {
-      qc.invalidateQueries({ queryKey: homeCardKeys.tab('due'), refetchType: 'all' });
-      qc.invalidateQueries({ queryKey: homeCardKeys.tab('learning'), refetchType: 'all' });
+      void invalidateAllHomeCaches(qc);
     },
   });
 }
@@ -328,6 +337,9 @@ export function useHomeDeleteCard() {
         restoreBothTabs(qc, context);
       }
       toast.error('カードの削除に失敗しました');
+    },
+    onSettled: () => {
+      void invalidateAllHomeCaches(qc);
     },
   });
 }
@@ -384,10 +396,7 @@ export function useHomeResetCard() {
       });
     },
     onSettled: () => {
-      qc.invalidateQueries({ queryKey: homeCardKeys.tab('due') });
-      qc.invalidateQueries({ queryKey: homeCardKeys.tab('learning') });
-      qc.invalidateQueries({ queryKey: cardKeys.todayCompleted() });
-      qc.invalidateQueries({ queryKey: homeCardKeys.tab('completed') });
+      void invalidateAllHomeCaches(qc);
     },
   });
 }
@@ -414,31 +423,13 @@ export function useHomeSubmitAssessment() {
         qc.setQueryData<InfiniteData<HomeCardsPage>>(homeCardKeys.tab(tab), (old) => {
           if (!old) return old;
 
-          let updated = updateCardInInfiniteData(old, input.cardId, (c) => {
-            if (input.assessment === 'ok') {
-              const newStep = c.currentStep + 1;
-              if (newStep >= c.schedule.length) {
-                return { ...c, currentStep: newStep, status: 'completed' as const, completedAt: new Date().toISOString(), nextReviewAt: null };
-              }
-              const nextDate = new Date();
-              nextDate.setDate(nextDate.getDate() + c.schedule[c.currentStep]);
-              return { ...c, currentStep: newStep, status: 'active' as const, nextReviewAt: nextDate.toISOString() };
-            }
-
-            if (input.assessment === 'again') {
-              const nextDate = new Date();
-              nextDate.setDate(nextDate.getDate() + c.schedule[0]);
-              return { ...c, currentStep: 0, status: 'active' as const, nextReviewAt: nextDate.toISOString(), completedAt: null };
-            }
-
-            if (input.assessment === 'remembered') {
-              return { ...c, status: 'completed' as const, completedAt: new Date().toISOString(), nextReviewAt: null };
-            }
-
-            /* c8 ignore next */
-            return c;
-          });
-
+          // どの評価でも、評価されたカードは今日のdue/learningタブの対象外になる。
+          // - ok:         completedになる or next_review_atが未来になる
+          // - again:      next_review_atが明日以降になる
+          // - remembered: completedになる
+          // そのためlearning/dueタブからは削除しつつ、todayStudiedCardIdsには追加して
+          // 完了画面の「今日学習済み」派生に反映させる。
+          let updated = removeCardFromInfiniteData(old, input.cardId);
           updated = addStudiedCardId(updated, input.cardId);
           return updated;
         });
@@ -452,19 +443,8 @@ export function useHomeSubmitAssessment() {
       }
       toast.error('評価の記録に失敗しました');
     },
-    onSuccess: ({ card: updatedCard }) => {
-      const tabs: TabKey[] = ['due', 'learning'];
-      for (const tab of tabs) {
-        qc.setQueryData<InfiniteData<HomeCardsPage>>(homeCardKeys.tab(tab), (old) => {
-          if (!old) return old;
-          return updateCardInInfiniteData(old, updatedCard.id, (c) => ({
-            ...c,
-            ...updatedCard,
-          }));
-        });
-      }
-      qc.invalidateQueries({ queryKey: cardKeys.todayCompleted() });
-      qc.invalidateQueries({ queryKey: homeCardKeys.tab('completed') });
+    onSettled: () => {
+      void invalidateAllHomeCaches(qc);
     },
   });
 }
