@@ -943,7 +943,7 @@ flowchart TB
 
 | 項目 | dev | preview | prod |
 |-----|-----|---------|------|
-| URL | localhost:3000 | pr-xxx.vercel.app | resave.app |
+| URL | localhost:3000 | pr-xxx.vercel.app | re-save.vercel.app |
 | Supabase | ローカル or dev | dev | prod |
 | ログレベル | DEBUG | INFO | WARN |
 | PWA | 無効 | 無効 | 有効 |

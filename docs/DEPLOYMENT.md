@@ -6,9 +6,13 @@
 
 | 環境 | ブランチ | URL | 用途 |
 |------|---------|-----|------|
-| Production | master | resave.vercel.app | 本番環境 |
-| Preview | develop | develop-resave.vercel.app | ステージング/QA |
-| Preview | feature/* | pr-xxx-resave.vercel.app | PR プレビュー |
+| Production | master | https://re-save.vercel.app | 本番環境 |
+| Preview | develop | Vercel が自動発行 (要確認) | ステージング/QA |
+| Preview | feature/* | Vercel が自動発行 (要確認) | PR プレビュー |
+
+> **注意**: 本番URLは `re-save.vercel.app`。`resave.app` は**無関係な他社サービス**なので混同しないこと。
+> Preview環境のURLは Vercel が自動発行する。正確な形式は Vercel ダッシュボードで確認すること
+> (`develop-resave.vercel.app` / `resave.vercel.app` はいずれも404で、過去の記載は誤り)。
 
 ---
 
