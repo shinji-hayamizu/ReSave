@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 import { getStudySession, submitAssessment } from '@/actions/study';
+import { homeCardKeys } from '@/lib/query-keys';
 import type { CardWithTags } from '@/types/card';
 import type { SubmitAssessmentInput, StudyStats } from '@/types/study-log';
 
@@ -100,6 +101,10 @@ export function useSubmitAssessment() {
       qc.invalidateQueries({ queryKey: cardKeys.today() });
       qc.invalidateQueries({ queryKey: cardKeys.todayCompleted() });
       qc.invalidateQueries({ queryKey: cardKeys.new() });
+      qc.invalidateQueries({ queryKey: homeCardKeys.tab('due') });
+      qc.invalidateQueries({ queryKey: homeCardKeys.tab('learning') });
+      qc.invalidateQueries({ queryKey: homeCardKeys.tab('completed') });
+      qc.invalidateQueries({ queryKey: homeCardKeys.dueCount() });
     },
   });
 }

@@ -146,7 +146,7 @@ describe('UpdatePasswordForm', () => {
       vi.advanceTimersByTime(2000);
 
       await waitFor(() => {
-        expect(mockPush).toHaveBeenCalledWith('/');
+        expect(mockPush).toHaveBeenCalledWith('/home');
         expect(mockRefresh).toHaveBeenCalled();
       });
     });

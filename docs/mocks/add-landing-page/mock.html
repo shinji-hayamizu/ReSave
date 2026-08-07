@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ReSave LP モック - 3パターン</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#3b82f6',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap');
+    body { font-family: 'Noto Sans JP', sans-serif; }
+  </style>
+</head>
+<body class="bg-gray-50">
+
+<!-- ========================================
+     Pattern 1: シンプル・クリーン（保守的）
+     reminDOのような白背景シンプルデザイン
+     ======================================== -->
+<div class="bg-white border-b-4 border-blue-500">
+  <div class="max-w-4xl mx-auto px-6 py-3 flex items-center gap-3">
+    <span class="bg-blue-500 text-white text-sm font-bold px-3 py-1 rounded-full">Pattern 1</span>
+    <span class="text-gray-700 font-medium">シンプル・クリーン（保守的）— reminDO風、白背景、既存UIと統一感</span>
+  </div>
+</div>
+
+<div class="bg-white min-h-screen">
+  <!-- Header -->
+  <header class="border-b border-gray-100 sticky top-0 bg-white/95 backdrop-blur z-10">
+    <div class="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+          <path d="M2 3H9C10.0609 3 11.0783 3.42143 11.8284 4.17157C12.5786 4.92172 13 5.93913 13 7V21C13 20.2044 12.6839 19.4413 12.1213 18.8787C11.5587 18.3161 10.7956 18 10 18H2V3Z" fill="#3B82F6" stroke="#2563EB" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M22 3H15C13.9391 3 12.9217 3.42143 12.1716 4.17157C11.4214 4.92172 11 5.93913 11 7V21C11 20.2044 11.3161 19.4413 11.8787 18.8787C12.4413 18.3161 13.2044 18 14 18H22V3Z" fill="#60A5FA" stroke="#3B82F6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <line x1="5" y1="8" x2="10" y2="8" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="5" y1="12" x2="9" y2="12" stroke="white" stroke-width="1.5" stroke-linecap="round" opacity="0.7"/>
+          <line x1="14" y1="8" x2="19" y2="8" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="14" y1="12" x2="18" y2="12" stroke="white" stroke-width="1.5" stroke-linecap="round" opacity="0.7"/>
+        </svg>
+        <span class="text-xl font-bold text-gray-900">ReSave</span>
+      </div>
+      <div class="flex items-center gap-3">
+        <a href="/login" class="text-sm text-gray-600 hover:text-gray-900 font-medium">ログイン</a>
+        <a href="/signup" class="bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">無料登録</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="max-w-3xl mx-auto px-6 py-24 text-center">
+    <div class="flex justify-center mb-8">
+      <svg width="72" height="72" viewBox="0 0 24 24" fill="none">
+        <path d="M2 3H9C10.0609 3 11.0783 3.42143 11.8284 4.17157C12.5786 4.92172 13 5.93913 13 7V21C13 20.2044 12.6839 19.4413 12.1213 18.8787C11.5587 18.3161 10.7956 18 10 18H2V3Z" fill="#3B82F6" stroke="#2563EB" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M22 3H15C13.9391 3 12.9217 3.42143 12.1716 4.17157C11.4214 4.92172 11 5.93913 11 7V21C11 20.2044 11.3161 19.4413 11.8787 18.8787C12.4413 18.3161 13.2044 18 14 18H22V3Z" fill="#60A5FA" stroke="#3B82F6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <line x1="5" y1="8" x2="10" y2="8" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="5" y1="12" x2="9" y2="12" stroke="white" stroke-width="1.5" stroke-linecap="round" opacity="0.7"/>
+        <line x1="14" y1="8" x2="19" y2="8" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="14" y1="12" x2="18" y2="12" stroke="white" stroke-width="1.5" stroke-linecap="round" opacity="0.7"/>
+      </svg>
+    </div>
+    <h1 class="text-4xl font-bold text-gray-900 mb-4 leading-tight">
+      忘却曲線に基づいた<br>記憶に残る学習カード
+    </h1>
+    <div class="w-12 h-0.5 bg-red-400 mx-auto mb-6"></div>
+    <div class="space-y-2 mb-10">
+      <p class="text-gray-600 flex items-center justify-center gap-2">
+        <span class="text-green-500">✔</span> 忘却曲線を使った学習の効率化で記憶力を大幅に向上させます
+      </p>
+      <p class="text-gray-600 flex items-center justify-center gap-2">
+        <span class="text-green-500">✔</span> TODOリストを処理するような快適な操作性でご利用頂けます
+      </p>
+    </div>
+    <div class="flex flex-col sm:flex-row gap-3 justify-center">
+      <a href="/signup" class="bg-blue-500 hover:bg-blue-600 text-white font-medium px-8 py-3 rounded-full text-lg transition-colors">無料で始める</a>
+      <a href="/login" class="border border-gray-300 text-gray-700 font-medium px-8 py-3 rounded-full text-lg hover:bg-gray-50 transition-colors">ログイン</a>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="bg-gray-50 py-20">
+    <div class="max-w-4xl mx-auto px-6">
+      <h2 class="text-2xl font-bold text-center text-gray-900 mb-12">ReSaveの特徴</h2>
+      <div class="grid md:grid-cols-3 gap-6">
+        <div class="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
+          <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center mb-4">
+            <span class="text-blue-500 text-xl">🧠</span>
+          </div>
+          <h3 class="font-bold text-gray-900 mb-2">科学的な復習タイミング</h3>
+          <p class="text-sm text-gray-600">エビングハウスの忘却曲線に基づき、1・3・7・14・30・180日の最適な間隔で復習をリマインド</p>
+        </div>
+        <div class="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
+          <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center mb-4">
+            <span class="text-blue-500 text-xl">🔖</span>
+          </div>
+          <h3 class="font-bold text-gray-900 mb-2">URLも一緒に保存</h3>
+          <p class="text-sm text-gray-600">メモにURLを紐付けて保存。後でしっかり読み返せるブックマーク＋学習カードとして使えます</p>
+        </div>
+        <div class="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
+          <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center mb-4">
+            <span class="text-blue-500 text-xl">⚡</span>
+          </div>
+          <h3 class="font-bold text-gray-900 mb-2">シンプルな操作性</h3>
+          <p class="text-sm text-gray-600">TODOリストのような直感的な操作。「覚えた」「もう一度」をタップするだけで次の復習が自動スケジュール</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How it works -->
+  <section class="py-20">
+    <div class="max-w-3xl mx-auto px-6">
+      <h2 class="text-2xl font-bold text-center text-gray-900 mb-12">使い方</h2>
+      <div class="space-y-8">
+        <div class="flex gap-6 items-start">
+          <div class="w-10 h-10 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold shrink-0">1</div>
+          <div>
+            <h3 class="font-bold text-gray-900 mb-1">カードを作成する</h3>
+            <p class="text-sm text-gray-600">覚えたいことをメモ。URLと一緒に保存することもできます。</p>
+          </div>
+        </div>
+        <div class="flex gap-6 items-start">
+          <div class="w-10 h-10 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold shrink-0">2</div>
+          <div>
+            <h3 class="font-bold text-gray-900 mb-1">毎日の復習をこなす</h3>
+            <p class="text-sm text-gray-600">ホーム画面に「今日の復習」が表示されます。「覚えた」か「もう一度」を選ぶだけ。</p>
+          </div>
+        </div>
+        <div class="flex gap-6 items-start">
+          <div class="w-10 h-10 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold shrink-0">3</div>
+          <div>
+            <h3 class="font-bold text-gray-900 mb-1">記憶に定着させる</h3>
+            <p class="text-sm text-gray-600">最適なタイミングで復習を繰り返すことで、長期記憶として定着します。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="bg-blue-500 py-16 text-center">
+    <h2 class="text-2xl font-bold text-white mb-4">今すぐ無料で始めましょう</h2>
+    <p class="text-blue-100 mb-8">登録は1分。クレジットカード不要。</p>
+    <a href="/signup" class="bg-white text-blue-600 font-bold px-10 py-3 rounded-full text-lg hover:bg-blue-50 transition-colors inline-block">無料登録する</a>
+  </section>
+
+  <!-- Footer -->
+  <footer class="border-t border-gray-100 py-8 text-center text-sm text-gray-500">
+    <p>© 2024 ReSave. All rights reserved.</p>
+  </footer>
+</div>
+
+<!-- ========================================
+     区切り
+     ======================================== -->
+<div class="bg-gray-800 py-8 text-center">
+  <p class="text-white text-xl font-bold">↑ Pattern 1 / Pattern 2 ↓</p>
+</div>
+
+<!-- ========================================
+     Pattern 2: グラデーション＋モダン（推奨案）
+     青のグラデーション背景ヒーロー、カード風特徴表示
+     ======================================== -->
+<div class="bg-white border-b-4 border-emerald-500">
+  <div class="max-w-4xl mx-auto px-6 py-3 flex items-center gap-3">
+    <span class="bg-emerald-500 text-white text-sm font-bold px-3 py-1 rounded-full">Pattern 2</span>
+    <span class="text-gray-700 font-medium">グラデーション＋モダン（推奨案）— ヒーローに青グラデ、視覚的インパクトあり</span>
+  </div>
+</div>
+
+<div style="background-color: #f8faff;" class="min-h-screen">
+  <!-- Header -->
+  <header class="sticky top-0 z-10 bg-white/80 backdrop-blur border-b border-gray-100">
+    <div class="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+          <path d="M2 3H9C10.0609 3 11.0783 3.42143 11.8284 4.17157C12.5786 4.92172 13 5.93913 13 7V21C13 20.2044 12.6839 19.4413 12.1213 18.8787C11.5587 18.3161 10.7956 18 10 18H2V3Z" fill="#3B82F6" stroke="#2563EB" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M22 3H15C13.9391 3 12.9217 3.42143 12.1716 4.17157C11.4214 4.92172 11 5.93913 11 7V21C11 20.2044 11.3161 19.4413 11.8787 18.8787C12.4413 18.3161 13.2044 18 14 18H22V3Z" fill="#60A5FA" stroke="#3B82F6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <line x1="5" y1="8" x2="10" y2="8" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="5" y1="12" x2="9" y2="12" stroke="white" stroke-width="1.5" stroke-linecap="round" opacity="0.7"/>
+          <line x1="14" y1="8" x2="19" y2="8" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="14" y1="12" x2="18" y2="12" stroke="white" stroke-width="1.5" stroke-linecap="round" opacity="0.7"/>
+        </svg>
+        <span class="text-xl font-bold text-gray-900">ReSave</span>
+      </div>
+      <div class="flex items-center gap-3">
+        <a href="/login" class="text-sm text-gray-600 hover:text-gray-900 font-medium">ログイン</a>
+        <a href="/signup" class="text-sm font-semibold px-4 py-2 rounded-lg text-white transition-all" style="background: linear-gradient(135deg, #3b82f6, #06b6d4);">無料登録</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero with gradient -->
+  <section style="background: linear-gradient(135deg, #1d4ed8 0%, #0891b2 100%);" class="py-28 px-6 text-center text-white">
+    <div class="max-w-3xl mx-auto">
+      <div class="inline-flex items-center gap-2 bg-white/10 rounded-full px-4 py-1.5 text-sm mb-8 border border-white/20">
+        <span>🧠</span>
+        <span>エビングハウスの忘却曲線を活用</span>
+      </div>
+      <h1 class="text-5xl font-bold mb-6 leading-tight">
+        学んだことを<br><span style="color: #bfdbfe;">記憶に残す</span>、<br>科学的な学習カード
+      </h1>
+      <p class="text-blue-100 text-lg mb-10 max-w-xl mx-auto">
+        覚えたいことをメモして保存。最適なタイミングで復習通知が届き、長期記憶に定着させます。
+      </p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a href="/signup" class="bg-white text-blue-700 font-bold px-8 py-3.5 rounded-xl text-lg shadow-lg hover:shadow-xl transition-all inline-block">
+          無料で始める →
+        </a>
+        <a href="/login" class="border border-white/30 text-white font-medium px-8 py-3.5 rounded-xl text-lg hover:bg-white/10 transition-all inline-block">
+          ログイン
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats band -->
+  <div class="bg-white border-y border-gray-100 py-6">
+    <div class="max-w-3xl mx-auto px-6 flex justify-around text-center">
+      <div>
+        <p class="text-2xl font-bold text-blue-600">6段階</p>
+        <p class="text-sm text-gray-500">復習間隔</p>
+      </div>
+      <div>
+        <p class="text-2xl font-bold text-blue-600">180日</p>
+        <p class="text-sm text-gray-500">最長スケジュール</p>
+      </div>
+      <div>
+        <p class="text-2xl font-bold text-blue-600">無料</p>
+        <p class="text-sm text-gray-500">完全無料で利用可能</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Features -->
+  <section class="py-20 px-6">
+    <div class="max-w-4xl mx-auto">
+      <h2 class="text-3xl font-bold text-center text-gray-900 mb-3">なぜReSaveが選ばれるのか</h2>
+      <p class="text-center text-gray-500 mb-12">科学的根拠に基づいた、シンプルで続けやすい学習体験</p>
+      <div class="grid md:grid-cols-3 gap-6">
+        <div class="rounded-2xl p-6 border border-blue-100 bg-white shadow-sm hover:shadow-md transition-shadow">
+          <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-4 text-2xl" style="background: linear-gradient(135deg, #dbeafe, #e0f2fe);">🧠</div>
+          <h3 class="font-bold text-gray-900 mb-2 text-lg">科学的な間隔反復</h3>
+          <p class="text-sm text-gray-600 leading-relaxed">1・3・7・14・30・180日の最適な間隔で自動スケジュール。最小の労力で最大の記憶定着を実現します。</p>
+        </div>
+        <div class="rounded-2xl p-6 border border-blue-100 bg-white shadow-sm hover:shadow-md transition-shadow">
+          <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-4 text-2xl" style="background: linear-gradient(135deg, #dbeafe, #e0f2fe);">🔖</div>
+          <h3 class="font-bold text-gray-900 mb-2 text-lg">URLブックマーク統合</h3>
+          <p class="text-sm text-gray-600 leading-relaxed">URLを一緒に保存することで、元の記事や資料にすぐアクセス。読み流しを「学習」に変えます。</p>
+        </div>
+        <div class="rounded-2xl p-6 border border-blue-100 bg-white shadow-sm hover:shadow-md transition-shadow">
+          <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-4 text-2xl" style="background: linear-gradient(135deg, #dbeafe, #e0f2fe);">⚡</div>
+          <h3 class="font-bold text-gray-900 mb-2 text-lg">TODOのような操作感</h3>
+          <p class="text-sm text-gray-600 leading-relaxed">「覚えた」「もう一度」をタップするだけ。タスク処理のような爽快感で毎日続けられます。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How it works -->
+  <section class="py-20 px-6 bg-white">
+    <div class="max-w-3xl mx-auto">
+      <h2 class="text-3xl font-bold text-center text-gray-900 mb-12">3ステップで始める</h2>
+      <div class="relative">
+        <div class="absolute left-5 top-10 bottom-10 w-0.5 bg-blue-100 hidden md:block"></div>
+        <div class="space-y-10">
+          <div class="flex gap-6 items-start">
+            <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-white shrink-0 z-10" style="background: linear-gradient(135deg, #3b82f6, #06b6d4);">1</div>
+            <div class="pt-1">
+              <h3 class="font-bold text-gray-900 mb-1 text-lg">カードを作成する</h3>
+              <p class="text-gray-600">覚えたいこと・気になるURLをメモ感覚で保存。タグで整理もできます。</p>
+            </div>
+          </div>
+          <div class="flex gap-6 items-start">
+            <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-white shrink-0 z-10" style="background: linear-gradient(135deg, #3b82f6, #06b6d4);">2</div>
+            <div class="pt-1">
+              <h3 class="font-bold text-gray-900 mb-1 text-lg">毎日の復習をこなす</h3>
+              <p class="text-gray-600">今日復習すべきカードだけが表示されます。「覚えた」か「もう一度」を選ぶだけ。</p>
+            </div>
+          </div>
+          <div class="flex gap-6 items-start">
+            <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-white shrink-0 z-10" style="background: linear-gradient(135deg, #3b82f6, #06b6d4);">3</div>
+            <div class="pt-1">
+              <h3 class="font-bold text-gray-900 mb-1 text-lg">長期記憶に定着</h3>
+              <p class="text-gray-600">6回の復習で完了。忘れかけた絶妙なタイミングで復習するから、自然と記憶に残ります。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="py-20 px-6 text-center" style="background: linear-gradient(135deg, #1d4ed8 0%, #0891b2 100%);">
+    <h2 class="text-3xl font-bold text-white mb-4">今すぐ記憶力を高めましょう</h2>
+    <p class="text-blue-100 mb-8">無料・登録30秒・クレジットカード不要</p>
+    <a href="/signup" class="bg-white text-blue-700 font-bold px-10 py-4 rounded-xl text-lg shadow-lg hover:shadow-xl transition-all inline-block">
+      無料登録する →
+    </a>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-gray-900 py-8 text-center text-sm text-gray-500">
+    <p>© 2024 ReSave. All rights reserved.</p>
+  </footer>
+</div>
+
+<!-- ========================================
+     区切り
+     ======================================== -->
+<div class="bg-gray-800 py-8 text-center">
+  <p class="text-white text-xl font-bold">↑ Pattern 2 / Pattern 3 ↓</p>
+</div>
+
+<!-- ========================================
+     Pattern 3: ダークヒーロー＋ミニマル（実験的）
+     黒背景ヒーロー、高級感・インパクト重視
+     ======================================== -->
+<div class="bg-white border-b-4 border-purple-500">
+  <div class="max-w-4xl mx-auto px-6 py-3 flex items-center gap-3">
+    <span class="bg-purple-500 text-white text-sm font-bold px-3 py-1 rounded-full">Pattern 3</span>
+    <span class="text-gray-700 font-medium">ダークヒーロー（実験的）— 黒背景で高級感・インパクト重視</span>
+  </div>
+</div>
+
+<div class="min-h-screen bg-white">
+  <!-- Header -->
+  <header class="bg-gray-950 sticky top-0 z-10">
+    <div class="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+          <path d="M2 3H9C10.0609 3 11.0783 3.42143 11.8284 4.17157C12.5786 4.92172 13 5.93913 13 7V21C13 20.2044 12.6839 19.4413 12.1213 18.8787C11.5587 18.3161 10.7956 18 10 18H2V3Z" fill="#3B82F6" stroke="#2563EB" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M22 3H15C13.9391 3 12.9217 3.42143 12.1716 4.17157C11.4214 4.92172 11 5.93913 11 7V21C11 20.2044 11.3161 19.4413 11.8787 18.8787C12.4413 18.3161 13.2044 18 14 18H22V3Z" fill="#60A5FA" stroke="#3B82F6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <line x1="5" y1="8" x2="10" y2="8" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="5" y1="12" x2="9" y2="12" stroke="white" stroke-width="1.5" stroke-linecap="round" opacity="0.7"/>
+          <line x1="14" y1="8" x2="19" y2="8" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="14" y1="12" x2="18" y2="12" stroke="white" stroke-width="1.5" stroke-linecap="round" opacity="0.7"/>
+        </svg>
+        <span class="text-xl font-bold text-white">ReSave</span>
+      </div>
+      <div class="flex items-center gap-4">
+        <a href="/login" class="text-sm text-gray-400 hover:text-white font-medium transition-colors">ログイン</a>
+        <a href="/signup" class="text-sm font-semibold bg-blue-500 hover:bg-blue-400 text-white px-4 py-2 rounded-lg transition-colors">無料登録</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Dark Hero -->
+  <section class="bg-gray-950 py-32 px-6 text-center relative overflow-hidden">
+    <!-- subtle grid pattern -->
+    <div class="absolute inset-0 opacity-5" style="background-image: linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px); background-size: 40px 40px;"></div>
+    <div class="relative max-w-3xl mx-auto">
+      <div class="flex justify-center mb-10">
+        <div class="p-4 rounded-2xl" style="background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.3);">
+          <svg width="56" height="56" viewBox="0 0 24 24" fill="none">
+            <path d="M2 3H9C10.0609 3 11.0783 3.42143 11.8284 4.17157C12.5786 4.92172 13 5.93913 13 7V21C13 20.2044 12.6839 19.4413 12.1213 18.8787C11.5587 18.3161 10.7956 18 10 18H2V3Z" fill="#3B82F6" stroke="#2563EB" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M22 3H15C13.9391 3 12.9217 3.42143 12.1716 4.17157C11.4214 4.92172 11 5.93913 11 7V21C11 20.2044 11.3161 19.4413 11.8787 18.8787C12.4413 18.3161 13.2044 18 14 18H22V3Z" fill="#60A5FA" stroke="#3B82F6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <line x1="5" y1="8" x2="10" y2="8" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="5" y1="12" x2="9" y2="12" stroke="white" stroke-width="1.5" stroke-linecap="round" opacity="0.7"/>
+            <line x1="14" y1="8" x2="19" y2="8" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="14" y1="12" x2="18" y2="12" stroke="white" stroke-width="1.5" stroke-linecap="round" opacity="0.7"/>
+          </svg>
+        </div>
+      </div>
+      <h1 class="text-5xl font-bold text-white mb-6 leading-tight">
+        読んで終わりに<br>しない。
+      </h1>
+      <p class="text-gray-400 text-xl mb-10 max-w-lg mx-auto leading-relaxed">
+        ReSaveは、忘却曲線に基づいた間隔反復で<br>あなたの学びを長期記憶に変えます。
+      </p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a href="/signup" class="bg-blue-500 hover:bg-blue-400 text-white font-bold px-8 py-4 rounded-xl text-lg transition-all inline-block">
+          無料で始める
+        </a>
+        <a href="/login" class="border border-gray-700 text-gray-300 hover:text-white hover:border-gray-500 font-medium px-8 py-4 rounded-xl text-lg transition-all inline-block">
+          ログイン
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features - minimal list -->
+  <section class="py-20 px-6">
+    <div class="max-w-2xl mx-auto">
+      <h2 class="text-2xl font-bold text-gray-900 mb-12 text-center">シンプルな3つの機能</h2>
+      <div class="space-y-6">
+        <div class="flex gap-5 p-6 rounded-2xl bg-gray-50 hover:bg-gray-100 transition-colors">
+          <span class="text-3xl shrink-0">🧠</span>
+          <div>
+            <h3 class="font-bold text-gray-900 mb-1">忘却曲線ベースの復習スケジュール</h3>
+            <p class="text-gray-600 text-sm">1・3・7・14・30・180日の間隔で自動スケジュール。忘れかけた絶妙なタイミングで復習できます。</p>
+          </div>
+        </div>
+        <div class="flex gap-5 p-6 rounded-2xl bg-gray-50 hover:bg-gray-100 transition-colors">
+          <span class="text-3xl shrink-0">🔖</span>
+          <div>
+            <h3 class="font-bold text-gray-900 mb-1">URLと一緒に保存</h3>
+            <p class="text-gray-600 text-sm">気になるURLをメモと一緒に保存。後でしっかり読み返せるブックマーク機能として使えます。</p>
+          </div>
+        </div>
+        <div class="flex gap-5 p-6 rounded-2xl bg-gray-50 hover:bg-gray-100 transition-colors">
+          <span class="text-3xl shrink-0">✅</span>
+          <div>
+            <h3 class="font-bold text-gray-900 mb-1">TODOのような操作感</h3>
+            <p class="text-gray-600 text-sm">「覚えた」か「もう一度」をタップするだけ。タスク完了のような爽快感が継続の鍵です。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How it works - timeline -->
+  <section class="py-20 px-6 bg-gray-950">
+    <div class="max-w-2xl mx-auto text-center">
+      <h2 class="text-2xl font-bold text-white mb-12">3ステップで記憶を定着</h2>
+      <div class="flex flex-col sm:flex-row gap-4">
+        <div class="flex-1 bg-gray-900 rounded-2xl p-6 border border-gray-800">
+          <div class="text-3xl mb-3">✏️</div>
+          <div class="text-blue-400 text-sm font-bold mb-1">STEP 1</div>
+          <h3 class="font-bold text-white mb-2">メモする</h3>
+          <p class="text-gray-500 text-xs">覚えたいことをURLと一緒に保存</p>
+        </div>
+        <div class="flex-1 bg-gray-900 rounded-2xl p-6 border border-gray-800">
+          <div class="text-3xl mb-3">🔄</div>
+          <div class="text-blue-400 text-sm font-bold mb-1">STEP 2</div>
+          <h3 class="font-bold text-white mb-2">復習する</h3>
+          <p class="text-gray-500 text-xs">最適なタイミングで通知。タップで完了</p>
+        </div>
+        <div class="flex-1 bg-gray-900 rounded-2xl p-6 border border-gray-800">
+          <div class="text-3xl mb-3">🧩</div>
+          <div class="text-blue-400 text-sm font-bold mb-1">STEP 3</div>
+          <h3 class="font-bold text-white mb-2">定着させる</h3>
+          <p class="text-gray-500 text-xs">6回の復習で長期記憶に変換</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="py-20 px-6 text-center bg-gray-950 border-t border-gray-800">
+    <h2 class="text-2xl font-bold text-white mb-3">読んで終わりを、卒業しよう。</h2>
+    <p class="text-gray-500 mb-8 text-sm">無料・30秒登録・クレジットカード不要</p>
+    <a href="/signup" class="bg-blue-500 hover:bg-blue-400 text-white font-bold px-10 py-4 rounded-xl text-lg transition-colors inline-block">
+      今すぐ無料登録 →
+    </a>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-gray-950 border-t border-gray-800 py-8 text-center text-sm text-gray-600">
+    <p>© 2024 ReSave. All rights reserved.</p>
+  </footer>
+</div>
+
+</body>
+</html>

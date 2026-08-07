@@ -373,7 +373,10 @@ export function useDeleteCard() {
       qc.invalidateQueries({ queryKey: cardKeys.new() });
       qc.invalidateQueries({ queryKey: cardKeys.today() });
       qc.invalidateQueries({ queryKey: cardKeys.todayCompleted() });
+      qc.invalidateQueries({ queryKey: homeCardKeys.tab('due') });
+      qc.invalidateQueries({ queryKey: homeCardKeys.tab('learning') });
       qc.invalidateQueries({ queryKey: homeCardKeys.tab('completed') });
+      qc.invalidateQueries({ queryKey: homeCardKeys.dueCount() });
     },
   });
 }
@@ -426,7 +429,10 @@ export function useResetCard() {
       qc.invalidateQueries({ queryKey: cardKeys.new() });
       qc.invalidateQueries({ queryKey: cardKeys.today() });
       qc.invalidateQueries({ queryKey: cardKeys.todayCompleted() });
+      qc.invalidateQueries({ queryKey: homeCardKeys.tab('due') });
+      qc.invalidateQueries({ queryKey: homeCardKeys.tab('learning') });
       qc.invalidateQueries({ queryKey: homeCardKeys.tab('completed') });
+      qc.invalidateQueries({ queryKey: homeCardKeys.dueCount() });
     },
   });
 }

@@ -1,3 +1,6 @@
+// [DEPRECATED] このファイルは vitest.config.ts の exclude: ["__tests__/**"] により実行されない。
+// 有効なテストは apps/web/src/app/api/health/__tests__/route.test.ts にある。
+// このファイルの削除可否はオーナー判断。
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { GET } from '@/app/api/health/route';
 import { createClient } from '@/lib/supabase/server';
