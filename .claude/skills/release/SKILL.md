@@ -114,7 +114,7 @@ PR作成完了: <PR URL>
    （"chore(main): release X.X.X" というPRがGitHubに表示されます）
    このPRをマージすると CHANGELOG.md 更新・Gitタグ・GitHub Releaseが作成されます
 
-本番URL: https://resave.vercel.app
+本番URL: https://re-save.vercel.app
 ```
 
 ## 注意事項
