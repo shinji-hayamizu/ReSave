@@ -11,7 +11,19 @@ export default {
   theme: {
   	extend: {
   		fontFamily: {
-  			sans: ['var(--font-noto-sans-jp)', 'var(--font-inter)', 'sans-serif'],
+  			sans: [
+  				'var(--font-inter)',
+  				'system-ui',
+  				'-apple-system',
+  				'BlinkMacSystemFont',
+  				'"Hiragino Sans"',
+  				'"Hiragino Kaku Gothic ProN"',
+  				'"Yu Gothic UI"',
+  				'"Yu Gothic"',
+  				'Meiryo',
+  				'"Noto Sans CJK JP"',
+  				'sans-serif',
+  			],
   		},
   		borderRadius: {
   			lg: 'var(--radius)',
